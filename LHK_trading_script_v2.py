@@ -430,7 +430,7 @@ short_term_results.sort(key=lambda x: x['rs'], reverse=True)
 with open(HISTORY_FILE, "w", encoding="utf-8") as f: json.dump(trade_history[-150:], f, indent=4)
 
 # =============================================================================
-# MODULE 6 — 總結算與數據持久化 (Stats & JSON Dump & Discord Report)
+# MODULE 6 — 總結算與 Discord 報告
 # =============================================================================
 print("⏳ [6/7] 正在結算戰績並發送 Discord 報告...")
 
@@ -476,9 +476,12 @@ if DISCORD_SUMMARY_WEBHOOK:
         breakdown_lines.append(f"**{tag}**: {w_rate}% 勝率 | P&L: {pnl_s} ({st['total']}單)")
     breakdown_text = "\n".join(breakdown_lines) if breakdown_lines else "尚無足夠結案數據。"
 
-    # 👇 【重點升級】：將美日雙市場健康度加入 Discord 欄位
-    us_macro_str = f"狀態: **{us_status}**\n市寬: {us_breadth}%\n派發: {us_dist} 日"
-    jp_macro_str = f"狀態: **{jp_status}**\n市寬: {jp_breadth}%\n派發: {jp_dist} 日"
+    # 👇 【重點升級】：計算美日股掃描數量，並加入 Discord 欄位
+    us_scan_count = len(us_tickers)
+    jp_scan_count = len(jp_tickers)
+
+    us_macro_str = f"狀態: **{us_status}**\n市寬: {us_breadth}%\n派發: {us_dist} 日\n掃描: **{us_scan_count} 隻**"
+    jp_macro_str = f"狀態: **{jp_status}**\n市寬: {jp_breadth}%\n派發: {jp_dist} 日\n掃描: **{jp_scan_count} 隻**"
 
     payload = {
         "embeds": [{
@@ -493,18 +496,20 @@ if DISCORD_SUMMARY_WEBHOOK:
                 {"name": "🌊 總浮動盈虧", "value": f"**{floating_str}**", "inline": True},
                 {"name": "📈 總勝率", "value": f"{win_rate}% ({wins}/{total_closed})", "inline": True}
             ],
-            "footer": {"text": f"每單本金 $10,000 USD | 時光機模式"}
+            "footer": {"text": f"每單本金 $10,000 USD | 正式生產環境"}
         }]
     }
     try: requests.post(DISCORD_SUMMARY_WEBHOOK, json=payload)
     except: pass
-
 # =============================================================================
-# MODULE 7 — 生成前端 HTML (整合 JS 計算機與 TradingView)
+# MODULE 7 — 生成 PROD 前端 HTML (雙分頁系統)
 # =============================================================================
-print("⏳ [7/7] 正在生成完整型雙策略儀表板...")
+print("⏳ [7/7] 正在生成雙分頁量化儀表板 (PROD 版)...")
 
 def get_unit(tk): return "¥" if tk.endswith(".T") else "$"
+
+js_payload_str = json.dumps(js_payload)
+trade_history_str = json.dumps(trade_history)
 
 html = f"""<!DOCTYPE html>
 <html lang="zh-TW">
@@ -516,18 +521,25 @@ html = f"""<!DOCTYPE html>
 </head>
 <body class="bg-[#020617] text-slate-300 p-4 font-sans h-screen flex flex-col overflow-hidden">
     
-    <header class="bg-slate-900 border border-slate-800 rounded-xl p-3 shrink-0 mb-4 shadow-lg flex flex-col gap-3">
-        <div class="flex justify-between items-center">
-            <div>
-                <h1 class="text-2xl font-black text-white italic tracking-tighter">V1 <span class="text-indigo-500">QUANT</span></h1>
-                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">時光機模擬: {today_str}</p>
+    <header class="bg-slate-900 border border-slate-800 rounded-xl p-3 shrink-0 mb-3 shadow-lg flex flex-col gap-3 relative overflow-hidden">
+        
+        <div class="flex justify-between items-center z-10">
+            <div class="flex items-center gap-4">
+                <div>
+                    <h1 class="text-2xl font-black text-white italic tracking-tighter">V1 PRO <span class="text-indigo-500">QUANT</span></h1>
+                    <div class="mt-1 inline-block px-3 py-0.5 bg-emerald-500/20 border border-emerald-500/30 rounded-full text-emerald-400 text-[10px] font-black tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+                        🟢 實時生產環境 (Production): {today_str}
+                    </div>
+                </div>
+                <div class="flex gap-2 ml-6 bg-slate-950 p-1 rounded-lg border border-slate-800">
+                    <button id="tabBtn-dashboard" onclick="switchTab('dashboard')" class="bg-indigo-600 text-white px-4 py-1.5 rounded-md font-bold text-sm shadow-md transition">📊 儀表板 (Dashboard)</button>
+                    <button id="tabBtn-journal" onclick="switchTab('journal')" class="text-slate-400 hover:text-white hover:bg-slate-800 px-4 py-1.5 rounded-md font-bold text-sm transition">📜 交易日誌 (Journal)</button>
+                </div>
             </div>
-            <div class="text-xs font-black text-slate-500 bg-black/50 px-3 py-1 rounded-lg border border-slate-800">
-                🌐 Dual-Market Macro Radar
-            </div>
+            <div class="text-xs font-black text-slate-500 bg-black/50 px-3 py-1 rounded-lg border border-slate-800">🌐 Dual-Market Macro Radar</div>
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-2 gap-4 z-10">
             <div class="flex items-center gap-2 bg-slate-800/30 p-2 rounded-lg border border-slate-800">
                 <div class="w-12 text-center text-xs font-black text-slate-400 border-r border-slate-700">美股<br>SPX</div>
                 <div class="flex-1 flex justify-between gap-2 px-2">
@@ -547,7 +559,7 @@ html = f"""<!DOCTYPE html>
         </div>
     </header>
 
-    <main class="flex-1 flex gap-4 overflow-hidden">
+    <main id="tab-dashboard" class="flex-1 flex gap-4 overflow-hidden z-10">
         <div class="w-1/3 flex flex-col gap-4 overflow-hidden">
             <div class="bg-slate-900 p-2 rounded-xl border border-slate-800 h-[200px] shrink-0 relative flex items-center justify-center shadow-lg">
                 <div class="absolute top-2 left-3 z-10 flex gap-2 items-center">
@@ -560,7 +572,7 @@ html = f"""<!DOCTYPE html>
 
             <div class="bg-slate-900 rounded-xl border border-slate-800 flex-1 flex flex-col overflow-hidden shadow-lg">
                 <div class="p-3 border-b border-slate-800 font-black text-indigo-400 flex justify-between items-center shrink-0">
-                    <span>🎯 今日推介信號 (點擊查看)</span>
+                    <span>🎯 實時推介信號 (點擊查看)</span>
                 </div>
                 <div class="overflow-y-auto flex-1 p-2 space-y-2" id="signal-list">
                     <div class="text-[10px] font-bold text-slate-500 uppercase ml-1 mt-2">🏆 波段策略 (Swing)</div>
@@ -598,8 +610,9 @@ html = f"""<!DOCTYPE html>
             <div class="bg-slate-900 rounded-xl border border-slate-700 p-4 shrink-0 shadow-lg">
                 <div class="flex justify-between items-center mb-3">
                     <div class="flex items-center gap-2">
-                        <h3 class="text-sm font-black text-amber-500">🧮 專業部位計算機 (Trade Execution Plan)</h3>
+                        <h3 class="text-sm font-black text-amber-500">🧮 專業部位計算機</h3>
                         <span id="calc_ticker_name" class="text-xs font-bold text-white bg-slate-700 px-2 py-0.5 rounded">-</span>
+                        <a id="tv_out_link" href="#" target="_blank" class="hidden text-[10px] font-bold bg-blue-600/30 text-blue-400 border border-blue-500/50 hover:bg-blue-600 hover:text-white px-2 py-0.5 rounded transition">🔗 在 TV 開啟</a>
                     </div>
                     <div class="flex items-center gap-2">
                         <label class="text-[10px] text-slate-400 font-bold uppercase">總資金 (Account Size):</label>
@@ -639,17 +652,72 @@ html = f"""<!DOCTYPE html>
         </div>
     </main>
 
+    <main id="tab-journal" class="hidden flex-1 overflow-y-auto bg-slate-900 rounded-xl border border-slate-800 p-6 z-10 flex flex-col gap-6 shadow-lg">
+        
+        <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+            <h2 class="text-2xl font-black text-white flex items-center gap-2">📜 歷史交易結算與日誌</h2>
+            <div class="text-xs text-slate-500">每單固定以 $10,000 基準結算盈虧</div>
+        </div>
+
+        <div class="grid grid-cols-4 gap-4" id="journal-stats"></div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-slate-800/30 rounded-xl border border-slate-700 p-4">
+                <h3 class="font-black text-cyan-400 mb-3 flex items-center gap-2">📂 目前持倉 (Open Positions)</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs text-left">
+                        <thead class="text-slate-500 uppercase border-b border-slate-700 bg-slate-800/50">
+                            <tr><th class="p-2">日期</th><th class="p-2">代號</th><th class="p-2">策略</th><th class="p-2">買入價</th><th class="p-2">現價</th><th class="p-2 text-right">浮動 P&L (USD)</th></tr>
+                        </thead>
+                        <tbody id="journal-open-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="bg-slate-800/30 rounded-xl border border-slate-700 p-4">
+                <h3 class="font-black text-emerald-400 mb-3 flex items-center gap-2">📁 最近結案紀錄 (Closed Trades)</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs text-left">
+                        <thead class="text-slate-500 uppercase border-b border-slate-700 bg-slate-800/50">
+                            <tr><th class="p-2">平倉日期</th><th class="p-2">代號</th><th class="p-2">策略</th><th class="p-2">狀態</th><th class="p-2 text-right">已實現 P&L (USD)</th></tr>
+                        </thead>
+                        <tbody id="journal-closed-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
     <script>
-        const rawData = {json.dumps(js_payload)};
+        const rawData = {js_payload_str};
+        const tradeHistory = {trade_history_str};
+        
         let currentSelectedTicker = null;
         let tvWidget = null;
 
+        function switchTab(tabId) {{
+            document.getElementById('tab-dashboard').classList.toggle('hidden', tabId !== 'dashboard');
+            document.getElementById('tab-journal').classList.toggle('hidden', tabId !== 'journal');
+            
+            document.getElementById('tabBtn-dashboard').className = tabId === 'dashboard' 
+                ? 'bg-indigo-600 text-white px-4 py-1.5 rounded-md font-bold text-sm shadow-md transition' 
+                : 'text-slate-400 hover:text-white hover:bg-slate-800 px-4 py-1.5 rounded-md font-bold text-sm transition';
+                
+            document.getElementById('tabBtn-journal').className = tabId === 'journal' 
+                ? 'bg-indigo-600 text-white px-4 py-1.5 rounded-md font-bold text-sm shadow-md transition' 
+                : 'text-slate-400 hover:text-white hover:bg-slate-800 px-4 py-1.5 rounded-md font-bold text-sm transition';
+
+            if (tabId === 'journal') renderJournal();
+        }}
+
         function loadContent(ticker) {{
             currentSelectedTicker = ticker;
-            
-            // 處理日股代號給 TradingView
             const isJp = ticker.endsWith('.T');
             const tvSymbol = isJp ? 'TSE:' + ticker.replace('.T', '') : ticker;
+
+            const tvLink = document.getElementById('tv_out_link');
+            tvLink.href = `https://www.tradingview.com/chart/?symbol=${{tvSymbol}}`;
+            tvLink.classList.remove('hidden');
 
             if (tvWidget) {{ tvWidget.remove(); }}
             tvWidget = new TradingView.widget({{
@@ -669,11 +737,9 @@ html = f"""<!DOCTYPE html>
             const unit = isJp ? '¥' : '$';
 
             document.getElementById('calc_ticker_name').innerText = data.ticker + " (" + data.tag + ")";
-            
             const accountSize = parseFloat(document.getElementById('acc_size').value) || 10000;
             const riskAmount = accountSize * {MAX_ACCOUNT_RISK_PCT};
             
-            // 核心邏輯：控制每單總虧損不超過帳戶的 1%
             let shares = Math.floor(riskAmount / data.risk_per_share);
             if (shares <= 0) shares = 0;
             
@@ -684,11 +750,86 @@ html = f"""<!DOCTYPE html>
             document.getElementById('calc_sl').innerText = unit + data.sl_price.toFixed(2);
             document.getElementById('calc_tp').innerText = unit + data.tp_price.toFixed(2);
             document.getElementById('calc_shares').innerText = shares;
-            document.getElementById('calc_cost').innerText = unit + totalCost.toLocaleString(undefined, {{maximumFractionDigits: 0}}) + " (" + actualPosPct + "%)";
+            document.getElementById('calc_cost').innerText = unit + totalCost.toLocaleString(undefined, {{maximumFractionDigits: 0}}) + " (" + actualPosPct + "%)\";
+        }}
+
+        function renderJournal() {{
+            const openTbody = document.getElementById('journal-open-tbody');
+            const closedTbody = document.getElementById('journal-closed-tbody');
+            const statsContainer = document.getElementById('journal-stats');
+
+            const sortedHist = [...tradeHistory].reverse();
+            const opens = sortedHist.filter(t => t.status === 'OPEN');
+            const closeds = sortedHist.filter(t => t.status !== 'OPEN');
+
+            let totalClosedPnl = 0, wins = 0, totalOpenPnl = 0;
+            
+            closeds.forEach(t => {{
+                totalClosedPnl += (10000 / t.px) * (t.last_px - t.px);
+                if (t.status.includes('✅')) wins++;
+            }});
+            opens.forEach(t => {{
+                totalOpenPnl += (10000 / t.px) * (t.last_px - t.px);
+            }});
+
+            const winRate = closeds.length > 0 ? ((wins / closeds.length) * 100).toFixed(1) : 0;
+            const closedSign = totalClosedPnl >= 0 ? '+' : '';
+            const openSign = totalOpenPnl >= 0 ? '+' : '';
+            const closedColor = totalClosedPnl >= 0 ? 'text-emerald-400' : 'text-red-400';
+            const openColor = totalOpenPnl >= 0 ? 'text-emerald-400' : 'text-red-400';
+
+            statsContainer.innerHTML = `
+                <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 text-center">
+                    <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">已結案總利潤</div>
+                    <div class="text-2xl font-black ${{closedColor}}">${{closedSign}}$${{totalClosedPnl.toFixed(0)}}</div>
+                </div>
+                <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 text-center">
+                    <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">歷史勝率</div>
+                    <div class="text-2xl font-black text-white">${{winRate}}%</div>
+                    <div class="text-[9px] text-slate-500 mt-1">${{wins}} 贏 / ${{closeds.length - wins}} 輸</div>
+                </div>
+                <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 text-center">
+                    <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">目前未平倉</div>
+                    <div class="text-2xl font-black text-cyan-400">${{opens.length}} 隻</div>
+                </div>
+                <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 text-center">
+                    <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">總浮動盈虧</div>
+                    <div class="text-2xl font-black ${{openColor}}">${{openSign}}$${{totalOpenPnl.toFixed(0)}}</div>
+                </div>
+            `;
+
+            openTbody.innerHTML = opens.length === 0 ? '<tr><td colspan="6" class="p-4 text-center text-slate-500">目前無持倉</td></tr>' : opens.map(t => {{
+                const pnl = (10000 / t.px) * (t.last_px - t.px);
+                const pColor = pnl >= 0 ? 'text-emerald-400' : 'text-red-400';
+                const isJp = t.tk.endsWith('.T');
+                return `
+                <tr class="border-b border-slate-700/50 hover:bg-slate-800 transition">
+                    <td class="p-2">${{t.date}}</td>
+                    <td class="p-2 font-bold text-white">${{t.tk}}</td>
+                    <td class="p-2"><span class="text-[9px] bg-slate-700 px-1 rounded">${{t.tag || 'N/A'}}</span></td>
+                    <td class="p-2">${{isJp?'¥':'$'}}${{t.px}}</td>
+                    <td class="p-2 text-white">${{isJp?'¥':'$'}}${{t.last_px}}</td>
+                    <td class="p-2 text-right font-black font-mono ${{pColor}}">${{pnl >= 0 ? '+' : ''}}${{pnl.toFixed(2)}}</td>
+                </tr>`;
+            }}).join('');
+
+            closedTbody.innerHTML = closeds.length === 0 ? '<tr><td colspan="5" class="p-4 text-center text-slate-500">無結案紀錄</td></tr>' : closeds.slice(0,50).map(t => {{
+                const pnl = (10000 / t.px) * (t.last_px - t.px);
+                const isWin = t.status.includes('✅');
+                const pColor = isWin ? 'text-emerald-400' : 'text-red-400';
+                return `
+                <tr class="border-b border-slate-700/50 hover:bg-slate-800 transition">
+                    <td class="p-2">${{t.close_date || t.date}}</td>
+                    <td class="p-2 font-bold text-white">${{t.tk}}</td>
+                    <td class="p-2 text-slate-400">${{t.tag || 'N/A'}}</td>
+                    <td class="p-2">${{isWin ? '🎯 止盈' : '🛑 止損'}}</td>
+                    <td class="p-2 text-right font-black font-mono ${{pColor}}">${{pnl >= 0 ? '+' : ''}}${{pnl.toFixed(2)}}</td>
+                </tr>`;
+            }}).join('');
         }}
     </script>
 </body>
 </html>"""
 
 with open(os.path.join(OUTPUT_DIR, "index.html"), "w", encoding="utf-8") as f: f.write(html)
-print(f"\n🎉 終極融合版建置完成！")
+print(f"\n🎉 正式生產版建置完成！")
