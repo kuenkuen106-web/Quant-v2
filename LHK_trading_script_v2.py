@@ -667,7 +667,7 @@ html = f"""<!DOCTYPE html>
                 <div class="overflow-x-auto">
                     <table class="w-full text-xs text-left">
                         <thead class="text-slate-500 uppercase border-b border-slate-700 bg-slate-800/50">
-                            <tr><th class="p-2">日期</th><th class="p-2">代號</th><th class="p-2">策略</th><th class="p-2">買入價</th><th class="p-2">現價</th><th class="p-2 text-right">浮動 P&L (USD)</th></tr>
+                            <tr><th class="p-2">日期</th><th class="p-2">代號</th><th class="p-2">策略</th><th class="p-2">買入價</th><th class="p-2">現價</th><th class="p-2 text-right">浮動 P&L (USD)</th><th class="p-2 text-right">回報 (%)</th></tr>
                         </thead>
                         <tbody id="journal-open-tbody"></tbody>
                     </table>
@@ -679,7 +679,7 @@ html = f"""<!DOCTYPE html>
                 <div class="overflow-x-auto">
                     <table class="w-full text-xs text-left">
                         <thead class="text-slate-500 uppercase border-b border-slate-700 bg-slate-800/50">
-                            <tr><th class="p-2">平倉日期</th><th class="p-2">代號</th><th class="p-2">策略</th><th class="p-2">狀態</th><th class="p-2 text-right">已實現 P&L (USD)</th></tr>
+                            <tr><th class="p-2">平倉日期</th><th class="p-2">代號</th><th class="p-2">策略</th><th class="p-2">狀態</th><th class="p-2 text-right">實現 P&L (USD)</th><th class="p-2 text-right">回報 (%)</th></tr>
                         </thead>
                         <tbody id="journal-closed-tbody"></tbody>
                     </table>
@@ -798,8 +798,10 @@ html = f"""<!DOCTYPE html>
                 </div>
             `;
 
-            openTbody.innerHTML = opens.length === 0 ? '<tr><td colspan="6" class="p-4 text-center text-slate-500">目前無持倉</td></tr>' : opens.map(t => {{
+            // 👇 渲染 Open Positions (加入 % 回報計算)
+            openTbody.innerHTML = opens.length === 0 ? '<tr><td colspan="7" class="p-4 text-center text-slate-500">目前無持倉</td></tr>' : opens.map(t => {{
                 const pnl = (10000 / t.px) * (t.last_px - t.px);
+                const pnlPct = ((t.last_px - t.px) / t.px * 100).toFixed(2); // 計算 %
                 const pColor = pnl >= 0 ? 'text-emerald-400' : 'text-red-400';
                 const isJp = t.tk.endsWith('.T');
                 return `
@@ -810,11 +812,14 @@ html = f"""<!DOCTYPE html>
                     <td class="p-2">${{isJp?'¥':'$'}}${{t.px}}</td>
                     <td class="p-2 text-white">${{isJp?'¥':'$'}}${{t.last_px}}</td>
                     <td class="p-2 text-right font-black font-mono ${{pColor}}">${{pnl >= 0 ? '+' : ''}}${{pnl.toFixed(2)}}</td>
+                    <td class="p-2 text-right font-black font-mono ${{pColor}}">${{pnl >= 0 ? '+' : ''}}${{pnlPct}}%</td>
                 </tr>`;
             }}).join('');
 
-            closedTbody.innerHTML = closeds.length === 0 ? '<tr><td colspan="5" class="p-4 text-center text-slate-500">無結案紀錄</td></tr>' : closeds.slice(0,50).map(t => {{
+            // 👇 渲染 Closed Trades (加入 % 回報計算)
+            closedTbody.innerHTML = closeds.length === 0 ? '<tr><td colspan="6" class="p-4 text-center text-slate-500">無結案紀錄</td></tr>' : closeds.slice(0,50).map(t => {{
                 const pnl = (10000 / t.px) * (t.last_px - t.px);
+                const pnlPct = ((t.last_px - t.px) / t.px * 100).toFixed(2); // 計算 %
                 const isWin = t.status.includes('✅');
                 const pColor = isWin ? 'text-emerald-400' : 'text-red-400';
                 return `
@@ -824,6 +829,7 @@ html = f"""<!DOCTYPE html>
                     <td class="p-2 text-slate-400">${{t.tag || 'N/A'}}</td>
                     <td class="p-2">${{isWin ? '🎯 止盈' : '🛑 止損'}}</td>
                     <td class="p-2 text-right font-black font-mono ${{pColor}}">${{pnl >= 0 ? '+' : ''}}${{pnl.toFixed(2)}}</td>
+                    <td class="p-2 text-right font-black font-mono ${{pColor}}">${{pnl >= 0 ? '+' : ''}}${{pnlPct}}%</td>
                 </tr>`;
             }}).join('');
         }}
