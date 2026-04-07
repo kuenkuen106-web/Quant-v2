@@ -1,5 +1,4 @@
-name: UAT Quant Master Auto Scan
-
+name: v2 UAT
 on:
   workflow_dispatch:  # 👈 核心：刪除所有 push 同 schedule，只保留呢行
     inputs:
