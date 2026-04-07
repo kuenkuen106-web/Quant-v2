@@ -685,8 +685,7 @@ html = f"""<!DOCTYPE html>
             <div class="text-xs text-slate-500">每單固定以 $10,000 基準結算盈虧</div>
         </div>
 
-        <div class="grid grid-cols-4 gap-4" id="journal-stats">
-            </div>
+        <div class="grid grid-cols-4 gap-4" id="journal-stats"></div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="bg-slate-800/30 rounded-xl border border-slate-700 p-4">
@@ -694,7 +693,7 @@ html = f"""<!DOCTYPE html>
                 <div class="overflow-x-auto">
                     <table class="w-full text-xs text-left">
                         <thead class="text-slate-500 uppercase border-b border-slate-700 bg-slate-800/50">
-                            <tr><th class="p-2">日期</th><th class="p-2">代號</th><th class="p-2">策略</th><th class="p-2">買入價</th><th class="p-2">現價</th><th class="p-2 text-right">浮動 P&L (USD)</th></tr>
+                            <tr><th class="p-2">日期</th><th class="p-2">代號</th><th class="p-2">策略</th><th class="p-2">買入價</th><th class="p-2">現價</th><th class="p-2 text-right">浮動 P&L (USD)</th><th class="p-2 text-right">回報 (%)</th></tr>
                         </thead>
                         <tbody id="journal-open-tbody"></tbody>
                     </table>
@@ -706,7 +705,7 @@ html = f"""<!DOCTYPE html>
                 <div class="overflow-x-auto">
                     <table class="w-full text-xs text-left">
                         <thead class="text-slate-500 uppercase border-b border-slate-700 bg-slate-800/50">
-                            <tr><th class="p-2">平倉日期</th><th class="p-2">代號</th><th class="p-2">策略</th><th class="p-2">狀態</th><th class="p-2 text-right">已實現 P&L (USD)</th></tr>
+                            <tr><th class="p-2">平倉日期</th><th class="p-2">代號</th><th class="p-2">策略</th><th class="p-2">狀態</th><th class="p-2 text-right">實現 P&L (USD)</th><th class="p-2 text-right">回報 (%)</th></tr>
                         </thead>
                         <tbody id="journal-closed-tbody"></tbody>
                     </table>
@@ -717,12 +716,11 @@ html = f"""<!DOCTYPE html>
 
     <script>
         const rawData = {js_payload_str};
-        const tradeHistory = {trade_history_str}; // 直接從 Python 讀取歷史
+        const tradeHistory = {trade_history_str};
         
         let currentSelectedTicker = null;
         let tvWidget = null;
 
-        // 1. 分頁切換功能
         function switchTab(tabId) {{
             document.getElementById('tab-dashboard').classList.toggle('hidden', tabId !== 'dashboard');
             document.getElementById('tab-journal').classList.toggle('hidden', tabId !== 'journal');
@@ -738,13 +736,11 @@ html = f"""<!DOCTYPE html>
             if (tabId === 'journal') renderJournal();
         }}
 
-        // 2. 載入 TradingView 與計算機
         function loadContent(ticker) {{
             currentSelectedTicker = ticker;
             const isJp = ticker.endsWith('.T');
             const tvSymbol = isJp ? 'TSE:' + ticker.replace('.T', '') : ticker;
 
-            // 顯示 TV 外部連結按鈕
             const tvLink = document.getElementById('tv_out_link');
             tvLink.href = `https://www.tradingview.com/chart/?symbol=${{tvSymbol}}`;
             tvLink.classList.remove('hidden');
@@ -758,7 +754,6 @@ html = f"""<!DOCTYPE html>
             updateCalculator();
         }}
 
-        // 3. 計算機邏輯
         function updateCalculator() {{
             if (!currentSelectedTicker) return;
             const data = rawData.find(d => d.ticker === currentSelectedTicker);
@@ -784,7 +779,6 @@ html = f"""<!DOCTYPE html>
             document.getElementById('calc_cost').innerText = unit + totalCost.toLocaleString(undefined, {{maximumFractionDigits: 0}}) + " (" + actualPosPct + "%)\";
         }}
 
-        // 4. 渲染 Journal 日誌內容
         function renderJournal() {{
             const openTbody = document.getElementById('journal-open-tbody');
             const closedTbody = document.getElementById('journal-closed-tbody');
@@ -794,7 +788,6 @@ html = f"""<!DOCTYPE html>
             const opens = sortedHist.filter(t => t.status === 'OPEN');
             const closeds = sortedHist.filter(t => t.status !== 'OPEN');
 
-            // 計算統計數據 (以 $10000 為基礎)
             let totalClosedPnl = 0, wins = 0, totalOpenPnl = 0;
             
             closeds.forEach(t => {{
@@ -811,7 +804,6 @@ html = f"""<!DOCTYPE html>
             const closedColor = totalClosedPnl >= 0 ? 'text-emerald-400' : 'text-red-400';
             const openColor = totalOpenPnl >= 0 ? 'text-emerald-400' : 'text-red-400';
 
-            // 填寫四宮格
             statsContainer.innerHTML = `
                 <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 text-center">
                     <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">已結案總利潤</div>
@@ -832,9 +824,10 @@ html = f"""<!DOCTYPE html>
                 </div>
             `;
 
-            // 填寫 Open Table
-            openTbody.innerHTML = opens.length === 0 ? '<tr><td colspan="6" class="p-4 text-center text-slate-500">目前無持倉</td></tr>' : opens.map(t => {{
+            // 👇 渲染 Open Positions (加入 % 回報計算)
+            openTbody.innerHTML = opens.length === 0 ? '<tr><td colspan="7" class="p-4 text-center text-slate-500">目前無持倉</td></tr>' : opens.map(t => {{
                 const pnl = (10000 / t.px) * (t.last_px - t.px);
+                const pnlPct = ((t.last_px - t.px) / t.px * 100).toFixed(2); // 計算 %
                 const pColor = pnl >= 0 ? 'text-emerald-400' : 'text-red-400';
                 const isJp = t.tk.endsWith('.T');
                 return `
@@ -845,12 +838,14 @@ html = f"""<!DOCTYPE html>
                     <td class="p-2">${{isJp?'¥':'$'}}${{t.px}}</td>
                     <td class="p-2 text-white">${{isJp?'¥':'$'}}${{t.last_px}}</td>
                     <td class="p-2 text-right font-black font-mono ${{pColor}}">${{pnl >= 0 ? '+' : ''}}${{pnl.toFixed(2)}}</td>
+                    <td class="p-2 text-right font-black font-mono ${{pColor}}">${{pnl >= 0 ? '+' : ''}}${{pnlPct}}%</td>
                 </tr>`;
             }}).join('');
 
-            // 填寫 Closed Table (最多顯示 50 筆)
-            closedTbody.innerHTML = closeds.length === 0 ? '<tr><td colspan="5" class="p-4 text-center text-slate-500">無結案紀錄</td></tr>' : closeds.slice(0,50).map(t => {{
+            // 👇 渲染 Closed Trades (加入 % 回報計算)
+            closedTbody.innerHTML = closeds.length === 0 ? '<tr><td colspan="6" class="p-4 text-center text-slate-500">無結案紀錄</td></tr>' : closeds.slice(0,50).map(t => {{
                 const pnl = (10000 / t.px) * (t.last_px - t.px);
+                const pnlPct = ((t.last_px - t.px) / t.px * 100).toFixed(2); // 計算 %
                 const isWin = t.status.includes('✅');
                 const pColor = isWin ? 'text-emerald-400' : 'text-red-400';
                 return `
@@ -860,6 +855,7 @@ html = f"""<!DOCTYPE html>
                     <td class="p-2 text-slate-400">${{t.tag || 'N/A'}}</td>
                     <td class="p-2">${{isWin ? '🎯 止盈' : '🛑 止損'}}</td>
                     <td class="p-2 text-right font-black font-mono ${{pColor}}">${{pnl >= 0 ? '+' : ''}}${{pnl.toFixed(2)}}</td>
+                    <td class="p-2 text-right font-black font-mono ${{pColor}}">${{pnl >= 0 ? '+' : ''}}${{pnlPct}}%</td>
                 </tr>`;
             }}).join('');
         }}
