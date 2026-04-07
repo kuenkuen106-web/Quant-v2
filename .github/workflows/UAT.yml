@@ -1,0 +1,52 @@
+name: UAT Quant Master Auto Scan
+
+on:
+  workflow_dispatch:  # 👈 核心：刪除所有 push 同 schedule，只保留呢行
+    inputs:
+      days_ago:
+        description: '時光機回溯天數 (需配合 Python Code 修改，或作紀錄用途)'
+        required: false
+        default: '30'
+
+# 加上併發控制，防止多次點擊導致 Git 衝突
+concurrency:
+  group: git-push-group
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  run-strategy:
+    runs-on: ubuntu-latest
+    steps:
+      # 【更新1】改用 v4
+      - name: 📥 讀取代碼 (Checkout)
+        uses: actions/checkout@v4 
+
+      # 【更新2】改用 v5
+      - name: 🐍 設定 Python 環境
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: 📦 安裝依賴工具
+        run: pip install -r requirements.txt
+
+      - name: 🚀 執行量化掃描與發送 Discord
+        env:
+          DISCORD_BACKTEST_WEBHOOK_URL: ${{ secrets.DISCORD_BACKTEST_WEBHOOK_URL }}
+          DISCORD_BACKTEST_SUMMARY_WEBHOOK: ${{ secrets.DISCORD_BACKTEST_SUMMARY_WEBHOOK }}
+          # 將 GitHub UI 嘅輸入傳入 Python 自然環境
+          UAT_DAYS_AGO: ${{ github.event.inputs.days_ago }}
+        # 【重要檢查】請確保下面呢個檔案名，同你 Repo 裡面嘅 Python 檔案名一模一樣！
+        # 如果你個檔案叫 main.py，請將下面改做 run: python main.py
+        run: python LHK_trading_script_backtest.py
+
+      - name: 💾 更新 Dashboard 網頁檔案
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/
+          git commit -m "Auto-update Dashboard" || echo "No changes to commit"
+          git push
