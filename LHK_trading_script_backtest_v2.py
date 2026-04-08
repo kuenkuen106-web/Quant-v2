@@ -398,8 +398,7 @@ for ticker in [t for t in ALL_TICKERS if t not in ['SPY','^VIX','^N225']]:
 
         rs = rs_rank[ticker].iloc[-1]
         rs_mom = rs_momentum[ticker].iloc[-1]
-        if pd.isna(rs) or rs < PQR_SWING_MIN: continue
-
+        
         sma20, std20 = c.rolling(20).mean(), c.rolling(20).std()
         bb_lower, bb_width = sma20 - (2 * std20), (4 * std20) / sma20
         atr = (h-l).rolling(14).mean(); catr = float(atr.iloc[-1])
@@ -407,6 +406,16 @@ for ticker in [t for t in ALL_TICKERS if t not in ['SPY','^VIX','^N225']]:
         delta = c.diff()
         rsi = 100 - (100 / (1 + (delta.where(delta > 0, 0)).rolling(14).mean() / (-delta.where(delta < 0, 0)).rolling(14).mean()))
         
+        # 👇 【新增】：每日更新「目前持倉」的現時指標 (curr_metric)
+        for t in trade_history:
+            if t.get('status') == 'OPEN' and t.get('tk') == ticker:
+                if '超賣' in t.get('tag', ''):
+                    t['curr_metric'] = f"RSI: {int(rsi.iloc[-1])}"
+                else:
+                    t['curr_metric'] = f"RS: {int(rs)}"
+
+        if pd.isna(rs) or rs < PQR_SWING_MIN: continue
+
         base_dd = (c.rolling(60).max() - c.rolling(60).min()) / c.rolling(60).max()
         rec_volat = (c.rolling(10).max() - c.rolling(10).min()) / c.rolling(10).max()
         is_vcp = (base_dd.iloc[-1] <= 0.35) and (rec_volat.iloc[-1] <= 0.06) and (v.iloc[-1] < v.rolling(50).mean().iloc[-1])
@@ -416,13 +425,16 @@ for ticker in [t for t in ALL_TICKERS if t not in ['SPY','^VIX','^N225']]:
         tag_name = ""
         sl_p, tp_p = 0, 0
         risk_per_share = 0
+        entry_metric = "" # 準備記錄進場指標
 
         if (is_vcp or is_bb_sqz) and ticker_is_bull:
             tag_name = "🏆 VCP 突破" if is_vcp else "💥 BB 擠壓"
             sl_p, tp_p = round(cp - 2.5 * catr, 2), round(cp + 4.5 * catr, 2)
             risk_per_share = cp - sl_p
+            entry_metric = f"RS: {int(rs)}" # 👈 記錄進場 RS
+            
             swing_results.append({'tk': ticker, 'rs': round(rs,0), 'mom': round(rs_mom,1), 'px': round(cp,2), 'sl': sl_p, 'tp': tp_p, 'tag': tag_name})
-            trade_info = {'date': today_str, 'tk': ticker, 'px': round(cp, 2), 'sl': sl_p, 'tp': tp_p, 'last_px': round(cp, 2), 'status': 'OPEN', 'tag': tag_name}
+            trade_info = {'date': today_str, 'tk': ticker, 'px': round(cp, 2), 'sl': sl_p, 'tp': tp_p, 'last_px': round(cp, 2), 'status': 'OPEN', 'tag': tag_name, 'entry_metric': entry_metric, 'curr_metric': entry_metric}
         
         elif not trade_info: 
             is_gap_up = ((op.iloc[-1] - c.iloc[-2]) / c.iloc[-2] >= 0.03) and (v.iloc[-1] > v.rolling(20).mean().iloc[-1] * 2)
@@ -431,8 +443,10 @@ for ticker in [t for t in ALL_TICKERS if t not in ['SPY','^VIX','^N225']]:
                 tag_name = "⚡ 缺口動能" if is_gap_up else "📉 極度超賣"
                 sl_p, tp_p = round(cp * 0.95, 2), round(cp * 1.05, 2)
                 risk_per_share = cp - sl_p
+                entry_metric = f"RSI: {int(rsi.iloc[-1])}" if is_oversold else f"RS: {int(rs)}" # 👈 超賣記 RSI，缺口記 RS
+                
                 short_term_results.append({'tk': ticker, 'rs': round(rs,0), 'mom': round(rs_mom,1), 'px': round(cp,2), 'sl': sl_p, 'tp': tp_p, 'tag': tag_name})
-                trade_info = {'date': today_str, 'tk': ticker, 'px': round(cp, 2), 'sl': sl_p, 'tp': tp_p, 'last_px': round(cp, 2), 'status': 'OPEN', 'tag': tag_name}
+                trade_info = {'date': today_str, 'tk': ticker, 'px': round(cp, 2), 'sl': sl_p, 'tp': tp_p, 'last_px': round(cp, 2), 'status': 'OPEN', 'tag': tag_name, 'entry_metric': entry_metric, 'curr_metric': entry_metric}
 
         if trade_info:
             send_discord_alert(ticker, tag_name, round(cp, 2), sl_p, tp_p, True, [])
@@ -678,7 +692,7 @@ html = f"""<!DOCTYPE html>
         </div>
     </main>
 
-    <main id="tab-journal" class="hidden flex-1 overflow-y-auto bg-slate-900 rounded-xl border border-slate-800 p-6 z-10 flex flex-col gap-6 shadow-lg">
+<main id="tab-journal" class="hidden flex-1 overflow-y-auto bg-slate-900 rounded-xl border border-slate-800 p-6 z-10 flex flex-col gap-6 shadow-lg">
         
         <div class="flex justify-between items-center border-b border-slate-800 pb-2">
             <h2 class="text-2xl font-black text-white flex items-center gap-2">📜 歷史交易結算與日誌</h2>
@@ -693,7 +707,7 @@ html = f"""<!DOCTYPE html>
                 <div class="overflow-x-auto">
                     <table class="w-full text-xs text-left">
                         <thead class="text-slate-500 uppercase border-b border-slate-700 bg-slate-800/50">
-                            <tr><th class="p-2">日期</th><th class="p-2">代號</th><th class="p-2">策略</th><th class="p-2">買入價</th><th class="p-2">現價</th><th class="p-2 text-right">浮動 P&L (USD)</th><th class="p-2 text-right">回報 (%)</th></tr>
+                            <tr><th class="p-2">日期</th><th class="p-2">代號</th><th class="p-2">策略</th><th class="p-2">進場指標</th><th class="p-2">現時指標</th><th class="p-2">買入價</th><th class="p-2">現價</th><th class="p-2 text-right">浮動 P&L (USD)</th><th class="p-2 text-right">回報 (%)</th></tr>
                         </thead>
                         <tbody id="journal-open-tbody"></tbody>
                     </table>
@@ -799,15 +813,21 @@ html = f"""<!DOCTYPE html>
             }});
 
             const winRate = closeds.length > 0 ? ((wins / closeds.length) * 100).toFixed(1) : 0;
+            
+            // 👇 計算總資本回報率 (基於每單投入 $10,000 計算總本金)
+            const closedPct = closeds.length > 0 ? ((totalClosedPnl / (closeds.length * 10000)) * 100).toFixed(2) : "0.00";
+            const openPct = opens.length > 0 ? ((totalOpenPnl / (opens.length * 10000)) * 100).toFixed(2) : "0.00";
+
             const closedSign = totalClosedPnl >= 0 ? '+' : '';
             const openSign = totalOpenPnl >= 0 ? '+' : '';
             const closedColor = totalClosedPnl >= 0 ? 'text-emerald-400' : 'text-red-400';
             const openColor = totalOpenPnl >= 0 ? 'text-emerald-400' : 'text-red-400';
 
+            // 👇 將 P&L (%) 融入顯示方塊中
             statsContainer.innerHTML = `
                 <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 text-center">
                     <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">已結案總利潤</div>
-                    <div class="text-2xl font-black ${{closedColor}}">${{closedSign}}$${{totalClosedPnl.toFixed(0)}}</div>
+                    <div class="text-2xl font-black ${{closedColor}}">${{closedSign}}$${{totalClosedPnl.toFixed(0)}} <span class="text-sm">(${{closedSign}}${{closedPct}}%)</span></div>
                 </div>
                 <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 text-center">
                     <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">歷史勝率</div>
@@ -820,21 +840,34 @@ html = f"""<!DOCTYPE html>
                 </div>
                 <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 text-center">
                     <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">總浮動盈虧</div>
-                    <div class="text-2xl font-black ${{openColor}}">${{openSign}}$${{totalOpenPnl.toFixed(0)}}</div>
+                    <div class="text-2xl font-black ${{openColor}}">${{openSign}}$${{totalOpenPnl.toFixed(0)}} <span class="text-sm">(${{openSign}}${{openPct}}%)</span></div>
                 </div>
             `;
 
-            // 👇 渲染 Open Positions (加入 % 回報計算)
-            openTbody.innerHTML = opens.length === 0 ? '<tr><td colspan="7" class="p-4 text-center text-slate-500">目前無持倉</td></tr>' : opens.map(t => {{
+            // 👇 填寫 Open Positions (加入指標顯示)
+            openTbody.innerHTML = opens.length === 0 ? '<tr><td colspan="9" class="p-4 text-center text-slate-500">目前無持倉</td></tr>' : opens.map(t => {{
                 const pnl = (10000 / t.px) * (t.last_px - t.px);
-                const pnlPct = ((t.last_px - t.px) / t.px * 100).toFixed(2); // 計算 %
+                const pnlPct = ((t.last_px - t.px) / t.px * 100).toFixed(2);
                 const pColor = pnl >= 0 ? 'text-emerald-400' : 'text-red-400';
                 const isJp = t.tk.endsWith('.T');
+                
+                // 動態比較指標強弱 (判斷現時指標比進場時強定弱)
+                let metricStatus = '';
+                if(t.curr_metric && t.entry_metric) {{
+                    const currVal = parseInt(t.curr_metric.replace(/[^0-9-]/g, ''));
+                    const entryVal = parseInt(t.entry_metric.replace(/[^0-9-]/g, ''));
+                    metricStatus = currVal >= entryVal ? 'text-emerald-400' : 'text-red-400';
+                }} else {{
+                    metricStatus = 'text-slate-300';
+                }}
+
                 return `
                 <tr class="border-b border-slate-700/50 hover:bg-slate-800 transition">
                     <td class="p-2">${{t.date}}</td>
                     <td class="p-2 font-bold text-white">${{t.tk}}</td>
                     <td class="p-2"><span class="text-[9px] bg-slate-700 px-1 rounded">${{t.tag || 'N/A'}}</span></td>
+                    <td class="p-2 text-[10px] font-mono text-slate-400">${{t.entry_metric || '-'}}</td>
+                    <td class="p-2 text-[10px] font-mono font-bold ${{metricStatus}}">${{t.curr_metric || '-'}}</td>
                     <td class="p-2">${{isJp?'¥':'$'}}${{t.px}}</td>
                     <td class="p-2 text-white">${{isJp?'¥':'$'}}${{t.last_px}}</td>
                     <td class="p-2 text-right font-black font-mono ${{pColor}}">${{pnl >= 0 ? '+' : ''}}${{pnl.toFixed(2)}}</td>
@@ -842,10 +875,10 @@ html = f"""<!DOCTYPE html>
                 </tr>`;
             }}).join('');
 
-            // 👇 渲染 Closed Trades (加入 % 回報計算)
+            // 填寫 Closed Trades (保持不變)
             closedTbody.innerHTML = closeds.length === 0 ? '<tr><td colspan="6" class="p-4 text-center text-slate-500">無結案紀錄</td></tr>' : closeds.slice(0,50).map(t => {{
                 const pnl = (10000 / t.px) * (t.last_px - t.px);
-                const pnlPct = ((t.last_px - t.px) / t.px * 100).toFixed(2); // 計算 %
+                const pnlPct = ((t.last_px - t.px) / t.px * 100).toFixed(2);
                 const isWin = t.status.includes('✅');
                 const pColor = isWin ? 'text-emerald-400' : 'text-red-400';
                 return `
