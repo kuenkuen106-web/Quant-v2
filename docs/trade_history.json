@@ -5,11 +5,11 @@
         "px": 1376.5,
         "sl": 1311.27,
         "tp": 1493.91,
-        "last_px": 1376.5,
+        "last_px": 1378.5,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 79",
-        "curr_metric": "RS: 79"
+        "curr_metric": "RS: 78"
     },
     {
         "date": "2026-04-08",
@@ -17,11 +17,11 @@
         "px": 5259.0,
         "sl": 4980.52,
         "tp": 5760.27,
-        "last_px": 5259.0,
+        "last_px": 5315.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 85",
-        "curr_metric": "RS: 85"
+        "curr_metric": "RS: 86"
     },
     {
         "date": "2026-04-08",
@@ -29,7 +29,7 @@
         "px": 3828.0,
         "sl": 3586.24,
         "tp": 4263.16,
-        "last_px": 3828.0,
+        "last_px": 3876.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 90",
@@ -41,11 +41,11 @@
         "px": 5822.0,
         "sl": 5573.09,
         "tp": 6270.05,
-        "last_px": 5822.0,
+        "last_px": 5800.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 76",
-        "curr_metric": "RS: 76"
+        "curr_metric": "RS: 75"
     },
     {
         "date": "2026-04-08",
@@ -53,11 +53,11 @@
         "px": 11200.0,
         "sl": 10542.86,
         "tp": 12382.86,
-        "last_px": 11200.0,
+        "last_px": 11120.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 82",
-        "curr_metric": "RS: 82"
+        "curr_metric": "RS: 81"
     },
     {
         "date": "2026-04-08",
@@ -65,11 +65,11 @@
         "px": 2772.0,
         "sl": 2535.99,
         "tp": 3196.82,
-        "last_px": 2772.0,
+        "last_px": 2834.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 85",
-        "curr_metric": "RS: 85"
+        "curr_metric": "RS: 86"
     },
     {
         "date": "2026-04-08",
@@ -77,11 +77,11 @@
         "px": 1146.5,
         "sl": 1073.12,
         "tp": 1278.59,
-        "last_px": 1146.5,
+        "last_px": 1176.5,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 91",
-        "curr_metric": "RS: 91"
+        "curr_metric": "RS: 92"
     },
     {
         "date": "2026-04-08",
@@ -89,7 +89,7 @@
         "px": 6580.0,
         "sl": 5909.39,
         "tp": 7787.11,
-        "last_px": 6580.0,
+        "last_px": 6604.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 80",
@@ -101,11 +101,11 @@
         "px": 2641.5,
         "sl": 2408.6,
         "tp": 3060.73,
-        "last_px": 2641.5,
+        "last_px": 2615.5,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 76",
-        "curr_metric": "RS: 76"
+        "curr_metric": "RS: 75"
     },
     {
         "date": "2026-04-08",
@@ -113,11 +113,11 @@
         "px": 2646.0,
         "sl": 2470.69,
         "tp": 2961.55,
-        "last_px": 2646.0,
+        "last_px": 2656.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 75",
-        "curr_metric": "RS: 75"
+        "curr_metric": "RS: 76"
     },
     {
         "date": "2026-04-08",
@@ -125,10 +125,22 @@
         "px": 6554.0,
         "sl": 6141.97,
         "tp": 7295.65,
-        "last_px": 6554.0,
+        "last_px": 6512.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 91",
-        "curr_metric": "RS: 91"
+        "curr_metric": "RS: 90"
+    },
+    {
+        "date": "2026-04-08",
+        "tk": "4507.T",
+        "px": 3616.0,
+        "sl": 3406.11,
+        "tp": 3993.8,
+        "last_px": 3616.0,
+        "status": "OPEN",
+        "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
+        "entry_metric": "RS: 81",
+        "curr_metric": "RS: 81"
     }
 ]
