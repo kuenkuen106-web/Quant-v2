@@ -5,11 +5,11 @@
         "px": 1352.68,
         "sl": 1281.92,
         "tp": 1480.06,
-        "last_px": 1341.5,
+        "last_px": 1343.5,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 78",
-        "curr_metric": "RS: 83"
+        "curr_metric": "RS: 82"
     },
     {
         "date": "2026-03-25",
@@ -17,11 +17,11 @@
         "px": 10970.0,
         "sl": 10344.46,
         "tp": 12095.96,
-        "last_px": 11245.0,
+        "last_px": 11010.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 79",
-        "curr_metric": "RS: 84"
+        "curr_metric": "RS: 83"
     },
     {
         "date": "2026-03-25",
@@ -42,11 +42,11 @@
         "px": 2610.28,
         "sl": 2401.06,
         "tp": 2986.88,
-        "last_px": 2600.0,
+        "last_px": 2585.5,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 90",
-        "curr_metric": "RS: 93"
+        "curr_metric": "RS: 90"
     },
     {
         "date": "2026-03-25",
@@ -54,11 +54,12 @@
         "px": 28420.0,
         "sl": 26884.29,
         "tp": 31184.29,
-        "last_px": 27025.0,
-        "status": "OPEN",
+        "last_px": 26550.0,
+        "status": "\u274c STOP LOSS",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 88",
-        "curr_metric": "RS: 85"
+        "curr_metric": "RS: 85",
+        "close_date": "2026-03-31"
     },
     {
         "date": "2026-03-25",
@@ -66,11 +67,11 @@
         "px": 40013.82,
         "sl": 37182.96,
         "tp": 45109.38,
-        "last_px": 38840.0,
+        "last_px": 37230.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 93",
-        "curr_metric": "RS: 92"
+        "curr_metric": "RS: 88"
     },
     {
         "date": "2026-03-25",
@@ -91,7 +92,7 @@
         "px": 6344.55,
         "sl": 5909.52,
         "tp": 7127.6,
-        "last_px": 6469.0,
+        "last_px": 6381.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 90",
@@ -103,7 +104,7 @@
         "px": 1878.0,
         "sl": 1763.27,
         "tp": 2084.52,
-        "last_px": 1870.0,
+        "last_px": 1877.5,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 75",
@@ -115,11 +116,11 @@
         "px": 5167.0,
         "sl": 4840.74,
         "tp": 5754.27,
-        "last_px": 5053.0,
+        "last_px": 5006.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 81",
-        "curr_metric": "RS: 82"
+        "curr_metric": "RS: 80"
     },
     {
         "date": "2026-03-27",
@@ -127,11 +128,11 @@
         "px": 274.34,
         "sl": 260.62,
         "tp": 288.06,
-        "last_px": 273.5,
+        "last_px": 287.56,
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 21",
-        "curr_metric": "RSI: 20"
+        "curr_metric": "RSI: 34"
     },
     {
         "date": "2026-03-27",
@@ -139,11 +140,11 @@
         "px": 273.76,
         "sl": 260.07,
         "tp": 287.45,
-        "last_px": 273.14,
+        "last_px": 286.86,
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 20",
-        "curr_metric": "RSI: 18"
+        "curr_metric": "RSI: 33"
     },
     {
         "date": "2026-03-27",
@@ -151,10 +152,35 @@
         "px": 88.59,
         "sl": 84.16,
         "tp": 93.02,
-        "last_px": 89.39,
+        "last_px": 93.6,
+        "status": "\u2705 TAKE PROFIT",
+        "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
+        "entry_metric": "RSI: 23",
+        "curr_metric": "RSI: 29",
+        "close_date": "2026-03-31"
+    },
+    {
+        "date": "2026-03-31",
+        "tk": "6954.T",
+        "px": 5302.0,
+        "sl": 5036.9,
+        "tp": 5567.1,
+        "last_px": 5302.0,
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 23",
-        "curr_metric": "RSI: 29"
+        "curr_metric": "RSI: 23"
+    },
+    {
+        "date": "2026-03-31",
+        "tk": "7013.T",
+        "px": 3138.0,
+        "sl": 2981.1,
+        "tp": 3294.9,
+        "last_px": 3138.0,
+        "status": "OPEN",
+        "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
+        "entry_metric": "RSI: 26",
+        "curr_metric": "RSI: 26"
     }
 ]
