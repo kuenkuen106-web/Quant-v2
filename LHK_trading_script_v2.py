@@ -676,9 +676,14 @@ html = f"""<!DOCTYPE html>
             <div class="bg-slate-800/30 rounded-xl border border-slate-700 p-4">
                 <h3 class="font-black text-cyan-400 mb-3 flex items-center gap-2">📂 目前持倉 (Open Positions)</h3>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-xs text-left">
+                    <table class="w-full text-xs text-left whitespace-nowrap">
                         <thead class="text-slate-500 uppercase border-b border-slate-700 bg-slate-800/50">
-                            <tr><th class="p-2">日期</th><th class="p-2">代號</th><th class="p-2">策略</th><th class="p-2">進場指標</th><th class="p-2">現時指標</th><th class="p-2">買入價</th><th class="p-2">現價</th><th class="p-2 text-right">浮動 P&L (USD)</th><th class="p-2 text-right">回報 (%)</th></tr>
+                            <tr>
+                                <th class="p-2">日期</th><th class="p-2">代號</th><th class="p-2">策略</th>
+                                <th class="p-2">進場指標</th><th class="p-2">現時指標</th>
+                                <th class="p-2">買入價</th><th class="p-2">止損</th><th class="p-2">止盈</th><th class="p-2">現價</th>
+                                <th class="p-2 text-right">浮動 P&L</th><th class="p-2 text-right">回報 (%)</th>
+                            </tr>
                         </thead>
                         <tbody id="journal-open-tbody"></tbody>
                     </table>
@@ -688,9 +693,14 @@ html = f"""<!DOCTYPE html>
             <div class="bg-slate-800/30 rounded-xl border border-slate-700 p-4">
                 <h3 class="font-black text-emerald-400 mb-3 flex items-center gap-2">📁 最近結案紀錄 (Closed Trades)</h3>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-xs text-left">
+                    <table class="w-full text-xs text-left whitespace-nowrap">
                         <thead class="text-slate-500 uppercase border-b border-slate-700 bg-slate-800/50">
-                            <tr><th class="p-2">平倉日期</th><th class="p-2">代號</th><th class="p-2">策略</th><th class="p-2">狀態</th><th class="p-2 text-right">實現 P&L (USD)</th><th class="p-2 text-right">回報 (%)</th></tr>
+                            <tr>
+                                <th class="p-2">買入日期</th><th class="p-2">平倉日期</th><th class="p-2">代號</th>
+                                <th class="p-2">策略</th><th class="p-2">狀態</th>
+                                <th class="p-2">買入價</th><th class="p-2">賣出價</th>
+                                <th class="p-2 text-right">實現 P&L</th><th class="p-2 text-right">回報 (%)</th>
+                            </tr>
                         </thead>
                         <tbody id="journal-closed-tbody"></tbody>
                     </table>
@@ -784,8 +794,6 @@ html = f"""<!DOCTYPE html>
             }});
 
             const winRate = closeds.length > 0 ? ((wins / closeds.length) * 100).toFixed(1) : 0;
-            
-            // 👇 計算總資本回報率 (基於每單投入 $10,000 計算總本金)
             const closedPct = closeds.length > 0 ? ((totalClosedPnl / (closeds.length * 10000)) * 100).toFixed(2) : "0.00";
             const openPct = opens.length > 0 ? ((totalOpenPnl / (opens.length * 10000)) * 100).toFixed(2) : "0.00";
 
@@ -794,7 +802,6 @@ html = f"""<!DOCTYPE html>
             const closedColor = totalClosedPnl >= 0 ? 'text-emerald-400' : 'text-red-400';
             const openColor = totalOpenPnl >= 0 ? 'text-emerald-400' : 'text-red-400';
 
-            // 👇 將 P&L (%) 融入顯示方塊中
             statsContainer.innerHTML = `
                 <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 text-center">
                     <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">已結案總利潤</div>
@@ -815,14 +822,14 @@ html = f"""<!DOCTYPE html>
                 </div>
             `;
 
-            // 👇 填寫 Open Positions (加入指標顯示)
-            openTbody.innerHTML = opens.length === 0 ? '<tr><td colspan="9" class="p-4 text-center text-slate-500">目前無持倉</td></tr>' : opens.map(t => {{
+            // 👇 填寫 Open Positions (加入 止損/止盈 價位)
+            openTbody.innerHTML = opens.length === 0 ? '<tr><td colspan="11" class="p-4 text-center text-slate-500">目前無持倉</td></tr>' : opens.map(t => {{
                 const pnl = (10000 / t.px) * (t.last_px - t.px);
                 const pnlPct = ((t.last_px - t.px) / t.px * 100).toFixed(2);
                 const pColor = pnl >= 0 ? 'text-emerald-400' : 'text-red-400';
                 const isJp = t.tk.endsWith('.T');
+                const unit = isJp ? '¥' : '$';
                 
-                // 動態比較指標強弱 (判斷現時指標比進場時強定弱)
                 let metricStatus = '';
                 if(t.curr_metric && t.entry_metric) {{
                     const currVal = parseInt(t.curr_metric.replace(/[^0-9-]/g, ''));
@@ -839,25 +846,33 @@ html = f"""<!DOCTYPE html>
                     <td class="p-2"><span class="text-[9px] bg-slate-700 px-1 rounded">${{t.tag || 'N/A'}}</span></td>
                     <td class="p-2 text-[10px] font-mono text-slate-400">${{t.entry_metric || '-'}}</td>
                     <td class="p-2 text-[10px] font-mono font-bold ${{metricStatus}}">${{t.curr_metric || '-'}}</td>
-                    <td class="p-2">${{isJp?'¥':'$'}}${{t.px}}</td>
-                    <td class="p-2 text-white">${{isJp?'¥':'$'}}${{t.last_px}}</td>
+                    <td class="p-2">${{unit}}${{t.px}}</td>
+                    <td class="p-2 text-red-400 font-mono">${{t.sl ? unit + t.sl : '-'}}</td>
+                    <td class="p-2 text-emerald-400 font-mono">${{t.tp ? unit + t.tp : '-'}}</td>
+                    <td class="p-2 text-white font-bold">${{unit}}${{t.last_px}}</td>
                     <td class="p-2 text-right font-black font-mono ${{pColor}}">${{pnl >= 0 ? '+' : ''}}${{pnl.toFixed(2)}}</td>
                     <td class="p-2 text-right font-black font-mono ${{pColor}}">${{pnl >= 0 ? '+' : ''}}${{pnlPct}}%</td>
                 </tr>`;
             }}).join('');
 
-            // 填寫 Closed Trades (保持不變)
-            closedTbody.innerHTML = closeds.length === 0 ? '<tr><td colspan="6" class="p-4 text-center text-slate-500">無結案紀錄</td></tr>' : closeds.slice(0,50).map(t => {{
+            // 👇 填寫 Closed Trades (加入 買入日期、買入/賣出 價位)
+            closedTbody.innerHTML = closeds.length === 0 ? '<tr><td colspan="9" class="p-4 text-center text-slate-500">無結案紀錄</td></tr>' : closeds.slice(0,50).map(t => {{
                 const pnl = (10000 / t.px) * (t.last_px - t.px);
                 const pnlPct = ((t.last_px - t.px) / t.px * 100).toFixed(2);
                 const isWin = t.status.includes('✅');
                 const pColor = isWin ? 'text-emerald-400' : 'text-red-400';
+                const isJp = t.tk.endsWith('.T');
+                const unit = isJp ? '¥' : '$';
+
                 return `
                 <tr class="border-b border-slate-700/50 hover:bg-slate-800 transition">
+                    <td class="p-2 text-slate-400">${{t.date}}</td>
                     <td class="p-2">${{t.close_date || t.date}}</td>
                     <td class="p-2 font-bold text-white">${{t.tk}}</td>
-                    <td class="p-2 text-slate-400">${{t.tag || 'N/A'}}</td>
+                    <td class="p-2 text-[10px] text-slate-400">${{t.tag || 'N/A'}}</td>
                     <td class="p-2">${{isWin ? '🎯 止盈' : '🛑 止損'}}</td>
+                    <td class="p-2">${{unit}}${{t.px}}</td>
+                    <td class="p-2 text-white font-bold">${{unit}}${{t.last_px}}</td>
                     <td class="p-2 text-right font-black font-mono ${{pColor}}">${{pnl >= 0 ? '+' : ''}}${{pnl.toFixed(2)}}</td>
                     <td class="p-2 text-right font-black font-mono ${{pColor}}">${{pnl >= 0 ? '+' : ''}}${{pnlPct}}%</td>
                 </tr>`;
