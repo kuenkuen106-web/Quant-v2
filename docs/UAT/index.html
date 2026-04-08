@@ -336,8 +336,7 @@
             <div class="text-xs text-slate-500">每單固定以 $10,000 基準結算盈虧</div>
         </div>
 
-        <div class="grid grid-cols-4 gap-4" id="journal-stats">
-            </div>
+        <div class="grid grid-cols-4 gap-4" id="journal-stats"></div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="bg-slate-800/30 rounded-xl border border-slate-700 p-4">
@@ -345,7 +344,7 @@
                 <div class="overflow-x-auto">
                     <table class="w-full text-xs text-left">
                         <thead class="text-slate-500 uppercase border-b border-slate-700 bg-slate-800/50">
-                            <tr><th class="p-2">日期</th><th class="p-2">代號</th><th class="p-2">策略</th><th class="p-2">買入價</th><th class="p-2">現價</th><th class="p-2 text-right">浮動 P&L (USD)</th></tr>
+                            <tr><th class="p-2">日期</th><th class="p-2">代號</th><th class="p-2">策略</th><th class="p-2">買入價</th><th class="p-2">現價</th><th class="p-2 text-right">浮動 P&L (USD)</th><th class="p-2 text-right">回報 (%)</th></tr>
                         </thead>
                         <tbody id="journal-open-tbody"></tbody>
                     </table>
@@ -357,7 +356,7 @@
                 <div class="overflow-x-auto">
                     <table class="w-full text-xs text-left">
                         <thead class="text-slate-500 uppercase border-b border-slate-700 bg-slate-800/50">
-                            <tr><th class="p-2">平倉日期</th><th class="p-2">代號</th><th class="p-2">策略</th><th class="p-2">狀態</th><th class="p-2 text-right">已實現 P&L (USD)</th></tr>
+                            <tr><th class="p-2">平倉日期</th><th class="p-2">代號</th><th class="p-2">策略</th><th class="p-2">狀態</th><th class="p-2 text-right">實現 P&L (USD)</th><th class="p-2 text-right">回報 (%)</th></tr>
                         </thead>
                         <tbody id="journal-closed-tbody"></tbody>
                     </table>
@@ -368,12 +367,11 @@
 
     <script>
         const rawData = [{"ticker": "1332.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 1360.5, "sl_price": 1293.46, "tp_price": 1481.17, "risk_per_share": 67.03999999999996}, {"ticker": "1721.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 5147.0, "sl_price": 4860.79, "tp_price": 5662.18, "risk_per_share": 286.21000000000004}, {"ticker": "1802.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 3703.0, "sl_price": 3460.71, "tp_price": 4139.13, "risk_per_share": 242.28999999999996}, {"ticker": "1803.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 2840.0, "sl_price": 2617.65, "tp_price": 3240.24, "risk_per_share": 222.3499999999999}, {"ticker": "2768.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 6402.0, "sl_price": 5991.87, "tp_price": 7140.24, "risk_per_share": 410.1300000000001}, {"ticker": "3407.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 1545.0, "sl_price": 1447.09, "tp_price": 1721.24, "risk_per_share": 97.91000000000008}, {"ticker": "4502.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 5798.0, "sl_price": 5558.03, "tp_price": 6229.95, "risk_per_share": 239.97000000000025}, {"ticker": "4578.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 11195.0, "sl_price": 10524.46, "tp_price": 12401.96, "risk_per_share": 670.5400000000009}, {"ticker": "5333.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 4145.0, "sl_price": 3883.34, "tp_price": 4616.0, "risk_per_share": 261.65999999999985}, {"ticker": "5541.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 2664.0, "sl_price": 2412.91, "tp_price": 3115.97, "risk_per_share": 251.09000000000015}, {"ticker": "6113.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 2229.5, "sl_price": 2090.87, "tp_price": 2479.04, "risk_per_share": 138.6300000000001}, {"ticker": "6971.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 2502.5, "sl_price": 2353.09, "tp_price": 2771.45, "risk_per_share": 149.40999999999985}, {"ticker": "7735.T", "tag": "\ud83d\udca5 BB \u64e0\u58d3", "curr_price": 9224.0, "sl_price": 8311.98, "tp_price": 10865.63, "risk_per_share": 912.0200000000004}, {"ticker": "8035.T", "tag": "\ud83d\udca5 BB \u64e0\u58d3", "curr_price": 38440.0, "sl_price": 35639.79, "tp_price": 43480.37, "risk_per_share": 2800.209999999999}, {"ticker": "8233.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 1981.5, "sl_price": 1877.21, "tp_price": 2169.21, "risk_per_share": 104.28999999999996}, {"ticker": "8309.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 5162.0, "sl_price": 4917.67, "tp_price": 5601.8, "risk_per_share": 244.32999999999993}, {"ticker": "8802.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 4460.0, "sl_price": 4170.93, "tp_price": 4980.32, "risk_per_share": 289.0699999999997}, {"ticker": "9412.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 3045.0, "sl_price": 2763.58, "tp_price": 3551.56, "risk_per_share": 281.4200000000001}, {"ticker": "9532.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 6462.0, "sl_price": 6044.4, "tp_price": 7213.69, "risk_per_share": 417.60000000000036}];
-        const tradeHistory = [{"date": "2026-04-06", "tk": "1332.T", "px": 1361.5, "sl": 1294.97, "tp": 1481.26, "last_px": 1360.5, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-06", "tk": "1721.T", "px": 5124.0, "sl": 4829.81, "tp": 5653.54, "last_px": 5147.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-06", "tk": "1802.T", "px": 3728.0, "sl": 3483.75, "tp": 4167.64, "last_px": 3703.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-06", "tk": "1803.T", "px": 2841.5, "sl": 2614.99, "tp": 3249.21, "last_px": 2840.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-06", "tk": "2768.T", "px": 6373.0, "sl": 5940.2, "tp": 7152.04, "last_px": 6402.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-06", "tk": "2914.T", "px": 6098.0, "sl": 5888.71, "tp": 6474.71, "last_px": 6086.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-06", "tk": "3407.T", "px": 1538.5, "sl": 1440.56, "tp": 1714.78, "last_px": 1545.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-06", "tk": "4502.T", "px": 5754.0, "sl": 5511.43, "tp": 6190.62, "last_px": 5798.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-06", "tk": "5541.T", "px": 2697.0, "sl": 2442.08, "tp": 3155.85, "last_px": 2664.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-06", "tk": "6113.T", "px": 2239.5, "sl": 2099.91, "tp": 2490.77, "last_px": 2229.5, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-06", "tk": "6971.T", "px": 2498.0, "sl": 2349.1, "tp": 2766.02, "last_px": 2502.5, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-06", "tk": "7735.T", "px": 9050.0, "sl": 8133.46, "tp": 10699.78, "last_px": 9224.0, "status": "OPEN", "tag": "\ud83d\udca5 BB \u64e0\u58d3"}, {"date": "2026-04-06", "tk": "8035.T", "px": 38370.0, "sl": 35523.19, "tp": 43494.26, "last_px": 38440.0, "status": "OPEN", "tag": "\ud83d\udca5 BB \u64e0\u58d3"}, {"date": "2026-04-06", "tk": "8309.T", "px": 5127.0, "sl": 4873.91, "tp": 5582.56, "last_px": 5162.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-06", "tk": "8802.T", "px": 4448.0, "sl": 4153.85, "tp": 4977.48, "last_px": 4460.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-06", "tk": "8830.T", "px": 4553.0, "sl": 4273.37, "tp": 5056.33, "last_px": 4672.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-06", "tk": "9532.T", "px": 6439.0, "sl": 6017.42, "tp": 7197.84, "last_px": 6462.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-06", "tk": "9983.T", "px": 65130.0, "sl": 61430.0, "tp": 71790.0, "last_px": 65090.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-07", "tk": "4578.T", "px": 11195.0, "sl": 10524.46, "tp": 12401.96, "last_px": 11195.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-07", "tk": "5333.T", "px": 4145.0, "sl": 3883.34, "tp": 4616.0, "last_px": 4145.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-07", "tk": "8233.T", "px": 1981.5, "sl": 1877.21, "tp": 2169.21, "last_px": 1981.5, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-07", "tk": "9412.T", "px": 3045.0, "sl": 2763.58, "tp": 3551.56, "last_px": 3045.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}]; // 直接從 Python 讀取歷史
+        const tradeHistory = [{"date": "2026-04-06", "tk": "1332.T", "px": 1361.5, "sl": 1294.97, "tp": 1481.26, "last_px": 1360.5, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-06", "tk": "1721.T", "px": 5124.0, "sl": 4829.81, "tp": 5653.54, "last_px": 5147.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-06", "tk": "1802.T", "px": 3728.0, "sl": 3483.75, "tp": 4167.64, "last_px": 3703.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-06", "tk": "1803.T", "px": 2841.5, "sl": 2614.99, "tp": 3249.21, "last_px": 2840.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-06", "tk": "2768.T", "px": 6373.0, "sl": 5940.2, "tp": 7152.04, "last_px": 6402.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-06", "tk": "2914.T", "px": 6098.0, "sl": 5888.71, "tp": 6474.71, "last_px": 6086.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-06", "tk": "3407.T", "px": 1538.5, "sl": 1440.56, "tp": 1714.78, "last_px": 1545.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-06", "tk": "4502.T", "px": 5754.0, "sl": 5511.43, "tp": 6190.62, "last_px": 5798.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-06", "tk": "5541.T", "px": 2697.0, "sl": 2442.08, "tp": 3155.85, "last_px": 2664.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-06", "tk": "6113.T", "px": 2239.5, "sl": 2099.91, "tp": 2490.77, "last_px": 2229.5, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-06", "tk": "6971.T", "px": 2498.0, "sl": 2349.1, "tp": 2766.02, "last_px": 2502.5, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-06", "tk": "7735.T", "px": 9050.0, "sl": 8133.46, "tp": 10699.78, "last_px": 9224.0, "status": "OPEN", "tag": "\ud83d\udca5 BB \u64e0\u58d3"}, {"date": "2026-04-06", "tk": "8035.T", "px": 38370.0, "sl": 35523.19, "tp": 43494.26, "last_px": 38440.0, "status": "OPEN", "tag": "\ud83d\udca5 BB \u64e0\u58d3"}, {"date": "2026-04-06", "tk": "8309.T", "px": 5127.0, "sl": 4873.91, "tp": 5582.56, "last_px": 5162.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-06", "tk": "8802.T", "px": 4448.0, "sl": 4153.85, "tp": 4977.48, "last_px": 4460.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-06", "tk": "8830.T", "px": 4553.0, "sl": 4273.37, "tp": 5056.33, "last_px": 4672.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-06", "tk": "9532.T", "px": 6439.0, "sl": 6017.42, "tp": 7197.84, "last_px": 6462.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-06", "tk": "9983.T", "px": 65130.0, "sl": 61430.0, "tp": 71790.0, "last_px": 65090.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-07", "tk": "4578.T", "px": 11195.0, "sl": 10524.46, "tp": 12401.96, "last_px": 11195.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-07", "tk": "5333.T", "px": 4145.0, "sl": 3883.34, "tp": 4616.0, "last_px": 4145.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-07", "tk": "8233.T", "px": 1981.5, "sl": 1877.21, "tp": 2169.21, "last_px": 1981.5, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-07", "tk": "9412.T", "px": 3045.0, "sl": 2763.58, "tp": 3551.56, "last_px": 3045.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}];
         
         let currentSelectedTicker = null;
         let tvWidget = null;
 
-        // 1. 分頁切換功能
         function switchTab(tabId) {
             document.getElementById('tab-dashboard').classList.toggle('hidden', tabId !== 'dashboard');
             document.getElementById('tab-journal').classList.toggle('hidden', tabId !== 'journal');
@@ -389,13 +387,11 @@
             if (tabId === 'journal') renderJournal();
         }
 
-        // 2. 載入 TradingView 與計算機
         function loadContent(ticker) {
             currentSelectedTicker = ticker;
             const isJp = ticker.endsWith('.T');
             const tvSymbol = isJp ? 'TSE:' + ticker.replace('.T', '') : ticker;
 
-            // 顯示 TV 外部連結按鈕
             const tvLink = document.getElementById('tv_out_link');
             tvLink.href = `https://www.tradingview.com/chart/?symbol=${tvSymbol}`;
             tvLink.classList.remove('hidden');
@@ -409,7 +405,6 @@
             updateCalculator();
         }
 
-        // 3. 計算機邏輯
         function updateCalculator() {
             if (!currentSelectedTicker) return;
             const data = rawData.find(d => d.ticker === currentSelectedTicker);
@@ -435,7 +430,6 @@
             document.getElementById('calc_cost').innerText = unit + totalCost.toLocaleString(undefined, {maximumFractionDigits: 0}) + " (" + actualPosPct + "%)";
         }
 
-        // 4. 渲染 Journal 日誌內容
         function renderJournal() {
             const openTbody = document.getElementById('journal-open-tbody');
             const closedTbody = document.getElementById('journal-closed-tbody');
@@ -445,7 +439,6 @@
             const opens = sortedHist.filter(t => t.status === 'OPEN');
             const closeds = sortedHist.filter(t => t.status !== 'OPEN');
 
-            // 計算統計數據 (以 $10000 為基礎)
             let totalClosedPnl = 0, wins = 0, totalOpenPnl = 0;
             
             closeds.forEach(t => {
@@ -462,7 +455,6 @@
             const closedColor = totalClosedPnl >= 0 ? 'text-emerald-400' : 'text-red-400';
             const openColor = totalOpenPnl >= 0 ? 'text-emerald-400' : 'text-red-400';
 
-            // 填寫四宮格
             statsContainer.innerHTML = `
                 <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 text-center">
                     <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">已結案總利潤</div>
@@ -483,9 +475,10 @@
                 </div>
             `;
 
-            // 填寫 Open Table
-            openTbody.innerHTML = opens.length === 0 ? '<tr><td colspan="6" class="p-4 text-center text-slate-500">目前無持倉</td></tr>' : opens.map(t => {
+            // 👇 渲染 Open Positions (加入 % 回報計算)
+            openTbody.innerHTML = opens.length === 0 ? '<tr><td colspan="7" class="p-4 text-center text-slate-500">目前無持倉</td></tr>' : opens.map(t => {
                 const pnl = (10000 / t.px) * (t.last_px - t.px);
+                const pnlPct = ((t.last_px - t.px) / t.px * 100).toFixed(2); // 計算 %
                 const pColor = pnl >= 0 ? 'text-emerald-400' : 'text-red-400';
                 const isJp = t.tk.endsWith('.T');
                 return `
@@ -496,12 +489,14 @@
                     <td class="p-2">${isJp?'¥':'$'}${t.px}</td>
                     <td class="p-2 text-white">${isJp?'¥':'$'}${t.last_px}</td>
                     <td class="p-2 text-right font-black font-mono ${pColor}">${pnl >= 0 ? '+' : ''}${pnl.toFixed(2)}</td>
+                    <td class="p-2 text-right font-black font-mono ${pColor}">${pnl >= 0 ? '+' : ''}${pnlPct}%</td>
                 </tr>`;
             }).join('');
 
-            // 填寫 Closed Table (最多顯示 50 筆)
-            closedTbody.innerHTML = closeds.length === 0 ? '<tr><td colspan="5" class="p-4 text-center text-slate-500">無結案紀錄</td></tr>' : closeds.slice(0,50).map(t => {
+            // 👇 渲染 Closed Trades (加入 % 回報計算)
+            closedTbody.innerHTML = closeds.length === 0 ? '<tr><td colspan="6" class="p-4 text-center text-slate-500">無結案紀錄</td></tr>' : closeds.slice(0,50).map(t => {
                 const pnl = (10000 / t.px) * (t.last_px - t.px);
+                const pnlPct = ((t.last_px - t.px) / t.px * 100).toFixed(2); // 計算 %
                 const isWin = t.status.includes('✅');
                 const pColor = isWin ? 'text-emerald-400' : 'text-red-400';
                 return `
@@ -511,6 +506,7 @@
                     <td class="p-2 text-slate-400">${t.tag || 'N/A'}</td>
                     <td class="p-2">${isWin ? '🎯 止盈' : '🛑 止損'}</td>
                     <td class="p-2 text-right font-black font-mono ${pColor}">${pnl >= 0 ? '+' : ''}${pnl.toFixed(2)}</td>
+                    <td class="p-2 text-right font-black font-mono ${pColor}">${pnl >= 0 ? '+' : ''}${pnlPct}%</td>
                 </tr>`;
             }).join('');
         }
