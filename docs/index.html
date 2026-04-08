@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <title>V1 QUANT (2026-04-08)</title>
+</head>
+<body class="bg-[#020617] text-slate-300 p-4 font-sans h-screen flex flex-col overflow-hidden">
+    
+    <header class="bg-slate-900 border border-slate-800 rounded-xl p-3 shrink-0 mb-3 shadow-lg flex flex-col gap-3 relative overflow-hidden">
+        
+        <div class="flex justify-between items-center z-10">
+            <div class="flex items-center gap-4">
+                <div>
+                    <h1 class="text-2xl font-black text-white italic tracking-tighter">V1 PRO <span class="text-indigo-500">QUANT</span></h1>
+                    <div class="mt-1 inline-block px-3 py-0.5 bg-emerald-500/20 border border-emerald-500/30 rounded-full text-emerald-400 text-[10px] font-black tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+                        🟢 實時生產環境 (Production): 2026-04-08
+                    </div>
+                </div>
+                <div class="flex gap-2 ml-6 bg-slate-950 p-1 rounded-lg border border-slate-800">
+                    <button id="tabBtn-dashboard" onclick="switchTab('dashboard')" class="bg-indigo-600 text-white px-4 py-1.5 rounded-md font-bold text-sm shadow-md transition">📊 儀表板 (Dashboard)</button>
+                    <button id="tabBtn-journal" onclick="switchTab('journal')" class="text-slate-400 hover:text-white hover:bg-slate-800 px-4 py-1.5 rounded-md font-bold text-sm transition">📜 交易日誌 (Journal)</button>
+                </div>
+            </div>
+            <div class="text-xs font-black text-slate-500 bg-black/50 px-3 py-1 rounded-lg border border-slate-800">🌐 Dual-Market Macro Radar</div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 z-10">
+            <div class="flex items-center gap-2 bg-slate-800/30 p-2 rounded-lg border border-slate-800">
+                <div class="w-12 text-center text-xs font-black text-slate-400 border-r border-slate-700">美股<br>SPX</div>
+                <div class="flex-1 flex justify-between gap-2 px-2">
+                    <div class="flex flex-col"><span class="text-[8px] text-slate-500">市寬</span><span class="text-xs font-bold text-red-400">30.6%</span></div>
+                    <div class="flex flex-col"><span class="text-[8px] text-slate-500">派發</span><span class="text-xs font-bold text-red-400">6d</span></div>
+                    <div class="flex flex-col"><span class="text-[8px] text-slate-500">狀態</span><span class="text-[10px] font-bold px-1 rounded text-red-500 bg-red-500/20 border-red-500/50">🚨 VIX 恐慌警戒</span></div>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 bg-slate-800/30 p-2 rounded-lg border border-slate-800">
+                <div class="w-12 text-center text-xs font-black text-slate-400 border-r border-slate-700">日股<br>N225</div>
+                <div class="flex-1 flex justify-between gap-2 px-2">
+                    <div class="flex flex-col"><span class="text-[8px] text-slate-500">市寬</span><span class="text-xs font-bold text-emerald-400">45.7%</span></div>
+                    <div class="flex flex-col"><span class="text-[8px] text-slate-500">派發</span><span class="text-xs font-bold text-red-400">7d</span></div>
+                    <div class="flex flex-col"><span class="text-[8px] text-slate-500">狀態</span><span class="text-[10px] font-bold px-1 rounded text-red-500 bg-red-500/20 border-red-500/50">🚨 VIX 恐慌警戒</span></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main id="tab-dashboard" class="flex-1 flex gap-4 overflow-hidden z-10">
+        <div class="w-1/3 flex flex-col gap-4 overflow-hidden">
+            <div class="bg-slate-900 p-2 rounded-xl border border-slate-800 h-[200px] shrink-0 relative flex items-center justify-center shadow-lg">
+                <div class="absolute top-2 left-3 z-10 flex gap-2 items-center">
+                    <span class="text-xs font-bold text-slate-400">SPX Anatomy:</span>
+                    <span class="text-[9px] bg-red-500/20 text-red-400 px-1 rounded border border-red-500/30">200MA</span>
+                    <span class="text-[9px] text-emerald-400 ml-2">▲ FTD</span>
+                </div>
+                <img src="charts/SPY_Trend.png" class="max-h-full max-w-full object-contain">
+            </div>
+
+            <div class="bg-slate-900 rounded-xl border border-slate-800 flex-1 flex flex-col overflow-hidden shadow-lg">
+                <div class="p-3 border-b border-slate-800 font-black text-indigo-400 flex justify-between items-center shrink-0">
+                    <span>🎯 實時推介信號 (點擊查看)</span>
+                </div>
+                <div class="overflow-y-auto flex-1 p-2 space-y-2" id="signal-list">
+                    <div class="text-[10px] font-bold text-slate-500 uppercase ml-1 mt-2">🏆 波段策略 (Swing)</div>
+                    
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('9412.T')">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-white text-sm">9412.T</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>RS: 98.0 (<span class="text-red-400">-0.4</span>)</span>
+                            <span>現價: ¥3045.0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('5333.T')">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-white text-sm">5333.T</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>RS: 96.0 (<span class="text-emerald-400">+0.4</span>)</span>
+                            <span>現價: ¥4145.0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('2768.T')">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-white text-sm">2768.T</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>RS: 94.0 (<span class="text-emerald-400">+0.7</span>)</span>
+                            <span>現價: ¥6402.0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('1803.T')">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-white text-sm">1803.T</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>RS: 92.0 (<span class="text-red-400">-2.9</span>)</span>
+                            <span>現價: ¥2840.0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('9532.T')">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-white text-sm">9532.T</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>RS: 92.0 (<span class="text-emerald-400">+1.8</span>)</span>
+                            <span>現價: ¥6462.0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('1802.T')">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-white text-sm">1802.T</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>RS: 91.0 (<span class="text-red-400">-2.4</span>)</span>
+                            <span>現價: ¥3703.0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('7735.T')">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-white text-sm">7735.T</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">💥 BB 擠壓</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>RS: 89.0 (<span class="text-red-400">-4.4</span>)</span>
+                            <span>現價: ¥9224.0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('8035.T')">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-white text-sm">8035.T</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">💥 BB 擠壓</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>RS: 88.0 (<span class="text-red-400">-7.1</span>)</span>
+                            <span>現價: ¥38440.0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('1721.T')">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-white text-sm">1721.T</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>RS: 85.0 (<span class="text-red-400">-4.9</span>)</span>
+                            <span>現價: ¥5147.0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('8802.T')">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-white text-sm">8802.T</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>RS: 85.0 (<span class="text-red-400">-7.8</span>)</span>
+                            <span>現價: ¥4460.0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('4578.T')">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-white text-sm">4578.T</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>RS: 84.0 (<span class="text-emerald-400">+16.7</span>)</span>
+                            <span>現價: ¥11195.0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('5541.T')">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-white text-sm">5541.T</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>RS: 84.0 (<span class="text-red-400">-9.1</span>)</span>
+                            <span>現價: ¥2664.0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('3407.T')">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-white text-sm">3407.T</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>RS: 81.0 (<span class="text-red-400">-6.5</span>)</span>
+                            <span>現價: ¥1545.0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('1332.T')">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-white text-sm">1332.T</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>RS: 80.0 (<span class="text-red-400">-4.0</span>)</span>
+                            <span>現價: ¥1360.5</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('8233.T')">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-white text-sm">8233.T</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>RS: 79.0 (<span class="text-red-400">-2.5</span>)</span>
+                            <span>現價: ¥1981.5</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('4502.T')">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-white text-sm">4502.T</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>RS: 78.0 (<span class="text-emerald-400">+2.2</span>)</span>
+                            <span>現價: ¥5798.0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('6113.T')">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-white text-sm">6113.T</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>RS: 78.0 (<span class="text-red-400">-4.0</span>)</span>
+                            <span>現價: ¥2229.5</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('8309.T')">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-white text-sm">8309.T</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>RS: 77.0 (<span class="text-emerald-400">+6.2</span>)</span>
+                            <span>現價: ¥5162.0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('6971.T')">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-white text-sm">6971.T</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>RS: 76.0 (<span class="text-red-400">-6.4</span>)</span>
+                            <span>現價: ¥2502.5</span>
+                        </div>
+                    </div>
+                    
+                    
+                    <div class="text-[10px] font-bold text-slate-500 uppercase ml-1 mt-4">⚡ 短線游擊 (Short Term)</div>
+                    <p class="text-slate-600 italic text-xs px-2">無訊號</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-2/3 flex flex-col gap-4 h-full">
+            <div class="bg-slate-900 rounded-xl border border-slate-700 p-4 shrink-0 shadow-lg">
+                <div class="flex justify-between items-center mb-3">
+                    <div class="flex items-center gap-2">
+                        <h3 class="text-sm font-black text-amber-500">🧮 專業部位計算機</h3>
+                        <span id="calc_ticker_name" class="text-xs font-bold text-white bg-slate-700 px-2 py-0.5 rounded">-</span>
+                        <a id="tv_out_link" href="#" target="_blank" class="hidden text-[10px] font-bold bg-blue-600/30 text-blue-400 border border-blue-500/50 hover:bg-blue-600 hover:text-white px-2 py-0.5 rounded transition">🔗 在 TV 開啟</a>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label class="text-[10px] text-slate-400 font-bold uppercase">總資金 (Account Size):</label>
+                        <input type="number" id="acc_size" value="10000" class="bg-slate-800 border border-slate-600 text-white text-xs px-2 py-1 rounded w-24 text-right focus:outline-none focus:border-amber-500" onchange="updateCalculator()" onkeyup="updateCalculator()">
+                    </div>
+                </div>
+                <div class="grid grid-cols-5 gap-3 text-center">
+                    <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700">
+                        <div class="text-[9px] text-slate-400 uppercase font-bold">進場現價</div>
+                        <div class="font-black text-white text-lg" id="calc_entry">-</div>
+                    </div>
+                    <div class="bg-red-900/10 p-2 rounded-lg border border-red-900/50">
+                        <div class="text-[9px] text-red-400 uppercase font-bold">嚴格止損 (-2.5 ATR)</div>
+                        <div class="font-black text-red-400 text-lg" id="calc_sl">-</div>
+                    </div>
+                    <div class="bg-emerald-900/10 p-2 rounded-lg border border-emerald-900/50">
+                        <div class="text-[9px] text-emerald-400 uppercase font-bold">目標止盈 (+4.5 ATR)</div>
+                        <div class="font-black text-emerald-400 text-lg" id="calc_tp">-</div>
+                    </div>
+                    <div class="bg-amber-500/10 p-2 rounded-lg border border-amber-500/30 relative">
+                        <div class="absolute -top-2 -right-2 bg-amber-500 text-black text-[8px] font-black px-1.5 py-0.5 rounded-full">1% Risk</div>
+                        <div class="text-[9px] text-amber-500 uppercase font-bold">建議買入股數</div>
+                        <div class="font-black text-amber-400 text-lg" id="calc_shares">-</div>
+                    </div>
+                    <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700">
+                        <div class="text-[9px] text-slate-400 uppercase font-bold">總持倉成本 (佔比)</div>
+                        <div class="font-black text-blue-300 text-lg" id="calc_cost">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 p-1 rounded-xl border border-slate-800 flex-1 relative shadow-lg" id="tv_chart_container">
+                <div class="absolute inset-0 flex items-center justify-center text-slate-600 text-sm italic font-bold z-0 pointer-events-none">
+                    請點擊左側信號以載入圖表
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <main id="tab-journal" class="hidden flex-1 overflow-y-auto bg-slate-900 rounded-xl border border-slate-800 p-6 z-10 flex flex-col gap-6 shadow-lg">
+        
+        <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+            <h2 class="text-2xl font-black text-white flex items-center gap-2">📜 歷史交易結算與日誌</h2>
+            <div class="text-xs text-slate-500">每單固定以 $10,000 基準結算盈虧</div>
+        </div>
+
+        <div class="grid grid-cols-4 gap-4" id="journal-stats"></div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-slate-800/30 rounded-xl border border-slate-700 p-4">
+                <h3 class="font-black text-cyan-400 mb-3 flex items-center gap-2">📂 目前持倉 (Open Positions)</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs text-left">
+                        <thead class="text-slate-500 uppercase border-b border-slate-700 bg-slate-800/50">
+                            <tr><th class="p-2">日期</th><th class="p-2">代號</th><th class="p-2">策略</th><th class="p-2">買入價</th><th class="p-2">現價</th><th class="p-2 text-right">浮動 P&L (USD)</th><th class="p-2 text-right">回報 (%)</th></tr>
+                        </thead>
+                        <tbody id="journal-open-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="bg-slate-800/30 rounded-xl border border-slate-700 p-4">
+                <h3 class="font-black text-emerald-400 mb-3 flex items-center gap-2">📁 最近結案紀錄 (Closed Trades)</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs text-left">
+                        <thead class="text-slate-500 uppercase border-b border-slate-700 bg-slate-800/50">
+                            <tr><th class="p-2">平倉日期</th><th class="p-2">代號</th><th class="p-2">策略</th><th class="p-2">狀態</th><th class="p-2 text-right">實現 P&L (USD)</th><th class="p-2 text-right">回報 (%)</th></tr>
+                        </thead>
+                        <tbody id="journal-closed-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const rawData = [{"ticker": "1332.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 1360.5, "sl_price": 1293.46, "tp_price": 1481.17, "risk_per_share": 67.03999999999996}, {"ticker": "1721.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 5147.0, "sl_price": 4860.79, "tp_price": 5662.18, "risk_per_share": 286.21000000000004}, {"ticker": "1802.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 3703.0, "sl_price": 3460.71, "tp_price": 4139.13, "risk_per_share": 242.28999999999996}, {"ticker": "1803.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 2840.0, "sl_price": 2617.65, "tp_price": 3240.24, "risk_per_share": 222.3499999999999}, {"ticker": "2768.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 6402.0, "sl_price": 5991.87, "tp_price": 7140.24, "risk_per_share": 410.1300000000001}, {"ticker": "3407.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 1545.0, "sl_price": 1447.09, "tp_price": 1721.24, "risk_per_share": 97.91000000000008}, {"ticker": "4502.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 5798.0, "sl_price": 5558.03, "tp_price": 6229.95, "risk_per_share": 239.97000000000025}, {"ticker": "4578.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 11195.0, "sl_price": 10524.46, "tp_price": 12401.96, "risk_per_share": 670.5400000000009}, {"ticker": "5333.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 4145.0, "sl_price": 3883.34, "tp_price": 4616.0, "risk_per_share": 261.65999999999985}, {"ticker": "5541.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 2664.0, "sl_price": 2412.91, "tp_price": 3115.97, "risk_per_share": 251.09000000000015}, {"ticker": "6113.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 2229.5, "sl_price": 2090.87, "tp_price": 2479.04, "risk_per_share": 138.6300000000001}, {"ticker": "6971.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 2502.5, "sl_price": 2353.09, "tp_price": 2771.45, "risk_per_share": 149.40999999999985}, {"ticker": "7735.T", "tag": "\ud83d\udca5 BB \u64e0\u58d3", "curr_price": 9224.0, "sl_price": 8311.98, "tp_price": 10865.63, "risk_per_share": 912.0200000000004}, {"ticker": "8035.T", "tag": "\ud83d\udca5 BB \u64e0\u58d3", "curr_price": 38440.0, "sl_price": 35639.79, "tp_price": 43480.37, "risk_per_share": 2800.209999999999}, {"ticker": "8233.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 1981.5, "sl_price": 1877.21, "tp_price": 2169.21, "risk_per_share": 104.28999999999996}, {"ticker": "8309.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 5162.0, "sl_price": 4917.67, "tp_price": 5601.8, "risk_per_share": 244.32999999999993}, {"ticker": "8802.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 4460.0, "sl_price": 4170.93, "tp_price": 4980.32, "risk_per_share": 289.0699999999997}, {"ticker": "9412.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 3045.0, "sl_price": 2763.58, "tp_price": 3551.56, "risk_per_share": 281.4200000000001}, {"ticker": "9532.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 6462.0, "sl_price": 6044.4, "tp_price": 7213.69, "risk_per_share": 417.60000000000036}];
+        const tradeHistory = [{"date": "2026-04-08", "tk": "1332.T", "px": 1360.5, "sl": 1293.46, "tp": 1481.17, "last_px": 1360.5, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-08", "tk": "1721.T", "px": 5147.0, "sl": 4860.79, "tp": 5662.18, "last_px": 5147.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-08", "tk": "1802.T", "px": 3703.0, "sl": 3460.71, "tp": 4139.13, "last_px": 3703.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-08", "tk": "1803.T", "px": 2840.0, "sl": 2617.65, "tp": 3240.24, "last_px": 2840.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-08", "tk": "2768.T", "px": 6402.0, "sl": 5991.87, "tp": 7140.24, "last_px": 6402.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-08", "tk": "3407.T", "px": 1545.0, "sl": 1447.09, "tp": 1721.24, "last_px": 1545.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-08", "tk": "4502.T", "px": 5798.0, "sl": 5558.03, "tp": 6229.95, "last_px": 5798.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-08", "tk": "4578.T", "px": 11195.0, "sl": 10524.46, "tp": 12401.96, "last_px": 11195.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-08", "tk": "5333.T", "px": 4145.0, "sl": 3883.34, "tp": 4616.0, "last_px": 4145.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-08", "tk": "5541.T", "px": 2664.0, "sl": 2412.91, "tp": 3115.97, "last_px": 2664.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-08", "tk": "6113.T", "px": 2229.5, "sl": 2090.87, "tp": 2479.04, "last_px": 2229.5, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-08", "tk": "6971.T", "px": 2502.5, "sl": 2353.09, "tp": 2771.45, "last_px": 2502.5, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-08", "tk": "7735.T", "px": 9224.0, "sl": 8311.98, "tp": 10865.63, "last_px": 9224.0, "status": "OPEN", "tag": "\ud83d\udca5 BB \u64e0\u58d3"}, {"date": "2026-04-08", "tk": "8035.T", "px": 38440.0, "sl": 35639.79, "tp": 43480.37, "last_px": 38440.0, "status": "OPEN", "tag": "\ud83d\udca5 BB \u64e0\u58d3"}, {"date": "2026-04-08", "tk": "8233.T", "px": 1981.5, "sl": 1877.21, "tp": 2169.21, "last_px": 1981.5, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-08", "tk": "8309.T", "px": 5162.0, "sl": 4917.67, "tp": 5601.8, "last_px": 5162.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-08", "tk": "8802.T", "px": 4460.0, "sl": 4170.93, "tp": 4980.32, "last_px": 4460.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-08", "tk": "9412.T", "px": 3045.0, "sl": 2763.58, "tp": 3551.56, "last_px": 3045.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}, {"date": "2026-04-08", "tk": "9532.T", "px": 6462.0, "sl": 6044.4, "tp": 7213.69, "last_px": 6462.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834"}];
+        
+        let currentSelectedTicker = null;
+        let tvWidget = null;
+
+        function switchTab(tabId) {
+            document.getElementById('tab-dashboard').classList.toggle('hidden', tabId !== 'dashboard');
+            document.getElementById('tab-journal').classList.toggle('hidden', tabId !== 'journal');
+            
+            document.getElementById('tabBtn-dashboard').className = tabId === 'dashboard' 
+                ? 'bg-indigo-600 text-white px-4 py-1.5 rounded-md font-bold text-sm shadow-md transition' 
+                : 'text-slate-400 hover:text-white hover:bg-slate-800 px-4 py-1.5 rounded-md font-bold text-sm transition';
+                
+            document.getElementById('tabBtn-journal').className = tabId === 'journal' 
+                ? 'bg-indigo-600 text-white px-4 py-1.5 rounded-md font-bold text-sm shadow-md transition' 
+                : 'text-slate-400 hover:text-white hover:bg-slate-800 px-4 py-1.5 rounded-md font-bold text-sm transition';
+
+            if (tabId === 'journal') renderJournal();
+        }
+
+        function loadContent(ticker) {
+            currentSelectedTicker = ticker;
+            const isJp = ticker.endsWith('.T');
+            const tvSymbol = isJp ? 'TSE:' + ticker.replace('.T', '') : ticker;
+
+            const tvLink = document.getElementById('tv_out_link');
+            tvLink.href = `https://www.tradingview.com/chart/?symbol=${tvSymbol}`;
+            tvLink.classList.remove('hidden');
+
+            if (tvWidget) { tvWidget.remove(); }
+            tvWidget = new TradingView.widget({
+                "autosize": true, "symbol": tvSymbol, "interval": "D", "timezone": "Etc/UTC",
+                "theme": "dark", "style": "1", "locale": "en", "container_id": "tv_chart_container"
+            });
+
+            updateCalculator();
+        }
+
+        function updateCalculator() {
+            if (!currentSelectedTicker) return;
+            const data = rawData.find(d => d.ticker === currentSelectedTicker);
+            if (!data) return;
+
+            const isJp = data.ticker.endsWith('.T');
+            const unit = isJp ? '¥' : '$';
+
+            document.getElementById('calc_ticker_name').innerText = data.ticker + " (" + data.tag + ")";
+            const accountSize = parseFloat(document.getElementById('acc_size').value) || 10000;
+            const riskAmount = accountSize * 0.01;
+            
+            let shares = Math.floor(riskAmount / data.risk_per_share);
+            if (shares <= 0) shares = 0;
+            
+            const totalCost = shares * data.curr_price;
+            const actualPosPct = (accountSize > 0) ? (totalCost / accountSize * 100).toFixed(1) : 0;
+            
+            document.getElementById('calc_entry').innerText = unit + data.curr_price.toFixed(2);
+            document.getElementById('calc_sl').innerText = unit + data.sl_price.toFixed(2);
+            document.getElementById('calc_tp').innerText = unit + data.tp_price.toFixed(2);
+            document.getElementById('calc_shares').innerText = shares;
+            document.getElementById('calc_cost').innerText = unit + totalCost.toLocaleString(undefined, {maximumFractionDigits: 0}) + " (" + actualPosPct + "%)";
+        }
+
+        function renderJournal() {
+            const openTbody = document.getElementById('journal-open-tbody');
+            const closedTbody = document.getElementById('journal-closed-tbody');
+            const statsContainer = document.getElementById('journal-stats');
+
+            const sortedHist = [...tradeHistory].reverse();
+            const opens = sortedHist.filter(t => t.status === 'OPEN');
+            const closeds = sortedHist.filter(t => t.status !== 'OPEN');
+
+            let totalClosedPnl = 0, wins = 0, totalOpenPnl = 0;
+            
+            closeds.forEach(t => {
+                totalClosedPnl += (10000 / t.px) * (t.last_px - t.px);
+                if (t.status.includes('✅')) wins++;
+            });
+            opens.forEach(t => {
+                totalOpenPnl += (10000 / t.px) * (t.last_px - t.px);
+            });
+
+            const winRate = closeds.length > 0 ? ((wins / closeds.length) * 100).toFixed(1) : 0;
+            const closedSign = totalClosedPnl >= 0 ? '+' : '';
+            const openSign = totalOpenPnl >= 0 ? '+' : '';
+            const closedColor = totalClosedPnl >= 0 ? 'text-emerald-400' : 'text-red-400';
+            const openColor = totalOpenPnl >= 0 ? 'text-emerald-400' : 'text-red-400';
+
+            statsContainer.innerHTML = `
+                <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 text-center">
+                    <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">已結案總利潤</div>
+                    <div class="text-2xl font-black ${closedColor}">${closedSign}$${totalClosedPnl.toFixed(0)}</div>
+                </div>
+                <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 text-center">
+                    <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">歷史勝率</div>
+                    <div class="text-2xl font-black text-white">${winRate}%</div>
+                    <div class="text-[9px] text-slate-500 mt-1">${wins} 贏 / ${closeds.length - wins} 輸</div>
+                </div>
+                <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 text-center">
+                    <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">目前未平倉</div>
+                    <div class="text-2xl font-black text-cyan-400">${opens.length} 隻</div>
+                </div>
+                <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 text-center">
+                    <div class="text-[10px] text-slate-400 uppercase font-bold mb-1">總浮動盈虧</div>
+                    <div class="text-2xl font-black ${openColor}">${openSign}$${totalOpenPnl.toFixed(0)}</div>
+                </div>
+            `;
+
+            // 👇 渲染 Open Positions (加入 % 回報計算)
+            openTbody.innerHTML = opens.length === 0 ? '<tr><td colspan="7" class="p-4 text-center text-slate-500">目前無持倉</td></tr>' : opens.map(t => {
+                const pnl = (10000 / t.px) * (t.last_px - t.px);
+                const pnlPct = ((t.last_px - t.px) / t.px * 100).toFixed(2); // 計算 %
+                const pColor = pnl >= 0 ? 'text-emerald-400' : 'text-red-400';
+                const isJp = t.tk.endsWith('.T');
+                return `
+                <tr class="border-b border-slate-700/50 hover:bg-slate-800 transition">
+                    <td class="p-2">${t.date}</td>
+                    <td class="p-2 font-bold text-white">${t.tk}</td>
+                    <td class="p-2"><span class="text-[9px] bg-slate-700 px-1 rounded">${t.tag || 'N/A'}</span></td>
+                    <td class="p-2">${isJp?'¥':'$'}${t.px}</td>
+                    <td class="p-2 text-white">${isJp?'¥':'$'}${t.last_px}</td>
+                    <td class="p-2 text-right font-black font-mono ${pColor}">${pnl >= 0 ? '+' : ''}${pnl.toFixed(2)}</td>
+                    <td class="p-2 text-right font-black font-mono ${pColor}">${pnl >= 0 ? '+' : ''}${pnlPct}%</td>
+                </tr>`;
+            }).join('');
+
+            // 👇 渲染 Closed Trades (加入 % 回報計算)
+            closedTbody.innerHTML = closeds.length === 0 ? '<tr><td colspan="6" class="p-4 text-center text-slate-500">無結案紀錄</td></tr>' : closeds.slice(0,50).map(t => {
+                const pnl = (10000 / t.px) * (t.last_px - t.px);
+                const pnlPct = ((t.last_px - t.px) / t.px * 100).toFixed(2); // 計算 %
+                const isWin = t.status.includes('✅');
+                const pColor = isWin ? 'text-emerald-400' : 'text-red-400';
+                return `
+                <tr class="border-b border-slate-700/50 hover:bg-slate-800 transition">
+                    <td class="p-2">${t.close_date || t.date}</td>
+                    <td class="p-2 font-bold text-white">${t.tk}</td>
+                    <td class="p-2 text-slate-400">${t.tag || 'N/A'}</td>
+                    <td class="p-2">${isWin ? '🎯 止盈' : '🛑 止損'}</td>
+                    <td class="p-2 text-right font-black font-mono ${pColor}">${pnl >= 0 ? '+' : ''}${pnl.toFixed(2)}</td>
+                    <td class="p-2 text-right font-black font-mono ${pColor}">${pnl >= 0 ? '+' : ''}${pnlPct}%</td>
+                </tr>`;
+            }).join('');
+        }
+    </script>
+</body>
+</html>
