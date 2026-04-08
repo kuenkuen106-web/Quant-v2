@@ -30,15 +30,15 @@
             <div class="flex items-center gap-2 bg-slate-800/30 p-2 rounded-lg border border-slate-800">
                 <div class="w-12 text-center text-xs font-black text-slate-400 border-r border-slate-700">美股<br>SPX</div>
                 <div class="flex-1 flex justify-between gap-2 px-2">
-                    <div class="flex flex-col"><span class="text-[8px] text-slate-500">市寬</span><span class="text-xs font-bold text-red-400">33.5%</span></div>
+                    <div class="flex flex-col"><span class="text-[8px] text-slate-500">市寬</span><span class="text-xs font-bold text-emerald-400">48.4%</span></div>
                     <div class="flex flex-col"><span class="text-[8px] text-slate-500">派發</span><span class="text-xs font-bold text-red-400">6d</span></div>
-                    <div class="flex flex-col"><span class="text-[8px] text-slate-500">狀態</span><span class="text-[10px] font-bold px-1 rounded text-red-500 bg-red-500/10 border-red-500/20">❌ 熊市空頭</span></div>
+                    <div class="flex flex-col"><span class="text-[8px] text-slate-500">狀態</span><span class="text-[10px] font-bold px-1 rounded text-emerald-500 bg-emerald-500/10 border-emerald-500/20">🟢 牛市格局</span></div>
                 </div>
             </div>
             <div class="flex items-center gap-2 bg-slate-800/30 p-2 rounded-lg border border-slate-800">
                 <div class="w-12 text-center text-xs font-black text-slate-400 border-r border-slate-700">日股<br>N225</div>
                 <div class="flex-1 flex justify-between gap-2 px-2">
-                    <div class="flex flex-col"><span class="text-[8px] text-slate-500">市寬</span><span class="text-xs font-bold text-emerald-400">62.8%</span></div>
+                    <div class="flex flex-col"><span class="text-[8px] text-slate-500">市寬</span><span class="text-xs font-bold text-emerald-400">45.3%</span></div>
                     <div class="flex flex-col"><span class="text-[8px] text-slate-500">派發</span><span class="text-xs font-bold text-red-400">6d</span></div>
                     <div class="flex flex-col"><span class="text-[8px] text-slate-500">狀態</span><span class="text-[10px] font-bold px-1 rounded text-emerald-500 bg-emerald-500/10 border-emerald-500/20">🟢 牛市格局</span></div>
                 </div>
@@ -64,47 +64,146 @@
                 <div class="overflow-y-auto flex-1 p-2 space-y-2" id="signal-list">
                     <div class="text-[10px] font-bold text-slate-500 uppercase ml-1 mt-2">🏆 波段策略 (Swing)</div>
                     
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('9412.T')">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-white text-sm">9412.T</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>RS: 98.0 (<span class="text-red-400">-0.2</span>)</span>
+                            <span>現價: ¥3045.0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('WBD')">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-white text-sm">WBD</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>RS: 97.0 (<span class="text-emerald-400">+1.5</span>)</span>
+                            <span>現價: $27.52</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('2768.T')">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-white text-sm">2768.T</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>RS: 94.0 (<span class="text-emerald-400">+0.4</span>)</span>
+                            <span>現價: ¥6402.0</span>
+                        </div>
+                    </div>
+                    
                     <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('1802.T')">
                         <div class="flex justify-between items-center">
                             <span class="font-black text-white text-sm">1802.T</span>
                             <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
                         </div>
                         <div class="flex justify-between text-[10px] text-slate-400 mt-1">
-                            <span>RS: 91.0 (<span class="text-red-400">-3.3</span>)</span>
-                            <span>現價: ¥3876.0</span>
+                            <span>RS: 91.0 (<span class="text-red-400">-3.6</span>)</span>
+                            <span>現價: ¥3703.0</span>
                         </div>
                     </div>
                     
-                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('9532.T')">
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('7735.T')">
                         <div class="flex justify-between items-center">
-                            <span class="font-black text-white text-sm">9532.T</span>
-                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
+                            <span class="font-black text-white text-sm">7735.T</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">💥 BB 擠壓</span>
                         </div>
                         <div class="flex justify-between text-[10px] text-slate-400 mt-1">
-                            <span>RS: 91.0 (<span class="text-red-400">-1.1</span>)</span>
-                            <span>現價: ¥6512.0</span>
+                            <span>RS: 90.0 (<span class="text-red-400">-2.9</span>)</span>
+                            <span>現價: ¥9224.0</span>
                         </div>
                     </div>
                     
-                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('4507.T')">
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('8035.T')">
                         <div class="flex justify-between items-center">
-                            <span class="font-black text-white text-sm">4507.T</span>
-                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
+                            <span class="font-black text-white text-sm">8035.T</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">💥 BB 擠壓</span>
                         </div>
                         <div class="flex justify-between text-[10px] text-slate-400 mt-1">
-                            <span>RS: 82.0 (<span class="text-red-400">-1.8</span>)</span>
-                            <span>現價: ¥3616.0</span>
+                            <span>RS: 88.0 (<span class="text-red-400">-6.5</span>)</span>
+                            <span>現價: ¥38440.0</span>
                         </div>
                     </div>
                     
-                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('4578.T')">
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('MRK')">
                         <div class="flex justify-between items-center">
-                            <span class="font-black text-white text-sm">4578.T</span>
+                            <span class="font-black text-white text-sm">MRK</span>
                             <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
                         </div>
                         <div class="flex justify-between text-[10px] text-slate-400 mt-1">
-                            <span>RS: 81.0 (<span class="text-emerald-400">+6.2</span>)</span>
-                            <span>現價: ¥11120.0</span>
+                            <span>RS: 86.0 (<span class="text-emerald-400">+4.9</span>)</span>
+                            <span>現價: $122.8</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('HAS')">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-white text-sm">HAS</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>RS: 86.0 (<span class="text-emerald-400">+3.8</span>)</span>
+                            <span>現價: $93.55</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('TRGP')">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-white text-sm">TRGP</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>RS: 86.0 (<span class="text-emerald-400">+6.2</span>)</span>
+                            <span>現價: $239.95</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('GM')">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-white text-sm">GM</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>RS: 85.0 (<span class="text-emerald-400">+5.3</span>)</span>
+                            <span>現價: $76.24</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('1721.T')">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-white text-sm">1721.T</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>RS: 85.0 (<span class="text-red-400">-4.2</span>)</span>
+                            <span>現價: ¥5147.0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('BKR')">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-white text-sm">BKR</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>RS: 84.0 (<span class="text-emerald-400">+8.4</span>)</span>
+                            <span>現價: $63.03</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('5541.T')">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-white text-sm">5541.T</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>RS: 82.0 (<span class="text-red-400">-11.3</span>)</span>
+                            <span>現價: ¥2664.0</span>
                         </div>
                     </div>
                     
@@ -114,30 +213,52 @@
                             <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
                         </div>
                         <div class="flex justify-between text-[10px] text-slate-400 mt-1">
-                            <span>RS: 79.0 (<span class="text-red-400">-4.7</span>)</span>
-                            <span>現價: ¥1378.5</span>
+                            <span>RS: 80.0 (<span class="text-red-400">-3.8</span>)</span>
+                            <span>現價: ¥1360.5</span>
                         </div>
                     </div>
                     
-                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('4502.T')">
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('8233.T')">
                         <div class="flex justify-between items-center">
-                            <span class="font-black text-white text-sm">4502.T</span>
+                            <span class="font-black text-white text-sm">8233.T</span>
                             <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
                         </div>
                         <div class="flex justify-between text-[10px] text-slate-400 mt-1">
-                            <span>RS: 76.0 (<span class="text-emerald-400">+0.5</span>)</span>
-                            <span>現價: ¥5800.0</span>
+                            <span>RS: 79.0 (<span class="text-emerald-400">+0.2</span>)</span>
+                            <span>現價: ¥1981.5</span>
                         </div>
                     </div>
                     
-                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('9503.T')">
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('TGT')">
                         <div class="flex justify-between items-center">
-                            <span class="font-black text-white text-sm">9503.T</span>
+                            <span class="font-black text-white text-sm">TGT</span>
                             <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
                         </div>
                         <div class="flex justify-between text-[10px] text-slate-400 mt-1">
-                            <span>RS: 76.0 (<span class="text-emerald-400">+9.6</span>)</span>
-                            <span>現價: ¥2656.0</span>
+                            <span>RS: 76.0 (<span class="text-emerald-400">+2.9</span>)</span>
+                            <span>現價: $121.86</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('JNJ')">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-white text-sm">JNJ</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>RS: 75.0 (<span class="text-red-400">-10.5</span>)</span>
+                            <span>現價: $239.47</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 hover:bg-indigo-900/30 cursor-pointer border border-slate-700/50 hover:border-indigo-500/50 rounded-lg p-2 transition" onclick="loadContent('REGN')">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-white text-sm">REGN</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded">🏆 VCP 突破</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>RS: 75.0 (<span class="text-emerald-400">+3.1</span>)</span>
+                            <span>現價: $773.67</span>
                         </div>
                     </div>
                     
@@ -241,8 +362,8 @@
     </main>
 
     <script>
-        const rawData = [{"ticker": "1332.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 1378.5, "sl_price": 1313.1, "tp_price": 1496.23, "risk_per_share": 65.40000000000009}, {"ticker": "1802.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 3876.0, "sl_price": 3634.24, "tp_price": 4311.16, "risk_per_share": 241.76000000000022}, {"ticker": "4502.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 5800.0, "sl_price": 5543.05, "tp_price": 6262.51, "risk_per_share": 256.9499999999998}, {"ticker": "4507.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 3616.0, "sl_price": 3406.11, "tp_price": 3993.8, "risk_per_share": 209.88999999999987}, {"ticker": "4578.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 11120.0, "sl_price": 10437.86, "tp_price": 12347.86, "risk_per_share": 682.1399999999994}, {"ticker": "9503.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 2656.0, "sl_price": 2480.69, "tp_price": 2971.55, "risk_per_share": 175.30999999999995}, {"ticker": "9532.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 6512.0, "sl_price": 6088.72, "tp_price": 7273.9, "risk_per_share": 423.27999999999975}];
-        const tradeHistory = [{"date": "2026-04-08", "tk": "1332.T", "px": 1376.5, "sl": 1311.27, "tp": 1493.91, "last_px": 1378.5, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 79", "curr_metric": "RS: 78"}, {"date": "2026-04-08", "tk": "1721.T", "px": 5259.0, "sl": 4980.52, "tp": 5760.27, "last_px": 5315.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 85", "curr_metric": "RS: 86"}, {"date": "2026-04-08", "tk": "1802.T", "px": 3828.0, "sl": 3586.24, "tp": 4263.16, "last_px": 3876.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 90", "curr_metric": "RS: 90"}, {"date": "2026-04-08", "tk": "4502.T", "px": 5822.0, "sl": 5573.09, "tp": 6270.05, "last_px": 5800.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 76", "curr_metric": "RS: 75"}, {"date": "2026-04-08", "tk": "4578.T", "px": 11200.0, "sl": 10542.86, "tp": 12382.86, "last_px": 11120.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 82", "curr_metric": "RS: 81"}, {"date": "2026-04-08", "tk": "5541.T", "px": 2772.0, "sl": 2535.99, "tp": 3196.82, "last_px": 2834.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 85", "curr_metric": "RS: 86"}, {"date": "2026-04-08", "tk": "6471.T", "px": 1146.5, "sl": 1073.12, "tp": 1278.59, "last_px": 1176.5, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 91", "curr_metric": "RS: 92"}, {"date": "2026-04-08", "tk": "9104.T", "px": 6580.0, "sl": 5909.39, "tp": 7787.11, "last_px": 6604.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 80", "curr_metric": "RS: 80"}, {"date": "2026-04-08", "tk": "9107.T", "px": 2641.5, "sl": 2408.6, "tp": 3060.73, "last_px": 2615.5, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 76", "curr_metric": "RS: 75"}, {"date": "2026-04-08", "tk": "9503.T", "px": 2646.0, "sl": 2470.69, "tp": 2961.55, "last_px": 2656.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 75", "curr_metric": "RS: 76"}, {"date": "2026-04-08", "tk": "9532.T", "px": 6554.0, "sl": 6141.97, "tp": 7295.65, "last_px": 6512.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 91", "curr_metric": "RS: 90"}, {"date": "2026-04-08", "tk": "4507.T", "px": 3616.0, "sl": 3406.11, "tp": 3993.8, "last_px": 3616.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 81", "curr_metric": "RS: 81"}];
+        const rawData = [{"ticker": "JNJ", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 239.47, "sl_price": 229.19, "tp_price": 257.97, "risk_per_share": 10.280001220703127}, {"ticker": "MRK", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 122.8, "sl_price": 116.2, "tp_price": 134.68, "risk_per_share": 6.60000305175781}, {"ticker": "REGN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 773.67, "sl_price": 731.28, "tp_price": 849.98, "risk_per_share": 42.38998291015628}, {"ticker": "TGT", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 121.86, "sl_price": 114.71, "tp_price": 134.74, "risk_per_share": 7.1549978637695375}, {"ticker": "BKR", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 63.03, "sl_price": 58.3, "tp_price": 71.54, "risk_per_share": 4.729998779296878}, {"ticker": "WBD", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 27.52, "sl_price": 26.94, "tp_price": 28.56, "risk_per_share": 0.5800004577636706}, {"ticker": "GM", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 76.24, "sl_price": 71.61, "tp_price": 84.58, "risk_per_share": 4.629997863769532}, {"ticker": "HAS", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 93.55, "sl_price": 87.36, "tp_price": 104.69, "risk_per_share": 6.190003051757813}, {"ticker": "TRGP", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 239.95, "sl_price": 223.2, "tp_price": 270.1, "risk_per_share": 16.7499969482422}, {"ticker": "1332.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 1360.5, "sl_price": 1292.77, "tp_price": 1482.41, "risk_per_share": 67.73000000000002}, {"ticker": "1721.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 5147.0, "sl_price": 4874.94, "tp_price": 5636.7, "risk_per_share": 272.0600000000004}, {"ticker": "1802.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 3703.0, "sl_price": 3461.6, "tp_price": 4137.52, "risk_per_share": 241.4000000000001}, {"ticker": "2768.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 6402.0, "sl_price": 6003.25, "tp_price": 7119.74, "risk_per_share": 398.75}, {"ticker": "5541.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 2664.0, "sl_price": 2424.77, "tp_price": 3094.61, "risk_per_share": 239.23000000000002}, {"ticker": "7735.T", "tag": "\ud83d\udca5 BB \u64e0\u58d3", "curr_price": 9224.0, "sl_price": 8312.12, "tp_price": 10865.38, "risk_per_share": 911.8799999999992}, {"ticker": "8035.T", "tag": "\ud83d\udca5 BB \u64e0\u58d3", "curr_price": 38440.0, "sl_price": 35629.75, "tp_price": 43498.46, "risk_per_share": 2810.25}, {"ticker": "8233.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 1981.5, "sl_price": 1881.41, "tp_price": 2161.66, "risk_per_share": 100.08999999999992}, {"ticker": "9412.T", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "curr_price": 3045.0, "sl_price": 2762.56, "tp_price": 3553.4, "risk_per_share": 282.44000000000005}];
+        const tradeHistory = [{"date": "2026-04-08", "tk": "1332.T", "px": 1376.5, "sl": 1311.27, "tp": 1493.91, "last_px": 1360.5, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 79", "curr_metric": "RS: 79"}, {"date": "2026-04-08", "tk": "1721.T", "px": 5259.0, "sl": 4980.52, "tp": 5760.27, "last_px": 5147.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 85", "curr_metric": "RS: 84"}, {"date": "2026-04-08", "tk": "1802.T", "px": 3828.0, "sl": 3586.24, "tp": 4263.16, "last_px": 3703.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 90", "curr_metric": "RS: 90"}, {"date": "2026-04-08", "tk": "4502.T", "px": 5822.0, "sl": 5573.09, "tp": 6270.05, "last_px": 5798.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 76", "curr_metric": "RS: 76"}, {"date": "2026-04-08", "tk": "4578.T", "px": 11200.0, "sl": 10542.86, "tp": 12382.86, "last_px": 11195.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 82", "curr_metric": "RS: 84"}, {"date": "2026-04-08", "tk": "5541.T", "px": 2772.0, "sl": 2535.99, "tp": 3196.82, "last_px": 2664.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 85", "curr_metric": "RS: 82"}, {"date": "2026-04-08", "tk": "6471.T", "px": 1146.5, "sl": 1073.12, "tp": 1278.59, "last_px": 1100.5, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 91", "curr_metric": "RS: 90"}, {"date": "2026-04-08", "tk": "9104.T", "px": 6580.0, "sl": 5909.39, "tp": 7787.11, "last_px": 6870.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 80", "curr_metric": "RS: 86"}, {"date": "2026-04-08", "tk": "9107.T", "px": 2641.5, "sl": 2408.6, "tp": 3060.73, "last_px": 2750.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 76", "curr_metric": "RS: 81"}, {"date": "2026-04-08", "tk": "9503.T", "px": 2646.0, "sl": 2470.69, "tp": 2961.55, "last_px": 2578.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 75", "curr_metric": "RS: 73"}, {"date": "2026-04-08", "tk": "9532.T", "px": 6554.0, "sl": 6141.97, "tp": 7295.65, "last_px": 6462.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 91", "curr_metric": "RS: 92"}, {"date": "2026-04-08", "tk": "4507.T", "px": 3616.0, "sl": 3406.11, "tp": 3993.8, "last_px": 3618.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 81", "curr_metric": "RS: 83"}, {"date": "2026-04-08", "tk": "JNJ", "px": 239.47, "sl": 229.19, "tp": 257.97, "last_px": 239.47, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 75", "curr_metric": "RS: 75"}, {"date": "2026-04-08", "tk": "MRK", "px": 122.8, "sl": 116.2, "tp": 134.68, "last_px": 122.8, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 86", "curr_metric": "RS: 86"}, {"date": "2026-04-08", "tk": "REGN", "px": 773.67, "sl": 731.28, "tp": 849.98, "last_px": 773.67, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 75", "curr_metric": "RS: 75"}, {"date": "2026-04-08", "tk": "TGT", "px": 121.86, "sl": 114.71, "tp": 134.74, "last_px": 121.86, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 76", "curr_metric": "RS: 76"}, {"date": "2026-04-08", "tk": "BKR", "px": 63.03, "sl": 58.3, "tp": 71.54, "last_px": 63.03, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 83", "curr_metric": "RS: 83"}, {"date": "2026-04-08", "tk": "WBD", "px": 27.52, "sl": 26.94, "tp": 28.56, "last_px": 27.52, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 97", "curr_metric": "RS: 97"}, {"date": "2026-04-08", "tk": "GM", "px": 76.24, "sl": 71.61, "tp": 84.58, "last_px": 76.24, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 85", "curr_metric": "RS: 85"}, {"date": "2026-04-08", "tk": "HAS", "px": 93.55, "sl": 87.36, "tp": 104.69, "last_px": 93.55, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 86", "curr_metric": "RS: 86"}, {"date": "2026-04-08", "tk": "TRGP", "px": 239.95, "sl": 223.2, "tp": 270.1, "last_px": 239.95, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 85", "curr_metric": "RS: 85"}, {"date": "2026-04-08", "tk": "2768.T", "px": 6402.0, "sl": 6003.25, "tp": 7119.74, "last_px": 6402.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 93", "curr_metric": "RS: 93"}, {"date": "2026-04-08", "tk": "7735.T", "px": 9224.0, "sl": 8312.12, "tp": 10865.38, "last_px": 9224.0, "status": "OPEN", "tag": "\ud83d\udca5 BB \u64e0\u58d3", "entry_metric": "RS: 90", "curr_metric": "RS: 90"}, {"date": "2026-04-08", "tk": "8035.T", "px": 38440.0, "sl": 35629.75, "tp": 43498.46, "last_px": 38440.0, "status": "OPEN", "tag": "\ud83d\udca5 BB \u64e0\u58d3", "entry_metric": "RS: 88", "curr_metric": "RS: 88"}, {"date": "2026-04-08", "tk": "8233.T", "px": 1981.5, "sl": 1881.41, "tp": 2161.66, "last_px": 1981.5, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 79", "curr_metric": "RS: 79"}, {"date": "2026-04-08", "tk": "9412.T", "px": 3045.0, "sl": 2762.56, "tp": 3553.4, "last_px": 3045.0, "status": "OPEN", "tag": "\ud83c\udfc6 VCP \u7a81\u7834", "entry_metric": "RS: 97", "curr_metric": "RS: 97"}];
         
         let currentSelectedTicker = null;
         let tvWidget = null;
