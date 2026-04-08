@@ -5,7 +5,7 @@
         "px": 1352.68,
         "sl": 1281.92,
         "tp": 1480.06,
-        "last_px": 1363.05,
+        "last_px": 1366.5,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 78",
@@ -17,11 +17,11 @@
         "px": 10970.0,
         "sl": 10344.46,
         "tp": 12095.96,
-        "last_px": 11090.0,
+        "last_px": 11400.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 79",
-        "curr_metric": "RS: 80"
+        "curr_metric": "RS: 81"
     },
     {
         "date": "2026-03-25",
@@ -29,11 +29,11 @@
         "px": 4881.0,
         "sl": 4560.11,
         "tp": 5458.61,
-        "last_px": 4779.0,
+        "last_px": 4716.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 76",
-        "curr_metric": "RS: 78"
+        "curr_metric": "RS: 72"
     },
     {
         "date": "2026-03-25",
@@ -41,7 +41,7 @@
         "px": 2610.28,
         "sl": 2401.06,
         "tp": 2986.88,
-        "last_px": 2673.8,
+        "last_px": 2647.5,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 90",
@@ -53,11 +53,11 @@
         "px": 28420.0,
         "sl": 26884.29,
         "tp": 31184.29,
-        "last_px": 28090.0,
+        "last_px": 27280.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 88",
-        "curr_metric": "RS: 86"
+        "curr_metric": "RS: 83"
     },
     {
         "date": "2026-03-25",
@@ -65,11 +65,11 @@
         "px": 40013.82,
         "sl": 37182.96,
         "tp": 45109.38,
-        "last_px": 40182.36,
+        "last_px": 38953.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 93",
-        "curr_metric": "RS: 94"
+        "curr_metric": "RS: 92"
     },
     {
         "date": "2026-03-25",
@@ -77,11 +77,11 @@
         "px": 7746.64,
         "sl": 7359.31,
         "tp": 8133.97,
-        "last_px": 7480.43,
+        "last_px": 7405.5,
         "status": "OPEN",
         "tag": "\u26a1 \u7f3a\u53e3\u52d5\u80fd",
         "entry_metric": "RS: 76",
-        "curr_metric": "RS: 75"
+        "curr_metric": "RS: 71"
     },
     {
         "date": "2026-03-25",
@@ -89,7 +89,7 @@
         "px": 6344.55,
         "sl": 5909.52,
         "tp": 7127.6,
-        "last_px": 6323.74,
+        "last_px": 6403.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 90",
@@ -101,11 +101,11 @@
         "px": 1878.0,
         "sl": 1763.27,
         "tp": 2084.52,
-        "last_px": 1878.0,
+        "last_px": 1903.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 75",
-        "curr_metric": "RS: 75"
+        "curr_metric": "RS: 74"
     },
     {
         "date": "2026-03-26",
@@ -117,6 +117,42 @@
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 81",
-        "curr_metric": "RS: 81"
+        "curr_metric": "RS: 79"
+    },
+    {
+        "date": "2026-03-27",
+        "tk": "GOOGL",
+        "px": 274.34,
+        "sl": 260.62,
+        "tp": 288.06,
+        "last_px": 274.34,
+        "status": "OPEN",
+        "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
+        "entry_metric": "RSI: 21",
+        "curr_metric": "RSI: 21"
+    },
+    {
+        "date": "2026-03-27",
+        "tk": "GOOG",
+        "px": 273.76,
+        "sl": 260.07,
+        "tp": 287.45,
+        "last_px": 273.76,
+        "status": "OPEN",
+        "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
+        "entry_metric": "RSI: 20",
+        "curr_metric": "RSI: 20"
+    },
+    {
+        "date": "2026-03-27",
+        "tk": "HAS",
+        "px": 88.59,
+        "sl": 84.16,
+        "tp": 93.02,
+        "last_px": 88.59,
+        "status": "OPEN",
+        "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
+        "entry_metric": "RSI: 23",
+        "curr_metric": "RSI: 23"
     }
 ]
