@@ -159,7 +159,6 @@ def build_dynamic_watchlist():
         ]
         add_to_map(sp500_fallback, "S&P500")
         print(f"  ✅ 成功載入 S&P 500 後備名單 (共 {len(sp500_fallback)} 隻)")
-    
     # ---------------------------------------------------------
     # 2. 獲取 Finviz 異動股 (Unusual Volume & Top Gainers)
     # ---------------------------------------------------------
@@ -188,27 +187,42 @@ def build_dynamic_watchlist():
     # ---------------------------------------------------------
     # 3. 獲取日股動態名單 (Nikkei 225 + 當日熱門)
     # ---------------------------------------------------------
-    jp_indexes = [
+    wiki_jp_indexes = [
         ("https://en.wikipedia.org/wiki/Nikkei_225", "NK225"),
         ("https://en.wikipedia.org/wiki/TOPIX_100", "TOPIX100")
         ("https://ja.wikipedia.org/wiki/TOPIX_Mid400", "TOPIX_Mid400_中型"),
         ("https://ja.wikipedia.org/wiki/TOPIX_Small500", "TOPIX_Small500_小型"),
     ]
-    for url, label in jp_indexes:
-        try:
-            res = requests.get(url, headers={'User-Agent': ua.random}, timeout=10)
-            tables = pd.read_html(StringIO(res.text))
-            
-            # 自動尋找包含股票代碼的表格 (日股通常是 4 位數字)
-            for df in tables:
-                # 尋找包含 'Ticker' 或 'Code' 的欄位
-                target_col = next((col for col in df.columns if 'ticker' in str(col).lower() or 'code' in str(col).lower() or 'symbol' in str(col).lower()), None)
-                if target_col:
-                    tickers = [f"{str(x).strip()}.T" for x in df[target_col].dropna() if re.match(r'^\d{4}$', str(x).strip())]
-                    add_to_map(tickers, label)
-                    print(f"  ✅ 成功從 Wikipedia 載入 {label}: {len(tickers)} 隻")
-                    break
-        except Exception as e:
+
+    try:
+        for url, label in wiki_jp_indexes:
+            try:
+                res = requests.get(url, headers={'User-Agent': ua.random}, timeout=10)
+                tables = pd.read_html(StringIO(res.text))
+                    
+                import re
+                target_col = None
+                # 自動尋找包含最多股票代號嘅表格 (日股通常係 4 位數字)
+                target_table = max(tables, key=len)
+                    
+                for col in target_table.columns:
+                    col_name = str(col).lower()
+                    if 'code' in col_name or 'ticker' in col_name or 'symbol' in col_name or 'コード' in col_name:
+                        target_col = col; break
+                    
+                if target_col is None:
+                    for col in target_table.columns:
+                        sample_vals = target_table[col].dropna().astype(str).tolist()[:5]
+                        if sample_vals and all(re.match(r'^\d{4}$', str(x)) for x in sample_vals):
+                            target_col = col; break
+
+                if target_col is not None:
+                    found_nk = [f"{str(x)}.T" for x in target_table[target_col] if re.match(r'^\d{4}$', str(x))]
+                    add_to_map(list(dict.fromkeys(found_nk)), label)
+                    print(f"  ✅ 成功從 Wikipedia 載入 {label} (共 {len(found_nk)} 隻)")
+            except Exception as e:
+                print(f"  ⚠️ {label} 載入失敗: {e}")
+    except Exception as e:
             print(f"  ⚠️ 日股名單載入失敗: {e}")
             # 如果 fail, 手動加入2026/04/05 list
             nk225_tickers = [
@@ -690,6 +704,12 @@ html = f"""<!DOCTYPE html>
 
         <div class="grid grid-cols-4 gap-4" id="journal-stats"></div>
 
+        <div class="bg-slate-800/30 rounded-xl border border-slate-700 p-4">
+            <h3 class="font-black text-fuchsia-400 mb-3 flex items-center gap-2">🎯 按策略分析 (Strategy Performance)</h3>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="strategy-stats-container">
+                </div>
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="bg-slate-800/30 rounded-xl border border-slate-700 p-4">
                 <h3 class="font-black text-cyan-400 mb-3 flex items-center gap-2">📂 目前持倉 (Open Positions)</h3>
@@ -839,6 +859,61 @@ html = f"""<!DOCTYPE html>
                     <div class="text-2xl font-black ${{openColor}}">${{openSign}}$${{totalOpenPnl.toFixed(0)}} <span class="text-sm">(${{openSign}}${{openPct}}%)</span></div>
                 </div>
             `;
+
+            // ==========================================
+            // 按策略 (Tag) 統計戰果
+            // ==========================================
+            const strategyStats = {{}};
+            
+            // 掃描所有已平倉交易
+            closeds.forEach(t => {{
+                const strat = t.tag || '未分類';
+                
+                if (!strategyStats[strat]) {{
+                    strategyStats[strat] = {{ trades: 0, wins: 0, pnl: 0, deployed: 0 }};
+                }}
+                
+                strategyStats[strat].trades += 1;
+                if (t.status.includes('✅')) strategyStats[strat].wins += 1;
+                
+                // 計算此單 P&L 同動用資金 (固定 10k 基準)
+                const tradePnl = (10000 / t.px) * (t.last_px - t.px);
+                strategyStats[strat].pnl += tradePnl;
+                strategyStats[strat].deployed += 10000;
+            }});
+
+            // 生成策略卡片 HTML (注意 JS 嘅 Template Literal $ 後面都要雙大括號)
+            const strategyHtml = Object.keys(strategyStats).map(strat => {{
+                const stats = strategyStats[strat];
+                const stratWinRate = ((stats.wins / stats.trades) * 100).toFixed(1);
+                const pColor = stats.pnl >= 0 ? 'text-emerald-400' : 'text-red-400';
+                const pSign = stats.pnl >= 0 ? '+' : '';
+                
+                return `
+                <div class="bg-slate-900/50 p-3 rounded-lg border border-slate-700/50 hover:border-fuchsia-500/50 transition">
+                    <div class="text-xs font-black text-white mb-2 uppercase px-1 bg-slate-800 inline-block rounded">${{strat}}</div>
+                    
+                    <div class="flex justify-between text-[10px] text-slate-400 mb-1">
+                        <span>勝率 (${{stats.wins}}/${{stats.trades}})</span>
+                        <span class="font-bold text-white">${{stratWinRate}}%</span>
+                    </div>
+                    
+                    <div class="flex justify-between text-[10px] text-slate-400 mb-1">
+                        <span>已動用資金</span>
+                        <span class="font-bold">$${{stats.deployed.toLocaleString()}}</span>
+                    </div>
+                    
+                    <div class="flex justify-between text-[10px] text-slate-400 mt-2 pt-2 border-t border-slate-700">
+                        <span>實現利潤</span>
+                        <span class="font-black ${{pColor}}">${{pSign}}$${{stats.pnl.toFixed(0)}}</span>
+                    </div>
+                </div>
+                `;
+            }}).join('');
+
+            document.getElementById('strategy-stats-container').innerHTML = 
+                strategyHtml || '<div class="text-xs text-slate-500 italic p-2">暫無策略數據</div>';
+            // ==========================================
 
             // 👇 填寫 Open Positions (加入 止損/止盈 價位)
             openTbody.innerHTML = opens.length === 0 ? '<tr><td colspan="11" class="p-4 text-center text-slate-500">目前無持倉</td></tr>' : opens.map(t => {{
