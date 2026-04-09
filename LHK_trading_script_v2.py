@@ -177,9 +177,9 @@ def build_dynamic_watchlist():
     # ---------------------------------------------------------
     wiki_jp_indexes = [
         ("https://en.wikipedia.org/wiki/Nikkei_225", "NK225"),
-        ("https://en.wikipedia.org/wiki/TOPIX_100", "TOPIX100")
+        ("https://en.wikipedia.org/wiki/TOPIX_100", "TOPIX100"),
         ("https://ja.wikipedia.org/wiki/TOPIX_Mid400", "TOPIX_Mid400_中型"),
-        ("https://ja.wikipedia.org/wiki/TOPIX_Small500", "TOPIX_Small500_小型"),
+        ("https://ja.wikipedia.org/wiki/TOPIX_Small500", "TOPIX_Small500_小型")
     ]
 
     try:
