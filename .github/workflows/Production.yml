@@ -2,10 +2,14 @@ name: v2 Production
 
 on:
   schedule:
-    - cron: '0 0 * * 1-5'
-    - cron: '30 13 * * 1-5'
-  workflow_dispatch:
-
+    # 🇯🇵 日股收市後結算 (UTC 08:17 / UK 朝早 09:17)
+    - cron: '17 8 * * 1-5'
+    
+    # 🇺🇸 美股收市後結算 (UTC 22:43 / UK 夜晚 23:43)
+    - cron: '43 22 * * 1-5'
+ 
+  workflow_dispatch: # 保持保留，方便你隨時手動撳掣
+  
 permissions:
   contents: write
 
