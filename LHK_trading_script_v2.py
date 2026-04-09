@@ -89,72 +89,64 @@ def build_dynamic_watchlist():
             if source_label not in ticker_sources[clean_t]: ticker_sources[clean_t].append(source_label)
     
     # ---------------------------------------------------------
-    # 1. 🇺🇸 美股黃金板塊擴充 (超過 1500 隻)
+    # 1. 獲取標普 500 名單 (美股)
     # ---------------------------------------------------------
     try:
-        wiki_us_indexes = [
-        ("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies", "S&P500_大盤"),
-        ("https://en.wikipedia.org/wiki/List_of_S%26P_400_companies", "S&P400_中型"),
-        ("https://en.wikipedia.org/wiki/List_of_S%26P_600_companies", "S&P600_小型"),
-        ("https://en.wikipedia.org/wiki/Nasdaq-100", "NDX100_科技")]
-
-        for url, label in wiki_us_indexes:
-            res = requests.get(url, headers={'User-Agent': ua.random}, timeout=10)
-            tables = pd.read_html(StringIO(res.text))
-            
-            # 自動尋找包含 Symbol 或 Ticker 的表格
-            for df in tables:
-                target_col = next((col for col in df.columns if 'symbol' in str(col).lower() or 'ticker' in str(col).lower()), None)
-                if target_col:
-                    add_to_map(df[target_col].dropna().astype(str).tolist(), label)
-                    print(f"  ✅ 成功載入 {label}: {len(df)} 隻")
-                    break
-       
-        #csv_url = "https://raw.githubusercontent.com/datasets/s-p-500-companies/master/data/constituents.csv"
-        #df_sp = pd.read_csv(csv_url, timeout=10)
-        #add_to_map(df_sp['Symbol'].tolist(), "S&P500")
+        csv_url = "https://raw.githubusercontent.com/datasets/s-p-500-companies/master/data/constituents.csv"
+        df_sp = pd.read_csv(csv_url, timeout=10)
+        add_to_map(df_sp['Symbol'].tolist(), "S&P500")
     except:
-        print(f"  ⚠️ S&P 500 CSV 載入失敗，啟動超級後備名單: {e}")
-        # 超強後備名單 (超過 400 隻美股核心成分股)
-        sp500_fallback = [
-            "AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "GOOG", "META", "BRK-B", "TSLA", "UNH",
-            "JPM", "XOM", "V", "MA", "AVGO", "PG", "HD", "JNJ", "LLY", "COST",
-            "CVX", "MRK", "ABBV", "PEP", "KO", "TMO", "PFE", "BAC", "ORCL", "MCD",
-            "CSCO", "CRM", "ABT", "ACN", "LIN", "NFLX", "AMD", "DIS", "WMT", "TXN",
-            "DHR", "PM", "NKE", "NEE", "VZ", "RTX", "UPS", "HON", "QCOM", "AMGN",
-            "LOW", "SPGI", "IBM", "INTU", "CAT", "UNP", "COP", "SBUX", "DE", "GS",
-            "PLD", "MS", "BLK", "ELV", "GILD", "ISRG", "TJX", "LMT", "SYK", "ADP",
-            "MDT", "VRTX", "MMC", "AMT", "GE", "CI", "CB", "NOW", "ADI", "LRCX",
-            "MDLZ", "T", "ETN", "REGN", "ZTS", "BSX", "MU", "PANW", "PGR", "FI",
-            "SNPS", "C", "KLAC", "VLO", "CDNS", "WM", "EOG", "SHW", "MAR", "MCK",
-            "CVS", "MO", "PH", "GD", "ORLY", "APH", "SLB", "ITW", "USB", "FDX",
-            "ECL", "ROP", "PXD", "TGT", "BDX", "NXPI", "CMG", "MNST", "MPC", "MCO",
-            "CTAS", "AIG", "NSC", "PSX", "ADSK", "AON", "EMR", "MET", "D", "KMB",
-            "SRE", "MSI", "MCHP", "AJG", "HCA", "AZO", "F", "WELL", "EW", "DRE",
-            "O", "PCAR", "GPN", "ADP", "FIS", "HUM", "PAYX", "TEL", "DOW", "BKR",
-            "ADM", "KDP", "STZ", "CNC", "JCI", "SYY", "CTSH", "CARR", "DXCM", "EIX",
-            "IDXX", "VRSK", "DLR", "IQV", "A", "GWW", "COR", "ED", "NEM", "CHTR",
-            "YUM", "OXY", "MSCI", "KHC", "WFC", "TFC", "PNC", "COF", "DFS", "SYF",
-            "KEY", "RF", "HBAN", "FITB", "CFG", "STT", "NTRS", "MTB", "BK", "AMP",
-            "IVZ", "BEN", "TROW", "GL", "L", "AIZ", "RE", "TRV", "CBRE", "HST",
-            "SPG", "AVB", "EQR", "VTR", "PEAK", "BXP", "MAA", "CPT", "UDR", "ESS",
-            "ARE", "VICI", "PSA", "EXR", "SBAC", "CCI", "AWK", "NI", "PNW", "ATO",
-            "LNT", "ES", "WEC", "CMS", "XEL", "ETR", "FE", "AEE", "AEP", "PEG",
-            "DTE", "PPL", "DUK", "SO", "CNP", "VST", "PARA", "WBD", "NWSA", "NWS",
-            "FOXA", "FOX", "LYV", "MTCH", "EA", "TTWO", "OMC", "IPG", "TMUS", "LUMN",
-            "FYBR", "AMX", "ROST", "HLT", "DHI", "LEN", "PHM", "NVR", "GRMN", "GM",
-            "BBY", "EBAY", "ETSY", "RVTY", "POOL", "HAS", "MAT", "EL", "CL", "K",
-            "GIS", "CPB", "HRL", "SJM", "TAP", "KR", "WBA", "DLTR", "DG", "HAL",
-            "HES", "DVN", "FANG", "MRO", "APA", "CTRA", "OKE", "TRGP", "KMI", "WMB",
-            "SCHW", "RJF", "LPLA", "AXP", "PYPL", "FISV", "JKHY", "WTW", "PRU", "AFL",
-            "ALL", "HIG", "CINF", "NDAQ", "CME", "ICE", "BMY", "STE", "WAT", "MTD",
-            "CRL", "RMD", "BA", "NOC", "TDG", "HWM", "TXT", "MMM", "AME", "ROK",
-            "DOV", "XYL", "FAST", "RSG", "CSX", "INVH", "AMH", "EQIX", "INTC", "AMAT",
-            "ANSS", "SAP", "FTNT", "STX", "WDC", "HPQ", "DELL", "NTAP"
-        ]
-        add_to_map(sp500_fallback, "S&P500")
-        print(f"  ✅ 成功載入 S&P 500 後備名單 (共 {len(sp500_fallback)} 隻)")
-        
+        add_to_map(["AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "GOOG", "META", "BRK-B", "TSLA", "UNH",
+        "JPM", "XOM", "V", "MA", "AVGO", "PG", "HD", "JNJ", "LLY", "COST",
+        "CVX", "MRK", "ABBV", "PEP", "KO", "TMO", "PFE", "BAC", "ORCL", "MCD",
+        "CSCO", "CRM", "ABT", "ACN", "LIN", "NFLX", "AMD", "DIS", "WMT", "TXN",
+        "DHR", "PM", "NKE", "NEE", "VZ", "RTX", "UPS", "HON", "QCOM", "AMGN",
+        "LOW", "SPGI", "IBM", "INTU", "CAT", "UNP", "COP", "SBUX", "DE", "GS",
+        "PLD", "MS", "BLK", "ELV", "GILD", "ISRG", "TJX", "LMT", "SYK", "ADP",
+        "MDT", "VRTX", "MMC", "AMT", "GE", "CI", "CB", "NOW", "ADI", "LRCX",
+        "MDLZ", "T", "ETN", "REGN", "ZTS", "BSX", "MU", "PANW", "PGR", "FI",
+        "SNPS", "C", "KLAC", "VLO", "CDNS", "WM", "EOG", "SHW", "MAR", "MCK",
+        "CVS", "MO", "PH", "GD", "ORLY", "APH", "SLB", "ITW", "USB", "FDX",
+        "ECL", "ROP", "PXD", "TGT", "BDX", "NXPI", "CMG", "MNST", "MPC", "MCO",
+        "CTAS", "AIG", "NSC", "PSX", "ADSK", "AON", "EMR", "MET", "D", "KMB",
+        "SRE", "MSI", "MCHP", "AJG", "HCA", "AZO", "F", "WELL", "EW", "DRE",
+        "O", "PCAR", "GPN", "ADP", "FIS", "HUM", "PAYX", "TEL", "DOW", "BKR",
+        "ADM", "KDP", "STZ", "CNC", "JCI", "SYY", "CTSH", "CARR", "DXCM", "EIX",
+        "IDXX", "VRSK", "DLR", "IQV", "A", "GWW", "COR", "ED", "NEM", "CHTR",
+        "YUM", "OXY", "MSCI", "KHC", "WFC", "TFC", "PNC", "COF", "DFS", "SYF",
+        "KEY", "RF", "HBAN", "FITB", "CFG", "STT", "NTRS", "MTB", "BK", "AMP",
+        "IVZ", "BEN", "TROW", "GL", "L", "AIZ", "RE", "TRV", "CBRE", "HST",
+        "SPG", "AVB", "EQR", "VTR", "PEAK", "BXP", "MAA", "CPT", "UDR", "ESS",
+        "ARE", "VICI", "PSA", "EXR", "SBAC", "CCI", "AWK", "NI", "PNW", "ATO",
+        "LNT", "ES", "WEC", "CMS", "XEL", "ETR", "FE", "AEE", "AEP", "PEG",
+        "DTE", "PPL", "DUK", "SO", "CNP", "VST", "PARA", "WBD", "NWSA", "NWS",
+        "FOXA", "FOX", "LYV", "MTCH", "GOOG", "GOOGL", "NFLX", "DIS", "EA",
+        "TTWO", "OMC", "IPG", "CHTR", "VZ", "T", "TMUS", "LUMN", "FYBR", "AMX",
+        "TSLA", "AMZN", "HD", "LOW", "MCD", "SBUX", "NKE", "TGT", "TJX", "ORLY",
+        "AZO", "ROST", "MAR", "HLT", "YUM", "CMG", "DHI", "LEN", "PHM", "NVR",
+        "GRMN", "F", "GM", "BBY", "EBAY", "ETSY", "RVTY", "POOL", "HAS", "MAT",
+        "WMT", "COST", "PG", "KO", "PEP", "PM", "MO", "EL", "CL", "KMB",
+        "MDLZ", "K", "GIS", "CPB", "HRL", "SJM", "ADM", "STZ", "TAP", "MNST",
+        "SYY", "KR", "WBA", "TGT", "DLTR", "DG", "XOM", "CVX", "COP", "SLB",
+        "HAL", "BKR", "MPC", "PSX", "VLO", "EOG", "PXD", "OXY", "HES", "DVN",
+        "FANG", "MRO", "APA", "CTRA", "OKE", "TRGP", "KMI", "WMB", "JPM", "BAC",
+        "WFC", "C", "MS", "GS", "BLK", "AMP", "TROW", "BEN", "IVZ", "STT",
+        "NTRS", "BK", "SCHW", "RJF", "LPLA", "AXP", "V", "MA", "DFS", "COF",
+        "SYF", "PYPL", "GPN", "FIS", "FISV", "JKHY", "AON", "MMC", "AJG", "WTW",
+        "MET", "PRU", "AFL", "TRV", "CB", "PGR", "ALL", "HIG", "L", "CINF",
+        "RE", "AIZ", "GL", "SPGI", "MCO", "MSCI", "NDAQ", "CME", "ICE", "BLK",
+        "UNH", "ELV", "CI", "HUM", "CNC", "CVS", "JNJ", "LLY", "ABBV", "MRK",
+        "PFE", "GILD", "VRTX", "REGN", "AMGN", "BMY", "ZTS", "IDXX", "EW", "BSX",
+        "MDT", "ABT", "SYK", "BDX", "ISRG", "DXCM", "STE", "TMO", "DHR", "A",
+        "WAT", "MTD", "IQV", "CRL", "RMD", "BA", "LMT", "RTX", "GD", "NOC",
+        "TDG", "HWM", "TXT", "GE", "HON", "MMM", "EMR", "ITW", "ETN", "PH",
+        "AME", "ROK", "DOV", "XYL", "GWW", "FAST", "CTAS", "ADP", "PAYX", "RSG",
+        "WM", "UNP", "NSC", "CSX", "FDX", "UPS", "CPT", "INVH", "AMH", "SBAC",
+        "CCI", "AMT", "PLD", "PSA", "EXR", "VICI", "DLR", "EQIX", "NVDA", "AVGO",
+        "AMD", "INTC", "QCOM", "TXN", "ADI", "MU", "AMAT", "LRCX", "KLAC", "SNPS",
+        "CDNS", "ADSK", "ANSS", "ORCL", "CRM", "SAP", "NOW", "PANW", "FTNT", "IBM",
+        "ACN", "CTSH", "TEL", "APH", "MSI", "STX", "WDC", "HPQ", "DELL", "NTAP"], "S&P500")
+    
     # ---------------------------------------------------------
     # 2. 獲取 Finviz 異動股 (Unusual Volume & Top Gainers)
     # ---------------------------------------------------------
@@ -183,27 +175,42 @@ def build_dynamic_watchlist():
     # ---------------------------------------------------------
     # 3. 獲取日股動態名單 (Nikkei 225 + 當日熱門)
     # ---------------------------------------------------------
-    jp_indexes = [
+    wiki_jp_indexes = [
         ("https://en.wikipedia.org/wiki/Nikkei_225", "NK225"),
         ("https://en.wikipedia.org/wiki/TOPIX_100", "TOPIX100")
         ("https://ja.wikipedia.org/wiki/TOPIX_Mid400", "TOPIX_Mid400_中型"),
         ("https://ja.wikipedia.org/wiki/TOPIX_Small500", "TOPIX_Small500_小型"),
     ]
-    for url, label in jp_indexes:
-        try:
-            res = requests.get(url, headers={'User-Agent': ua.random}, timeout=10)
-            tables = pd.read_html(StringIO(res.text))
-            
-            # 自動尋找包含股票代碼的表格 (日股通常是 4 位數字)
-            for df in tables:
-                # 尋找包含 'Ticker' 或 'Code' 的欄位
-                target_col = next((col for col in df.columns if 'ticker' in str(col).lower() or 'code' in str(col).lower() or 'symbol' in str(col).lower()), None)
-                if target_col:
-                    tickers = [f"{str(x).strip()}.T" for x in df[target_col].dropna() if re.match(r'^\d{4}$', str(x).strip())]
-                    add_to_map(tickers, label)
-                    print(f"  ✅ 成功從 Wikipedia 載入 {label}: {len(tickers)} 隻")
-                    break
-        except Exception as e:
+
+    try:
+        for url, label in wiki_jp_indexes:
+            try:
+                res = requests.get(url, headers={'User-Agent': ua.random}, timeout=10)
+                tables = pd.read_html(StringIO(res.text))
+                    
+                import re
+                target_col = None
+                # 自動尋找包含最多股票代號嘅表格 (日股通常係 4 位數字)
+                target_table = max(tables, key=len)
+                    
+                for col in target_table.columns:
+                    col_name = str(col).lower()
+                    if 'code' in col_name or 'ticker' in col_name or 'symbol' in col_name or 'コード' in col_name:
+                        target_col = col; break
+                    
+                if target_col is None:
+                    for col in target_table.columns:
+                        sample_vals = target_table[col].dropna().astype(str).tolist()[:5]
+                        if sample_vals and all(re.match(r'^\d{4}$', str(x)) for x in sample_vals):
+                            target_col = col; break
+
+                if target_col is not None:
+                    found_nk = [f"{str(x)}.T" for x in target_table[target_col] if re.match(r'^\d{4}$', str(x))]
+                    add_to_map(list(dict.fromkeys(found_nk)), label)
+                    print(f"  ✅ 成功從 Wikipedia 載入 {label} (共 {len(found_nk)} 隻)")
+            except Exception as e:
+                print(f"  ⚠️ {label} 載入失敗: {e}")
+    except Exception as e:
             print(f"  ⚠️ 日股名單載入失敗: {e}")
             # 如果 fail, 手動加入2026/04/05 list
             nk225_tickers = [
@@ -233,7 +240,7 @@ def build_dynamic_watchlist():
             ]
             # 執行合併
             add_to_map(nk225_tickers, "NK225")
-            
+
     # B. 捕捉 JP Trending (保持不變)
     try:
         jp_trending_url = "https://query1.finance.yahoo.com/v1/finance/trending/JP?count=20"
@@ -661,6 +668,12 @@ html = f"""<!DOCTYPE html>
 
         <div class="grid grid-cols-4 gap-4" id="journal-stats"></div>
 
+        <div class="bg-slate-800/30 rounded-xl border border-slate-700 p-4">
+            <h3 class="font-black text-fuchsia-400 mb-3 flex items-center gap-2">🎯 按策略分析 (Strategy Performance)</h3>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="strategy-stats-container">
+                </div>
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="bg-slate-800/30 rounded-xl border border-slate-700 p-4">
                 <h3 class="font-black text-cyan-400 mb-3 flex items-center gap-2">📂 目前持倉 (Open Positions)</h3>
@@ -810,6 +823,61 @@ html = f"""<!DOCTYPE html>
                     <div class="text-2xl font-black ${{openColor}}">${{openSign}}$${{totalOpenPnl.toFixed(0)}} <span class="text-sm">(${{openSign}}${{openPct}}%)</span></div>
                 </div>
             `;
+
+            // ==========================================
+            // 按策略 (Tag) 統計戰果
+            // ==========================================
+            const strategyStats = {{}};
+            
+            // 掃描所有已平倉交易
+            closeds.forEach(t => {{
+                const strat = t.tag || '未分類';
+                
+                if (!strategyStats[strat]) {{
+                    strategyStats[strat] = {{ trades: 0, wins: 0, pnl: 0, deployed: 0 }};
+                }}
+                
+                strategyStats[strat].trades += 1;
+                if (t.status.includes('✅')) strategyStats[strat].wins += 1;
+                
+                // 計算此單 P&L 同動用資金 (固定 10k 基準)
+                const tradePnl = (10000 / t.px) * (t.last_px - t.px);
+                strategyStats[strat].pnl += tradePnl;
+                strategyStats[strat].deployed += 10000;
+            }});
+
+            // 生成策略卡片 HTML (注意 JS 嘅 Template Literal $ 後面都要雙大括號)
+            const strategyHtml = Object.keys(strategyStats).map(strat => {{
+                const stats = strategyStats[strat];
+                const stratWinRate = ((stats.wins / stats.trades) * 100).toFixed(1);
+                const pColor = stats.pnl >= 0 ? 'text-emerald-400' : 'text-red-400';
+                const pSign = stats.pnl >= 0 ? '+' : '';
+                
+                return `
+                <div class="bg-slate-900/50 p-3 rounded-lg border border-slate-700/50 hover:border-fuchsia-500/50 transition">
+                    <div class="text-xs font-black text-white mb-2 uppercase px-1 bg-slate-800 inline-block rounded">${{strat}}</div>
+                    
+                    <div class="flex justify-between text-[10px] text-slate-400 mb-1">
+                        <span>勝率 (${{stats.wins}}/${{stats.trades}})</span>
+                        <span class="font-bold text-white">${{stratWinRate}}%</span>
+                    </div>
+                    
+                    <div class="flex justify-between text-[10px] text-slate-400 mb-1">
+                        <span>已動用資金</span>
+                        <span class="font-bold">$${{stats.deployed.toLocaleString()}}</span>
+                    </div>
+                    
+                    <div class="flex justify-between text-[10px] text-slate-400 mt-2 pt-2 border-t border-slate-700">
+                        <span>實現利潤</span>
+                        <span class="font-black ${{pColor}}">${{pSign}}$${{stats.pnl.toFixed(0)}}</span>
+                    </div>
+                </div>
+                `;
+            }}).join('');
+
+            document.getElementById('strategy-stats-container').innerHTML = 
+                strategyHtml || '<div class="text-xs text-slate-500 italic p-2">暫無策略數據</div>';
+            // ==========================================
 
             // 👇 填寫 Open Positions (加入 止損/止盈 價位)
             openTbody.innerHTML = opens.length === 0 ? '<tr><td colspan="11" class="p-4 text-center text-slate-500">目前無持倉</td></tr>' : opens.map(t => {{
