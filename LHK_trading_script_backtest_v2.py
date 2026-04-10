@@ -688,7 +688,11 @@ html = f"""<!DOCTYPE html>
                         </div>
                         <div class="flex justify-between text-[10px] text-slate-400 mt-1">
                             <span>RS: {d['rs']} (<span class="{ 'text-emerald-400' if d['mom']>0 else 'text-red-400'}">{'+' if d['mom']>0 else ''}{d['mom']}</span>)</span>
-                            <span>現價: {get_unit(d['tk'])}{d['px']}</span>
+                            <span class="font-bold text-white">現價: {get_unit(d['tk'])}{d['px']}</span>
+                        </div>
+                        <div class="flex justify-between text-[9px] mt-1.5 pt-1.5 border-t border-slate-700/50">
+                            <span class="text-emerald-400 font-mono">🎯 TP: {get_unit(d['tk'])}{d['tp']} (+{((d['tp']-d['px'])/d['px']*100):.1f}%)</span>
+                            <span class="text-red-400 font-mono">🛑 SL: {get_unit(d['tk'])}{d['sl']} ({((d['sl']-d['px'])/d['px']*100):.1f}%)</span>
                         </div>
                     </div>
                     ''' for d in swing_results]) if swing_results else '<p class="text-slate-600 italic text-xs px-2">無訊號</p>'}
@@ -702,7 +706,11 @@ html = f"""<!DOCTYPE html>
                         </div>
                         <div class="flex justify-between text-[10px] text-slate-400 mt-1">
                             <span>RS: {d['rs']}</span>
-                            <span>現價: {get_unit(d['tk'])}{d['px']}</span>
+                            <span class="font-bold text-white">現價: {get_unit(d['tk'])}{d['px']}</span>
+                        </div>
+                        <div class="flex justify-between text-[9px] mt-1.5 pt-1.5 border-t border-slate-700/50">
+                            <span class="text-emerald-400 font-mono">🎯 TP: {get_unit(d['tk'])}{d['tp']} (+{((d['tp']-d['px'])/d['px']*100):.1f}%)</span>
+                            <span class="text-red-400 font-mono">🛑 SL: {get_unit(d['tk'])}{d['sl']} ({((d['sl']-d['px'])/d['px']*100):.1f}%)</span>
                         </div>
                     </div>
                     ''' for d in short_term_results]) if short_term_results else '<p class="text-slate-600 italic text-xs px-2">無訊號</p>'}
@@ -901,7 +909,7 @@ html = f"""<!DOCTYPE html>
             document.getElementById('calc_cost').innerText = unit + totalCost.toLocaleString(undefined, {{maximumFractionDigits: 0}}) + " (" + actualPosPct + "%)\";
         }}
 
-function renderJournal() {{
+        function renderJournal() {{
             const openTbody = document.getElementById('journal-open-tbody');
             const closedTbody = document.getElementById('journal-closed-tbody');
             const statsContainer = document.getElementById('journal-stats');
