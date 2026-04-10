@@ -89,71 +89,63 @@ def build_dynamic_watchlist():
             if source_label not in ticker_sources[clean_t]: ticker_sources[clean_t].append(source_label)
     
     # ---------------------------------------------------------
-    # 1. 🇺🇸 美股黃金板塊擴充 (超過 1500 隻)
+    # 1. 獲取標普 500 名單 (美股)
     # ---------------------------------------------------------
     try:
-        wiki_us_indexes = [
-        ("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies", "S&P500_大盤"),
-        ("https://en.wikipedia.org/wiki/List_of_S%26P_400_companies", "S&P400_中型"),
-        ("https://en.wikipedia.org/wiki/List_of_S%26P_600_companies", "S&P600_小型"),
-        ("https://en.wikipedia.org/wiki/Nasdaq-100", "NDX100_科技")]
-
-        for url, label in wiki_us_indexes:
-            res = requests.get(url, headers={'User-Agent': ua.random}, timeout=10)
-            tables = pd.read_html(StringIO(res.text))
-            
-            # 自動尋找包含 Symbol 或 Ticker 的表格
-            for df in tables:
-                target_col = next((col for col in df.columns if 'symbol' in str(col).lower() or 'ticker' in str(col).lower()), None)
-                if target_col:
-                    add_to_map(df[target_col].dropna().astype(str).tolist(), label)
-                    print(f"  ✅ 成功載入 {label}: {len(df)} 隻")
-                    break
-       
-        #csv_url = "https://raw.githubusercontent.com/datasets/s-p-500-companies/master/data/constituents.csv"
-        #df_sp = pd.read_csv(csv_url, timeout=10)
-        #add_to_map(df_sp['Symbol'].tolist(), "S&P500")
+        csv_url = "https://raw.githubusercontent.com/datasets/s-p-500-companies/master/data/constituents.csv"
+        df_sp = pd.read_csv(csv_url, timeout=10)
+        add_to_map(df_sp['Symbol'].tolist(), "S&P500")
     except:
-        print(f"  ⚠️ S&P 500 CSV 載入失敗，啟動超級後備名單: {e}")
-        # 超強後備名單 (超過 400 隻美股核心成分股)
-        sp500_fallback = [
-            "AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "GOOG", "META", "BRK-B", "TSLA", "UNH",
-            "JPM", "XOM", "V", "MA", "AVGO", "PG", "HD", "JNJ", "LLY", "COST",
-            "CVX", "MRK", "ABBV", "PEP", "KO", "TMO", "PFE", "BAC", "ORCL", "MCD",
-            "CSCO", "CRM", "ABT", "ACN", "LIN", "NFLX", "AMD", "DIS", "WMT", "TXN",
-            "DHR", "PM", "NKE", "NEE", "VZ", "RTX", "UPS", "HON", "QCOM", "AMGN",
-            "LOW", "SPGI", "IBM", "INTU", "CAT", "UNP", "COP", "SBUX", "DE", "GS",
-            "PLD", "MS", "BLK", "ELV", "GILD", "ISRG", "TJX", "LMT", "SYK", "ADP",
-            "MDT", "VRTX", "MMC", "AMT", "GE", "CI", "CB", "NOW", "ADI", "LRCX",
-            "MDLZ", "T", "ETN", "REGN", "ZTS", "BSX", "MU", "PANW", "PGR", "FI",
-            "SNPS", "C", "KLAC", "VLO", "CDNS", "WM", "EOG", "SHW", "MAR", "MCK",
-            "CVS", "MO", "PH", "GD", "ORLY", "APH", "SLB", "ITW", "USB", "FDX",
-            "ECL", "ROP", "PXD", "TGT", "BDX", "NXPI", "CMG", "MNST", "MPC", "MCO",
-            "CTAS", "AIG", "NSC", "PSX", "ADSK", "AON", "EMR", "MET", "D", "KMB",
-            "SRE", "MSI", "MCHP", "AJG", "HCA", "AZO", "F", "WELL", "EW", "DRE",
-            "O", "PCAR", "GPN", "ADP", "FIS", "HUM", "PAYX", "TEL", "DOW", "BKR",
-            "ADM", "KDP", "STZ", "CNC", "JCI", "SYY", "CTSH", "CARR", "DXCM", "EIX",
-            "IDXX", "VRSK", "DLR", "IQV", "A", "GWW", "COR", "ED", "NEM", "CHTR",
-            "YUM", "OXY", "MSCI", "KHC", "WFC", "TFC", "PNC", "COF", "DFS", "SYF",
-            "KEY", "RF", "HBAN", "FITB", "CFG", "STT", "NTRS", "MTB", "BK", "AMP",
-            "IVZ", "BEN", "TROW", "GL", "L", "AIZ", "RE", "TRV", "CBRE", "HST",
-            "SPG", "AVB", "EQR", "VTR", "PEAK", "BXP", "MAA", "CPT", "UDR", "ESS",
-            "ARE", "VICI", "PSA", "EXR", "SBAC", "CCI", "AWK", "NI", "PNW", "ATO",
-            "LNT", "ES", "WEC", "CMS", "XEL", "ETR", "FE", "AEE", "AEP", "PEG",
-            "DTE", "PPL", "DUK", "SO", "CNP", "VST", "PARA", "WBD", "NWSA", "NWS",
-            "FOXA", "FOX", "LYV", "MTCH", "EA", "TTWO", "OMC", "IPG", "TMUS", "LUMN",
-            "FYBR", "AMX", "ROST", "HLT", "DHI", "LEN", "PHM", "NVR", "GRMN", "GM",
-            "BBY", "EBAY", "ETSY", "RVTY", "POOL", "HAS", "MAT", "EL", "CL", "K",
-            "GIS", "CPB", "HRL", "SJM", "TAP", "KR", "WBA", "DLTR", "DG", "HAL",
-            "HES", "DVN", "FANG", "MRO", "APA", "CTRA", "OKE", "TRGP", "KMI", "WMB",
-            "SCHW", "RJF", "LPLA", "AXP", "PYPL", "FISV", "JKHY", "WTW", "PRU", "AFL",
-            "ALL", "HIG", "CINF", "NDAQ", "CME", "ICE", "BMY", "STE", "WAT", "MTD",
-            "CRL", "RMD", "BA", "NOC", "TDG", "HWM", "TXT", "MMM", "AME", "ROK",
-            "DOV", "XYL", "FAST", "RSG", "CSX", "INVH", "AMH", "EQIX", "INTC", "AMAT",
-            "ANSS", "SAP", "FTNT", "STX", "WDC", "HPQ", "DELL", "NTAP"
-        ]
-        add_to_map(sp500_fallback, "S&P500")
-        print(f"  ✅ 成功載入 S&P 500 後備名單 (共 {len(sp500_fallback)} 隻)")
+        add_to_map(["AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "GOOG", "META", "BRK-B", "TSLA", "UNH",
+        "JPM", "XOM", "V", "MA", "AVGO", "PG", "HD", "JNJ", "LLY", "COST",
+        "CVX", "MRK", "ABBV", "PEP", "KO", "TMO", "PFE", "BAC", "ORCL", "MCD",
+        "CSCO", "CRM", "ABT", "ACN", "LIN", "NFLX", "AMD", "DIS", "WMT", "TXN",
+        "DHR", "PM", "NKE", "NEE", "VZ", "RTX", "UPS", "HON", "QCOM", "AMGN",
+        "LOW", "SPGI", "IBM", "INTU", "CAT", "UNP", "COP", "SBUX", "DE", "GS",
+        "PLD", "MS", "BLK", "ELV", "GILD", "ISRG", "TJX", "LMT", "SYK", "ADP",
+        "MDT", "VRTX", "MMC", "AMT", "GE", "CI", "CB", "NOW", "ADI", "LRCX",
+        "MDLZ", "T", "ETN", "REGN", "ZTS", "BSX", "MU", "PANW", "PGR", "FI",
+        "SNPS", "C", "KLAC", "VLO", "CDNS", "WM", "EOG", "SHW", "MAR", "MCK",
+        "CVS", "MO", "PH", "GD", "ORLY", "APH", "SLB", "ITW", "USB", "FDX",
+        "ECL", "ROP", "PXD", "TGT", "BDX", "NXPI", "CMG", "MNST", "MPC", "MCO",
+        "CTAS", "AIG", "NSC", "PSX", "ADSK", "AON", "EMR", "MET", "D", "KMB",
+        "SRE", "MSI", "MCHP", "AJG", "HCA", "AZO", "F", "WELL", "EW", "DRE",
+        "O", "PCAR", "GPN", "ADP", "FIS", "HUM", "PAYX", "TEL", "DOW", "BKR",
+        "ADM", "KDP", "STZ", "CNC", "JCI", "SYY", "CTSH", "CARR", "DXCM", "EIX",
+        "IDXX", "VRSK", "DLR", "IQV", "A", "GWW", "COR", "ED", "NEM", "CHTR",
+        "YUM", "OXY", "MSCI", "KHC", "WFC", "TFC", "PNC", "COF", "DFS", "SYF",
+        "KEY", "RF", "HBAN", "FITB", "CFG", "STT", "NTRS", "MTB", "BK", "AMP",
+        "IVZ", "BEN", "TROW", "GL", "L", "AIZ", "RE", "TRV", "CBRE", "HST",
+        "SPG", "AVB", "EQR", "VTR", "PEAK", "BXP", "MAA", "CPT", "UDR", "ESS",
+        "ARE", "VICI", "PSA", "EXR", "SBAC", "CCI", "AWK", "NI", "PNW", "ATO",
+        "LNT", "ES", "WEC", "CMS", "XEL", "ETR", "FE", "AEE", "AEP", "PEG",
+        "DTE", "PPL", "DUK", "SO", "CNP", "VST", "PARA", "WBD", "NWSA", "NWS",
+        "FOXA", "FOX", "LYV", "MTCH", "GOOG", "GOOGL", "NFLX", "DIS", "EA",
+        "TTWO", "OMC", "IPG", "CHTR", "VZ", "T", "TMUS", "LUMN", "FYBR", "AMX",
+        "TSLA", "AMZN", "HD", "LOW", "MCD", "SBUX", "NKE", "TGT", "TJX", "ORLY",
+        "AZO", "ROST", "MAR", "HLT", "YUM", "CMG", "DHI", "LEN", "PHM", "NVR",
+        "GRMN", "F", "GM", "BBY", "EBAY", "ETSY", "RVTY", "POOL", "HAS", "MAT",
+        "WMT", "COST", "PG", "KO", "PEP", "PM", "MO", "EL", "CL", "KMB",
+        "MDLZ", "K", "GIS", "CPB", "HRL", "SJM", "ADM", "STZ", "TAP", "MNST",
+        "SYY", "KR", "WBA", "TGT", "DLTR", "DG", "XOM", "CVX", "COP", "SLB",
+        "HAL", "BKR", "MPC", "PSX", "VLO", "EOG", "PXD", "OXY", "HES", "DVN",
+        "FANG", "MRO", "APA", "CTRA", "OKE", "TRGP", "KMI", "WMB", "JPM", "BAC",
+        "WFC", "C", "MS", "GS", "BLK", "AMP", "TROW", "BEN", "IVZ", "STT",
+        "NTRS", "BK", "SCHW", "RJF", "LPLA", "AXP", "V", "MA", "DFS", "COF",
+        "SYF", "PYPL", "GPN", "FIS", "FISV", "JKHY", "AON", "MMC", "AJG", "WTW",
+        "MET", "PRU", "AFL", "TRV", "CB", "PGR", "ALL", "HIG", "L", "CINF",
+        "RE", "AIZ", "GL", "SPGI", "MCO", "MSCI", "NDAQ", "CME", "ICE", "BLK",
+        "UNH", "ELV", "CI", "HUM", "CNC", "CVS", "JNJ", "LLY", "ABBV", "MRK",
+        "PFE", "GILD", "VRTX", "REGN", "AMGN", "BMY", "ZTS", "IDXX", "EW", "BSX",
+        "MDT", "ABT", "SYK", "BDX", "ISRG", "DXCM", "STE", "TMO", "DHR", "A",
+        "WAT", "MTD", "IQV", "CRL", "RMD", "BA", "LMT", "RTX", "GD", "NOC",
+        "TDG", "HWM", "TXT", "GE", "HON", "MMM", "EMR", "ITW", "ETN", "PH",
+        "AME", "ROK", "DOV", "XYL", "GWW", "FAST", "CTAS", "ADP", "PAYX", "RSG",
+        "WM", "UNP", "NSC", "CSX", "FDX", "UPS", "CPT", "INVH", "AMH", "SBAC",
+        "CCI", "AMT", "PLD", "PSA", "EXR", "VICI", "DLR", "EQIX", "NVDA", "AVGO",
+        "AMD", "INTC", "QCOM", "TXN", "ADI", "MU", "AMAT", "LRCX", "KLAC", "SNPS",
+        "CDNS", "ADSK", "ANSS", "ORCL", "CRM", "SAP", "NOW", "PANW", "FTNT", "IBM",
+        "ACN", "CTSH", "TEL", "APH", "MSI", "STX", "WDC", "HPQ", "DELL", "NTAP"], "S&P500")
     
     # ---------------------------------------------------------
     # 2. 獲取 Finviz 異動股 (Unusual Volume & Top Gainers)
@@ -288,15 +280,35 @@ vix_c = closes['^VIX'].ffill()
 jp_tickers = [t for t in closes.columns if str(t).endswith('.T')]
 us_tickers = [t for t in closes.columns if not str(t).endswith('.T') and t not in ['SPY', '^VIX', '^N225']]
 
-# 2. 獨立計算市寬 (Market Breadth > 50MA)
-def calc_breadth(ticker_list):
-    if not ticker_list: return 0
-    sub_closes = closes[ticker_list]
-    breadth = (sub_closes > sub_closes.rolling(50).mean()).sum(axis=1) / sub_closes.shape[1] * 100
-    return round(float(breadth.iloc[-1]), 1)
+# 👇 從 TICKER_MAP 智能提取「大盤成份股」名單
+us_index_tickers = [tk for tk, sources in TICKER_MAP.items() if any(s in ['S&P500_大盤', 'S&P500'] for s in sources)]
+jp_index_tickers = [tk for tk, sources in TICKER_MAP.items() if any(s in ['NK225', 'TOPIX100'] for s in sources)]
 
-us_breadth = calc_breadth(us_tickers)
-jp_breadth = calc_breadth(jp_tickers)
+# 👇 極速向量化計算矩陣市寬 (Vectorised Breadth Matrix)
+def calc_matrix(all_tks, idx_tks):
+    valid_all = [t for t in all_tks if t in closes.columns]
+    valid_idx = [t for t in idx_tks if t in closes.columns]
+    
+    if not valid_all or not valid_idx:
+        return {'total_20ma_pct': 0, 'total_50ma_pct': 0, 'index_50ma_pct': 0, 'index_200ma_pct': 0}
+        
+    c_all, c_idx = closes[valid_all], closes[valid_idx]
+    
+    ma20_all, ma50_all = c_all.rolling(20).mean(), c_all.rolling(50).mean()
+    ma50_idx, ma200_idx = c_idx.rolling(50).mean(), c_idx.rolling(200).mean()
+    
+    tot_20 = (c_all.iloc[-1] > ma20_all.iloc[-1]).sum() / len(valid_all) * 100
+    tot_50 = (c_all.iloc[-1] > ma50_all.iloc[-1]).sum() / len(valid_all) * 100
+    idx_50 = (c_idx.iloc[-1] > ma50_idx.iloc[-1]).sum() / len(valid_idx) * 100
+    idx_200 = (c_idx.iloc[-1] > ma200_idx.iloc[-1]).sum() / len(valid_idx) * 100
+    
+    return {
+        'total_20ma_pct': round(float(tot_20), 1), 'total_50ma_pct': round(float(tot_50), 1),
+        'index_50ma_pct': round(float(idx_50), 1), 'index_200ma_pct': round(float(idx_200), 1)
+    }
+
+us_matrix = calc_matrix(us_tickers, us_index_tickers)
+jp_matrix = calc_matrix(jp_tickers, jp_index_tickers)
 
 # 3. 核心宏觀計算引擎 (FTD & Distribution)
 def calc_macro_regime(index_ticker):
@@ -491,22 +503,57 @@ if DISCORD_SUMMARY_WEBHOOK:
         breakdown_lines.append(f"**{tag}**: {w_rate}% 勝率 | P&L: {pnl_s} ({st['total']}單)")
     breakdown_text = "\n".join(breakdown_lines) if breakdown_lines else "尚無足夠結案數據。"
 
-    # 👇 【重點升級】：計算美日股掃描數量，並加入 Discord 欄位
+    # 👇 【重點升級】：加入大盤價位與進階紅黃綠燈判斷
     us_scan_count = len(us_tickers)
     jp_scan_count = len(jp_tickers)
+    
+    spx_price = float(closes['SPY'].iloc[-1])
+    spx_200ma = float(closes['SPY'].rolling(200).mean().iloc[-1])
+    n225_price = float(closes['^N225'].iloc[-1])
+    n225_200ma = float(closes['^N225'].rolling(200).mean().iloc[-1])
 
-    us_macro_str = f"狀態: **{us_status}**\n市寬: {us_breadth}%\n派發: {us_dist} 日\n掃描: **{us_scan_count} 隻**"
-    jp_macro_str = f"狀態: **{jp_status}**\n市寬: {jp_breadth}%\n派發: {jp_dist} 日\n掃描: **{jp_scan_count} 隻**"
+    def evaluate_market_health(price, ma200, idx_50, tot_50, idx_200, tot_20, dist):
+        if price < ma200 or idx_200 < 30 or dist >= 6:
+            return "🔴 防禦/熊市", 16711680, "長線破位或極端派發，嚴禁新建倉，現金為主。"
+        elif (idx_50 > 50 and tot_50 < 30): 
+            return "🟡 內部背馳", 16766720, "指數強但中小盤弱 (拉大出細)，注碼減半，鎖定利潤。"
+        elif idx_50 < 40 or dist >= 4:
+            return "🟡 派發警告", 16766720, "大市動力減弱，提高警覺，切勿追高。"
+        elif tot_20 < 15:
+            return "🟡 極度超賣", 16766720, "短線跌幅極端，隨時暴力反彈，留意底部 VCP。"
+        elif idx_50 >= 50 and tot_50 >= 40 and dist <= 3:
+            return "🟢 全面牛市", 65280, "大細盤共振向上，勝率極高，可 Full Size 積極做多！"
+        else:
+            return "⚪ 震盪過渡", 8421504, "大市方向未明，維持現有持倉，小注試水溫。"
+
+    us_macro_status, us_macro_color, us_action = evaluate_market_health(
+        spx_price, spx_200ma, us_matrix['index_50ma_pct'], us_matrix['total_50ma_pct'], 
+        us_matrix['index_200ma_pct'], us_matrix['total_20ma_pct'], us_dist
+    )
+    jp_macro_status, jp_macro_color, jp_action = evaluate_market_health(
+        n225_price, n225_200ma, jp_matrix['index_50ma_pct'], jp_matrix['total_50ma_pct'], 
+        jp_matrix['index_200ma_pct'], jp_matrix['total_20ma_pct'], jp_dist
+    )
+
+    if us_macro_color == 16711680 or jp_macro_color == 16711680: final_color = 16711680
+    elif us_macro_color == 16766720 or jp_macro_color == 16766720: final_color = 16766720
+    else: final_color = 65280
+
+    us_macro_str = f"狀態: **{us_macro_status}**\n🔸 盤長(>200MA): **{us_matrix['index_200ma_pct']}%**\n🔸 盤中(>50MA): **{us_matrix['index_50ma_pct']}%**\n🔸 總中(>50MA): **{us_matrix['total_50ma_pct']}%**\n🔸 超賣(>20MA): **{us_matrix['total_20ma_pct']}%**\n🛑 派發: **{us_dist} 日** | 掃描: {us_scan_count}"
+    jp_macro_str = f"狀態: **{jp_macro_status}**\n🔸 盤長(>200MA): **{jp_matrix['index_200ma_pct']}%**\n🔸 盤中(>50MA): **{jp_matrix['index_50ma_pct']}%**\n🔸 總中(>50MA): **{jp_matrix['total_50ma_pct']}%**\n🔸 超賣(>20MA): **{jp_matrix['total_20ma_pct']}%**\n🛑 派發: **{jp_dist} 日** | 掃描: {jp_scan_count}"
 
     payload = {
         "embeds": [{
-            "title": f"📊 系統戰績與宏觀結算摘要 ({today_str})", 
+            "title": f"📊 系統戰績與 3D 矩陣雷達 ({today_str})", 
             "description": f"**今日結案動態:**\n{details_text}\n\n**🔍 各策略歷史表現:**\n{breakdown_text}",
-            "color": floating_color,
+            "color": final_color,
             "fields": [
-                {"name": "🇺🇸 美股大盤 (SPX)", "value": us_macro_str, "inline": True},
-                {"name": "🇯🇵 日股大盤 (N225)", "value": jp_macro_str, "inline": True},
-                {"name": '\u200b', "value": '\u200b', "inline": False}, # 分隔行
+                {"name": "🇺🇸 美股 (SPX vs Total)", "value": us_macro_str, "inline": True},
+                {"name": "🇯🇵 日股 (N225 vs Total)", "value": jp_macro_str, "inline": True},
+                {"name": '\u200b', "value": '\u200b', "inline": False},
+                {"name": "🇺🇸 美股行動指引", "value": f"`{us_action}`", "inline": False},
+                {"name": "🇯🇵 日股行動指引", "value": f"`{jp_action}`", "inline": False},
+                {"name": '\u200b', "value": '\u200b', "inline": False},
                 {"name": "📂 目前持倉", "value": f"{len(open_trades)} 隻", "inline": True},
                 {"name": "🌊 總浮動盈虧", "value": f"**{floating_str}**", "inline": True},
                 {"name": "📈 總勝率", "value": f"{win_rate}% ({wins}/{total_closed})", "inline": True}
@@ -556,19 +603,24 @@ html = f"""<!DOCTYPE html>
 
         <div class="grid grid-cols-2 gap-4 z-10">
             <div class="flex items-center gap-2 bg-slate-800/30 p-2 rounded-lg border border-slate-800">
-                <div class="w-12 text-center text-xs font-black text-slate-400 border-r border-slate-700">美股<br>SPX</div>
-                <div class="flex-1 flex justify-between gap-2 px-2">
-                    <div class="flex flex-col"><span class="text-[8px] text-slate-500">市寬</span><span class="text-xs font-bold {'text-emerald-400' if us_breadth>40 else 'text-red-400'}">{us_breadth}%</span></div>
-                    <div class="flex flex-col"><span class="text-[8px] text-slate-500">派發</span><span class="text-xs font-bold {'text-red-400' if us_dist>=5 else 'text-emerald-400'}">{us_dist}d</span></div>
-                    <div class="flex flex-col"><span class="text-[8px] text-slate-500">狀態</span><span class="text-[10px] font-bold px-1 rounded {us_color}">{us_status}</span></div>
+                <div class="w-16 text-center text-xs font-black text-slate-400 border-r border-slate-700">美股<br><span class="text-[9px] {us_color}">{us_status.split(' ', 1)[-1] if ' ' in us_status else us_status}</span></div>
+                <div class="flex-1 grid grid-cols-5 gap-1 px-2 text-center items-center">
+                    <div class="flex flex-col"><span class="text-[8px] text-slate-500">大盤>200MA</span><span class="text-[11px] font-bold {'text-emerald-400' if us_matrix['index_200ma_pct']>=40 else 'text-red-400'}">{us_matrix['index_200ma_pct']}%</span></div>
+                    <div class="flex flex-col"><span class="text-[8px] text-slate-500">大盤>50MA</span><span class="text-[11px] font-bold {'text-emerald-400' if us_matrix['index_50ma_pct']>=40 else 'text-amber-400' if us_matrix['index_50ma_pct']>=20 else 'text-red-400'}">{us_matrix['index_50ma_pct']}%</span></div>
+                    <div class="flex flex-col border-l border-slate-700/50 pl-1"><span class="text-[8px] text-slate-500">全市>50MA</span><span class="text-[11px] font-bold {'text-emerald-400' if us_matrix['total_50ma_pct']>=40 else 'text-red-400'}">{us_matrix['total_50ma_pct']}%</span></div>
+                    <div class="flex flex-col"><span class="text-[8px] text-slate-500">超賣>20MA</span><span class="text-[11px] font-bold {'text-red-500' if us_matrix['total_20ma_pct']<=15 else 'text-slate-300'}">{us_matrix['total_20ma_pct']}%</span></div>
+                    <div class="flex flex-col border-l border-slate-700/50 pl-1"><span class="text-[8px] text-slate-500">派發日</span><span class="text-[11px] font-bold {'text-red-400' if us_dist>=5 else 'text-emerald-400'}">{us_dist}d</span></div>
                 </div>
             </div>
+            
             <div class="flex items-center gap-2 bg-slate-800/30 p-2 rounded-lg border border-slate-800">
-                <div class="w-12 text-center text-xs font-black text-slate-400 border-r border-slate-700">日股<br>N225</div>
-                <div class="flex-1 flex justify-between gap-2 px-2">
-                    <div class="flex flex-col"><span class="text-[8px] text-slate-500">市寬</span><span class="text-xs font-bold {'text-emerald-400' if jp_breadth>40 else 'text-red-400'}">{jp_breadth}%</span></div>
-                    <div class="flex flex-col"><span class="text-[8px] text-slate-500">派發</span><span class="text-xs font-bold {'text-red-400' if jp_dist>=5 else 'text-emerald-400'}">{jp_dist}d</span></div>
-                    <div class="flex flex-col"><span class="text-[8px] text-slate-500">狀態</span><span class="text-[10px] font-bold px-1 rounded {jp_color}">{jp_status}</span></div>
+                <div class="w-16 text-center text-xs font-black text-slate-400 border-r border-slate-700">日股<br><span class="text-[9px] {jp_color}">{jp_status.split(' ', 1)[-1] if ' ' in jp_status else jp_status}</span></div>
+                <div class="flex-1 grid grid-cols-5 gap-1 px-2 text-center items-center">
+                    <div class="flex flex-col"><span class="text-[8px] text-slate-500">大盤>200MA</span><span class="text-[11px] font-bold {'text-emerald-400' if jp_matrix['index_200ma_pct']>=40 else 'text-red-400'}">{jp_matrix['index_200ma_pct']}%</span></div>
+                    <div class="flex flex-col"><span class="text-[8px] text-slate-500">大盤>50MA</span><span class="text-[11px] font-bold {'text-emerald-400' if jp_matrix['index_50ma_pct']>=40 else 'text-amber-400' if jp_matrix['index_50ma_pct']>=20 else 'text-red-400'}">{jp_matrix['index_50ma_pct']}%</span></div>
+                    <div class="flex flex-col border-l border-slate-700/50 pl-1"><span class="text-[8px] text-slate-500">全市>50MA</span><span class="text-[11px] font-bold {'text-emerald-400' if jp_matrix['total_50ma_pct']>=40 else 'text-red-400'}">{jp_matrix['total_50ma_pct']}%</span></div>
+                    <div class="flex flex-col"><span class="text-[8px] text-slate-500">超賣>20MA</span><span class="text-[11px] font-bold {'text-red-500' if jp_matrix['total_20ma_pct']<=15 else 'text-slate-300'}">{jp_matrix['total_20ma_pct']}%</span></div>
+                    <div class="flex flex-col border-l border-slate-700/50 pl-1"><span class="text-[8px] text-slate-500">派發日</span><span class="text-[11px] font-bold {'text-red-400' if jp_dist>=5 else 'text-emerald-400'}">{jp_dist}d</span></div>
                 </div>
             </div>
         </div>
@@ -682,6 +734,34 @@ html = f"""<!DOCTYPE html>
                 </div>
         </div>
 
+        <div class="bg-slate-800/30 rounded-xl border border-slate-700 p-4">
+            <h3 class="font-black text-indigo-400 mb-3 flex items-center gap-2">📊 進場指標與勝率分析</h3>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div class="bg-slate-900/50 rounded-lg border border-slate-700/50 overflow-hidden">
+                    <div class="bg-slate-800 px-3 py-1 text-xs font-bold text-slate-300 border-b border-slate-700">📈 動能策略 (按 RS 分佈)</div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-left whitespace-nowrap">
+                            <thead class="text-slate-500 uppercase border-b border-slate-700">
+                                <tr><th class="p-2">RS 區間</th><th class="p-2 text-center">單數</th><th class="p-2 text-center">勝率</th><th class="p-2 text-right">實現 P&L</th></tr>
+                            </thead>
+                            <tbody id="metric-rs-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="bg-slate-900/50 rounded-lg border border-slate-700/50 overflow-hidden">
+                    <div class="bg-slate-800 px-3 py-1 text-xs font-bold text-slate-300 border-b border-slate-700">📉 撈底策略 (按 RSI 分佈)</div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-left whitespace-nowrap">
+                            <thead class="text-slate-500 uppercase border-b border-slate-700">
+                                <tr><th class="p-2">RSI 區間</th><th class="p-2 text-center">單數</th><th class="p-2 text-center">勝率</th><th class="p-2 text-right">實現 P&L</th></tr>
+                            </thead>
+                            <tbody id="metric-rsi-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="bg-slate-800/30 rounded-xl border border-slate-700 p-4">
                 <h3 class="font-black text-cyan-400 mb-3 flex items-center gap-2">📂 目前持倉 (Open Positions)</h3>
@@ -784,7 +864,7 @@ html = f"""<!DOCTYPE html>
             document.getElementById('calc_cost').innerText = unit + totalCost.toLocaleString(undefined, {{maximumFractionDigits: 0}}) + " (" + actualPosPct + "%)\";
         }}
 
-        function renderJournal() {{
+function renderJournal() {{
             const openTbody = document.getElementById('journal-open-tbody');
             const closedTbody = document.getElementById('journal-closed-tbody');
             const statsContainer = document.getElementById('journal-stats');
@@ -833,61 +913,103 @@ html = f"""<!DOCTYPE html>
             `;
 
             // ==========================================
-            // 按策略 (Tag) 統計戰果
+            // 1. 生成策略卡片
             // ==========================================
             const strategyStats = {{}};
-            
-            // 掃描所有已平倉交易
             closeds.forEach(t => {{
                 const strat = t.tag || '未分類';
-                
                 if (!strategyStats[strat]) {{
                     strategyStats[strat] = {{ trades: 0, wins: 0, pnl: 0, deployed: 0 }};
                 }}
-                
                 strategyStats[strat].trades += 1;
                 if (t.status.includes('✅')) strategyStats[strat].wins += 1;
-                
-                // 計算此單 P&L 同動用資金 (固定 10k 基準)
                 const tradePnl = (10000 / t.px) * (t.last_px - t.px);
                 strategyStats[strat].pnl += tradePnl;
                 strategyStats[strat].deployed += 10000;
             }});
 
-            // 生成策略卡片 HTML (注意 JS 嘅 Template Literal $ 後面都要雙大括號)
             const strategyHtml = Object.keys(strategyStats).map(strat => {{
                 const stats = strategyStats[strat];
                 const stratWinRate = ((stats.wins / stats.trades) * 100).toFixed(1);
                 const pColor = stats.pnl >= 0 ? 'text-emerald-400' : 'text-red-400';
                 const pSign = stats.pnl >= 0 ? '+' : '';
-                
                 return `
                 <div class="bg-slate-900/50 p-3 rounded-lg border border-slate-700/50 hover:border-fuchsia-500/50 transition">
                     <div class="text-xs font-black text-white mb-2 uppercase px-1 bg-slate-800 inline-block rounded">${{strat}}</div>
-                    
                     <div class="flex justify-between text-[10px] text-slate-400 mb-1">
-                        <span>勝率 (${{stats.wins}}/${{stats.trades}})</span>
-                        <span class="font-bold text-white">${{stratWinRate}}%</span>
+                        <span>勝率 (${{stats.wins}}/${{stats.trades}})</span><span class="font-bold text-white">${{stratWinRate}}%</span>
                     </div>
-                    
                     <div class="flex justify-between text-[10px] text-slate-400 mb-1">
-                        <span>已動用資金</span>
-                        <span class="font-bold">$${{stats.deployed.toLocaleString()}}</span>
+                        <span>已動用資金</span><span class="font-bold">$${{stats.deployed.toLocaleString()}}</span>
                     </div>
-                    
                     <div class="flex justify-between text-[10px] text-slate-400 mt-2 pt-2 border-t border-slate-700">
-                        <span>實現利潤</span>
-                        <span class="font-black ${{pColor}}">${{pSign}}$${{stats.pnl.toFixed(0)}}</span>
+                        <span>實現利潤</span><span class="font-black ${{pColor}}">${{pSign}}$${{stats.pnl.toFixed(0)}}</span>
                     </div>
-                </div>
-                `;
+                </div>`;
             }}).join('');
+            document.getElementById('strategy-stats-container').innerHTML = strategyHtml || '<div class="text-xs text-slate-500 italic p-2">暫無策略數據</div>';
 
-            document.getElementById('strategy-stats-container').innerHTML = 
-                strategyHtml || '<div class="text-xs text-slate-500 italic p-2">暫無策略數據</div>';
             // ==========================================
+            // 2. 按進場指標 (RS / RSI) 分組統計
+            // ==========================================
+            const metricStats = {{
+                rs: {{ '95-99 (極強)': {{ trades: 0, wins: 0, pnl: 0 }}, '90-94 (強勢)': {{ trades: 0, wins: 0, pnl: 0 }}, '80-89 (中等)': {{ trades: 0, wins: 0, pnl: 0 }}, '< 80 (較弱)': {{ trades: 0, wins: 0, pnl: 0 }} }},
+                rsi: {{ '< 20 (極度超賣)': {{ trades: 0, wins: 0, pnl: 0 }}, '20-25 (嚴重超賣)': {{ trades: 0, wins: 0, pnl: 0 }}, '> 25 (輕微超賣)': {{ trades: 0, wins: 0, pnl: 0 }} }}
+            }};
 
-            // 👇 填寫 Open Positions (加入 止損/止盈 價位)
+            closeds.forEach(t => {{
+                const isWin = t.status.includes('✅');
+                const tradePnl = (10000 / t.px) * (t.last_px - t.px);
+                
+                if (t.entry_metric) {{
+                    if (t.entry_metric.startsWith('RS:')) {{
+                        const rsVal = parseInt(t.entry_metric.replace('RS:', '').trim());
+                        let bucket = '< 80 (較弱)';
+                        if (rsVal >= 95) bucket = '95-99 (極強)';
+                        else if (rsVal >= 90) bucket = '90-94 (強勢)';
+                        else if (rsVal >= 80) bucket = '80-89 (中等)';
+                        
+                        metricStats.rs[bucket].trades++;
+                        if (isWin) metricStats.rs[bucket].wins++;
+                        metricStats.rs[bucket].pnl += tradePnl;
+                    }} else if (t.entry_metric.startsWith('RSI:')) {{
+                        const rsiVal = parseInt(t.entry_metric.replace('RSI:', '').trim());
+                        let bucket = '> 25 (輕微超賣)';
+                        if (rsiVal < 20) bucket = '< 20 (極度超賣)';
+                        else if (rsiVal <= 25) bucket = '20-25 (嚴重超賣)';
+                        
+                        metricStats.rsi[bucket].trades++;
+                        if (isWin) metricStats.rsi[bucket].wins++;
+                        metricStats.rsi[bucket].pnl += tradePnl;
+                    }}
+                }}
+            }});
+
+            const renderMetricRows = (statsObj) => {{
+                return Object.keys(statsObj).map(key => {{
+                    const s = statsObj[key];
+                    if (s.trades === 0) return `<tr><td class="p-2 text-slate-500">${{key}}</td><td colspan="3" class="p-2 text-center text-slate-600 text-[10px]">無數據</td></tr>`;
+                    const winRate = ((s.wins / s.trades) * 100).toFixed(1);
+                    const pColor = s.pnl >= 0 ? 'text-emerald-400' : 'text-red-400';
+                    const pSign = s.pnl >= 0 ? '+' : '';
+                    return `
+                    <tr class="border-b border-slate-700/50 hover:bg-slate-800 transition">
+                        <td class="p-2 font-bold text-white">${{key}}</td>
+                        <td class="p-2 text-center">${{s.trades}}</td>
+                        <td class="p-2 text-center font-bold text-cyan-400">${{winRate}}%</td>
+                        <td class="p-2 text-right font-black font-mono ${{pColor}}">${{pSign}}$${{s.pnl.toFixed(0)}}</td>
+                    </tr>`;
+                }}).join('');
+            }};
+
+            const rsTbody = document.getElementById('metric-rs-tbody');
+            const rsiTbody = document.getElementById('metric-rsi-tbody');
+            if(rsTbody) rsTbody.innerHTML = renderMetricRows(metricStats.rs);
+            if(rsiTbody) rsiTbody.innerHTML = renderMetricRows(metricStats.rsi);
+
+            // ==========================================
+            // 3. 渲染 Open Positions
+            // ==========================================
             openTbody.innerHTML = opens.length === 0 ? '<tr><td colspan="11" class="p-4 text-center text-slate-500">目前無持倉</td></tr>' : opens.map(t => {{
                 const pnl = (10000 / t.px) * (t.last_px - t.px);
                 const pnlPct = ((t.last_px - t.px) / t.px * 100).toFixed(2);
@@ -920,8 +1042,22 @@ html = f"""<!DOCTYPE html>
                 </tr>`;
             }}).join('');
 
-            // 👇 填寫 Closed Trades (加入 買入日期、買入/賣出 價位)
-            closedTbody.innerHTML = closeds.length === 0 ? '<tr><td colspan="9" class="p-4 text-center text-slate-500">無結案紀錄</td></tr>' : closeds.slice(0,50).map(t => {{
+            // ==========================================
+            // 4. 渲染 Closed Trades (加入進場指標欄位)
+            // ==========================================
+            const closedThead = document.querySelector('#journal-closed-tbody').parentElement.querySelector('thead');
+            if(closedThead) {{
+                closedThead.innerHTML = `
+                    <tr>
+                        <th class="p-2">買入日期</th><th class="p-2">平倉日期</th><th class="p-2">代號</th>
+                        <th class="p-2">策略</th><th class="p-2 text-indigo-400">進場指標</th><th class="p-2">狀態</th>
+                        <th class="p-2">買入價</th><th class="p-2">賣出價</th>
+                        <th class="p-2 text-right">實現 P&L</th><th class="p-2 text-right">回報 (%)</th>
+                    </tr>
+                `;
+            }}
+
+            closedTbody.innerHTML = closeds.length === 0 ? '<tr><td colspan="10" class="p-4 text-center text-slate-500">無結案紀錄</td></tr>' : closeds.slice(0,50).map(t => {{
                 const pnl = (10000 / t.px) * (t.last_px - t.px);
                 const pnlPct = ((t.last_px - t.px) / t.px * 100).toFixed(2);
                 const isWin = t.status.includes('✅');
@@ -935,6 +1071,7 @@ html = f"""<!DOCTYPE html>
                     <td class="p-2">${{t.close_date || t.date}}</td>
                     <td class="p-2 font-bold text-white">${{t.tk}}</td>
                     <td class="p-2 text-[10px] text-slate-400">${{t.tag || 'N/A'}}</td>
+                    <td class="p-2 text-[10px] font-mono text-indigo-300">${{t.entry_metric || '-'}}</td>
                     <td class="p-2">${{isWin ? '🎯 止盈' : '🛑 止損'}}</td>
                     <td class="p-2">${{unit}}${{t.px}}</td>
                     <td class="p-2 text-white font-bold">${{unit}}${{t.last_px}}</td>
