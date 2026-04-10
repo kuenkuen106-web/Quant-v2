@@ -5,11 +5,11 @@
         "px": 1376.5,
         "sl": 1311.27,
         "tp": 1493.91,
-        "last_px": 1377.0,
+        "last_px": 1340.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 79",
-        "curr_metric": "RS: 79"
+        "curr_metric": "RS: 76"
     },
     {
         "date": "2026-04-08",
@@ -17,11 +17,11 @@
         "px": 5259.0,
         "sl": 4980.52,
         "tp": 5760.27,
-        "last_px": 5357.0,
+        "last_px": 5259.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 85",
-        "curr_metric": "RS: 85"
+        "curr_metric": "RS: 84"
     },
     {
         "date": "2026-04-08",
@@ -101,11 +101,11 @@
         "px": 2641.5,
         "sl": 2408.6,
         "tp": 3060.73,
-        "last_px": 2657.5,
+        "last_px": 2661.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 76",
-        "curr_metric": "RS: 74"
+        "curr_metric": "RS: 77"
     },
     {
         "date": "2026-04-08",
@@ -113,11 +113,11 @@
         "px": 2646.0,
         "sl": 2470.69,
         "tp": 2961.55,
-        "last_px": 2622.0,
+        "last_px": 2593.5,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 75",
-        "curr_metric": "RS: 74"
+        "curr_metric": "RS: 73"
     },
     {
         "date": "2026-04-08",
@@ -125,11 +125,11 @@
         "px": 6554.0,
         "sl": 6141.97,
         "tp": 7295.65,
-        "last_px": 6467.0,
+        "last_px": 6448.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 91",
-        "curr_metric": "RS: 87"
+        "curr_metric": "RS: 89"
     },
     {
         "date": "2026-04-08",
@@ -153,7 +153,7 @@
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 75",
-        "curr_metric": "RS: 74"
+        "curr_metric": "RS: 76"
     },
     {
         "date": "2026-04-08",
@@ -165,7 +165,7 @@
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 86",
-        "curr_metric": "RS: 82"
+        "curr_metric": "RS: 84"
     },
     {
         "date": "2026-04-08",
@@ -189,7 +189,7 @@
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 76",
-        "curr_metric": "RS: 74"
+        "curr_metric": "RS: 76"
     },
     {
         "date": "2026-04-08",
@@ -201,7 +201,7 @@
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 83",
-        "curr_metric": "RS: 82"
+        "curr_metric": "RS: 84"
     },
     {
         "date": "2026-04-08",
@@ -249,7 +249,7 @@
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 85",
-        "curr_metric": "RS: 86"
+        "curr_metric": "RS: 85"
     },
     {
         "date": "2026-04-08",
@@ -365,11 +365,11 @@
         "px": 1487.5,
         "sl": 1393.27,
         "tp": 1657.11,
-        "last_px": 1487.5,
+        "last_px": 1452.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 85",
-        "curr_metric": "RS: 86"
+        "curr_metric": "RS: 85"
     },
     {
         "date": "2026-04-09",
@@ -389,7 +389,7 @@
         "px": 10300.0,
         "sl": 9740.76,
         "tp": 11306.64,
-        "last_px": 10300.0,
+        "last_px": 10315.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 81",
@@ -413,11 +413,11 @@
         "px": 1288.0,
         "sl": 1216.4,
         "tp": 1416.87,
-        "last_px": 1288.0,
+        "last_px": 1268.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 83",
-        "curr_metric": "RS: 84"
+        "curr_metric": "RS: 82"
     },
     {
         "date": "2026-04-09",
@@ -425,7 +425,7 @@
         "px": 5243.0,
         "sl": 4950.44,
         "tp": 5769.6,
-        "last_px": 5243.0,
+        "last_px": 5152.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 83",
@@ -449,11 +449,11 @@
         "px": 6043.0,
         "sl": 6021.57,
         "tp": 6081.57,
-        "last_px": 6043.0,
+        "last_px": 6045.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 75",
-        "curr_metric": "RS: 76"
+        "curr_metric": "RS: 78"
     },
     {
         "date": "2026-04-09",
@@ -461,7 +461,7 @@
         "px": 4507.0,
         "sl": 4213.38,
         "tp": 5035.52,
-        "last_px": 4507.0,
+        "last_px": 4431.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 77",
@@ -473,7 +473,7 @@
         "px": 14520.0,
         "sl": 12658.39,
         "tp": 17870.89,
-        "last_px": 14520.0,
+        "last_px": 13970.0,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 98",
@@ -485,11 +485,11 @@
         "px": 1598.0,
         "sl": 1493.3,
         "tp": 1786.45,
-        "last_px": 1598.0,
+        "last_px": 1595.5,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 76",
-        "curr_metric": "RS: 76"
+        "curr_metric": "RS: 79"
     },
     {
         "date": "2026-04-09",
@@ -509,11 +509,11 @@
         "px": 1802.5,
         "sl": 1696.78,
         "tp": 1992.8,
-        "last_px": 1802.5,
+        "last_px": 1836.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 79",
-        "curr_metric": "RS: 81"
+        "curr_metric": "RS: 82"
     },
     {
         "date": "2026-04-09",
@@ -545,11 +545,11 @@
         "px": 5830.0,
         "sl": 5401.59,
         "tp": 6601.14,
-        "last_px": 5830.0,
+        "last_px": 5850.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 78",
-        "curr_metric": "RS: 79"
+        "curr_metric": "RS: 81"
     },
     {
         "date": "2026-04-09",
@@ -573,7 +573,7 @@
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 88",
-        "curr_metric": "RS: 88"
+        "curr_metric": "RS: 90"
     },
     {
         "date": "2026-04-09",
@@ -593,11 +593,11 @@
         "px": 2871.0,
         "sl": 2723.28,
         "tp": 3136.9,
-        "last_px": 2871.0,
+        "last_px": 2816.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 76",
-        "curr_metric": "RS: 77"
+        "curr_metric": "RS: 78"
     },
     {
         "date": "2026-04-09",
@@ -617,11 +617,11 @@
         "px": 1209.0,
         "sl": 1119.58,
         "tp": 1369.96,
-        "last_px": 1209.0,
+        "last_px": 1220.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 75",
-        "curr_metric": "RS: 76"
+        "curr_metric": "RS: 78"
     },
     {
         "date": "2026-04-09",
@@ -665,11 +665,11 @@
         "px": 2003.0,
         "sl": 1843.49,
         "tp": 2290.13,
-        "last_px": 2003.0,
+        "last_px": 1971.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 75",
-        "curr_metric": "RS: 75"
+        "curr_metric": "RS: 73"
     },
     {
         "date": "2026-04-09",
@@ -681,7 +681,7 @@
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 75",
-        "curr_metric": "RS: 74"
+        "curr_metric": "RS: 75"
     },
     {
         "date": "2026-04-09",
@@ -689,11 +689,11 @@
         "px": 4430.0,
         "sl": 4213.4,
         "tp": 4819.88,
-        "last_px": 4430.0,
+        "last_px": 4480.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 75",
-        "curr_metric": "RS: 74"
+        "curr_metric": "RS: 77"
     },
     {
         "date": "2026-04-09",
@@ -701,11 +701,11 @@
         "px": 4315.0,
         "sl": 4099.25,
         "tp": 4530.75,
-        "last_px": 4315.0,
+        "last_px": 4350.0,
         "status": "OPEN",
         "tag": "\u26a1 \u7f3a\u53e3\u52d5\u80fd",
         "entry_metric": "RS: 75",
-        "curr_metric": "RS: 75"
+        "curr_metric": "RS: 78"
     },
     {
         "date": "2026-04-10",
@@ -813,7 +813,7 @@
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 92",
-        "curr_metric": "RS: 92"
+        "curr_metric": "RS: 91"
     },
     {
         "date": "2026-04-10",
@@ -897,7 +897,7 @@
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 84",
-        "curr_metric": "RS: 84"
+        "curr_metric": "RS: 85"
     },
     {
         "date": "2026-04-10",
@@ -934,5 +934,41 @@
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 83",
         "curr_metric": "RS: 83"
+    },
+    {
+        "date": "2026-04-10",
+        "tk": "6101.T",
+        "px": 4240.0,
+        "sl": 4028.0,
+        "tp": 4452.0,
+        "last_px": 4240.0,
+        "status": "OPEN",
+        "tag": "\u26a1 \u7f3a\u53e3\u52d5\u80fd",
+        "entry_metric": "RS: 95",
+        "curr_metric": "RS: 95"
+    },
+    {
+        "date": "2026-04-10",
+        "tk": "6814.T",
+        "px": 7720.0,
+        "sl": 7334.0,
+        "tp": 8106.0,
+        "last_px": 7720.0,
+        "status": "OPEN",
+        "tag": "\u26a1 \u7f3a\u53e3\u52d5\u80fd",
+        "entry_metric": "RS: 95",
+        "curr_metric": "RS: 95"
+    },
+    {
+        "date": "2026-04-10",
+        "tk": "9303.T",
+        "px": 4100.0,
+        "sl": 3889.22,
+        "tp": 4479.4,
+        "last_px": 4100.0,
+        "status": "OPEN",
+        "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
+        "entry_metric": "RS: 76",
+        "curr_metric": "RS: 76"
     }
 ]
