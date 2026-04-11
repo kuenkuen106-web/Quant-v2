@@ -616,15 +616,33 @@ jp_hist_dist = jp_dist_mask.rolling(25).sum()
 chart_data = []
 for i, d in enumerate(hist_dates):
     d_str = d.strftime('%Y-%m-%d')
-    us_open, jp_open = 0, 0
-    
-    # 計算當日有多少 Open Orders
+    # 👇 更新：將單一變數拆分為 Profit（賺）與 Loss（蝕）
+    us_open_profit, us_open_loss = 0, 0
+    jp_open_profit, jp_open_loss = 0, 0
+        
+    # 準備當日嘅價格數據 (Vectorised 方法，非常快)
+    d_prices = closes.loc[d]
+        
+    # 計算當日有多少 Open Orders，並根據 P&L 狀態細分
     for t in trade_history:
+        # 時光機邏輯：只計當日或之前進場的單
         if t['date'] <= d_str:
             c_date = t.get('close_date', '9999-99-99')
+            # 判斷當日該單是否仍處於 OPEN 狀態
             if c_date > d_str or t.get('status') == 'OPEN':
-                if t['tk'].endswith('.T'): jp_open += 1
-                else: us_open += 1
+                tk = t['tk']
+                # 確保 closes 數據內有呢隻股票，且當日有價格
+                if tk in d_prices.index and not pd.isna(d_prices[tk]):
+                    # 判斷是日賺蝕 (比較當日收市價與當初進場價)
+                    is_profit = float(d_prices[tk]) >= float(t['px'])
+                        
+                    # 根據市場 (美/日) 與狀態 (賺/蝕) 累加
+                    if tk.endswith('.T'):
+                        if is_profit: jp_open_profit += 1
+                        else: jp_open_loss += 1
+                    else:
+                        if is_profit: us_open_profit += 1
+                        else: us_open_loss += 1
                 
     # 判斷美股歷史燈號顏色 (Hex 碼供 ApexCharts 畫底色)
     us_c_color = "#22c55e" # 綠燈
@@ -641,15 +659,24 @@ for i, d in enumerate(hist_dates):
         jp_c_color = "#eab308"
         
     # 👇 更新呢度：將單一市寬拆分為「大盤」同「全市」
+    # 將數據打包
     chart_data.append({
         'date': d_str,
-        'us_idx_breadth': round(float(v_us_idx50.loc[d]), 1), # 大盤 50MA
-        'us_tot_breadth': round(float(v_us_tot50.loc[d]), 1), # 全市 50MA
-        'us_open': us_open, 'us_color': us_c_color,
-        
-        'jp_idx_breadth': round(float(v_jp_idx50.loc[d]), 1), # 大盤 50MA
-        'jp_tot_breadth': round(float(v_jp_tot50.loc[d]), 1), # 全市 50MA
-        'jp_open': jp_open, 'jp_color': jp_c_color
+        # 美股雙市寬數據 (保留實線+虛線升級版)
+        'us_idx_breadth': round(float(v_us_idx50.loc[d]), 1),
+        'us_tot_breadth': round(float(v_us_tot50.loc[d]), 1),
+        # 👇 美股持倉細分
+        'us_open_profit': us_open_profit,
+        'us_open_loss': us_open_loss,
+        'us_color': us_c_color,
+            
+        # 日股數據
+        'jp_idx_breadth': round(float(v_jp_idx50.loc[d]), 1),
+        'jp_tot_breadth': round(float(v_jp_tot50.loc[d]), 1),
+        # 👇 日股持倉細分
+        'jp_open_profit': jp_open_profit,
+        'jp_open_loss': jp_open_loss,
+        'jp_color': jp_c_color
     })
 
 chart_data_str = json.dumps(chart_data)
@@ -940,42 +967,80 @@ html = f"""<!DOCTYPE html>
 
         function renderCharts() {{
             const dates = chartData.map(d => d.date);
-
+            
             const createChartOptions = (market) => {{
-                const breadthData = chartData.map(d => d[market + '_breadth']);
-                const openData = chartData.map(d => d[market + '_open']);
-
-                // 動態生成紅黃綠底色區塊 (Annotations)
+                // 讀取所有數據欄位
+                const idxBreadthData = chartData.map(d => d[market + '_idx_breadth']);
+                const totBreadthData = chartData.map(d => d[market + '_tot_breadth']);
+                const profitData = chartData.map(d => d[market + '_open_profit']);
+                const lossData = chartData.map(d => d[market + '_open_loss']);
+                
+                // 動態生成底色區塊 (Annotations)
                 const annotations = chartData.map((d, i) => ({{
                     x: d.date,
                     x2: i < chartData.length - 1 ? chartData[i+1].date : d.date,
                     fillColor: d[market + '_color'],
-                    opacity: 0.15, // 底色透明度
+                    opacity: 0.15,
                     strokeDashArray: 0,
                     borderWidth: 0
                 }}));
 
                 return {{
                     series: [
-                        {{ name: '市寬 (Breadth %)', type: 'line', data: breadthData }},
-                        {{ name: '持倉數量 (Open Orders)', type: 'column', data: openData }}
+                        {{ name: '大盤市寬 (>50MA)', type: 'line', data: idxBreadthData }},
+                        {{ name: '全市市寬 (>50MA)', type: 'line', data: totBreadthData }},
+                        # 👇 新增：Profit 與 Loss 數據，並將 P&L 狀態綁定為 Column 類型
+                        {{ name: '賺錢持倉 (Profit)', type: 'column', data: profitData }},
+                        {{ name: '蝕本持倉 (Loss)', type: 'column', data: lossData }}
                     ],
-                    chart: {{ height: 350, type: 'line', toolbar: {{ show: false }}, background: 'transparent' }},
-                    stroke: {{ width: [3, 0], curve: 'smooth' }},
-                    colors: ['#06b6d4', '#8b5cf6'], // 淺藍線(市寬)，紫色柱(持倉)
+                    chart: {{ 
+                        height: 350, 
+                        type: 'line', 
+                        # 👇 開啟 Stacked (堆疊) 模式！
+                        stacked: true,
+                        toolbar: {{ show: false }}, 
+                        background: 'transparent' 
+                    }},
+                    stroke: {{ 
+                        width: [3, 2, 0, 0], # 前兩條是線，後兩條是柱狀圖的邊框
+                        curve: 'smooth', 
+                        dashArray: [0, 4, 0, 0] # 大盤實線，全市虛線
+                    }},
+                    # 👇 定義顏色：[大盤線, 全市虛線, Profit柱, Loss柱]
+                    colors: ['#f59e0b', '#06b6d4', '#22c55e', '#ef4444'], # 湖水綠, 橙色, 綠色, 紅色
                     annotations: {{ xaxis: annotations }},
                     xaxis: {{ categories: dates, labels: {{ style: {{ colors: '#94a3b8' }} }}, tickAmount: 10 }},
                     yaxis: [
-                        {{ title: {{ text: '市寬 (%)', style: {{ color: '#06b6d4' }} }}, labels: {{ style: {{ colors: '#06b6d4' }} }}, min: 0, max: 100 }},
-                        {{ opposite: true, title: {{ text: '持倉數量 (隻)', style: {{ color: '#8b5cf6' }} }}, labels: {{ style: {{ colors: '#8b5cf6' }} }} }}
+                        {{ 
+                            seriesName: '大盤市寬 (>50MA)', 
+                            title: {{ text: '市寬 (%)', style: {{ color: '#94a3b8' }} }}, 
+                            labels: {{ style: {{ colors: '#94a3b8' }} }}, 
+                            min: 0, max: 100 
+                        }},
+                        {{ seriesName: '大盤市寬 (>50MA)', show: false }}, // 共用市寬Y軸
+                        {{ 
+                            opposite: true, 
+                            seriesName: '賺錢持倉 (Profit)', 
+                            title: {{ text: '持倉數量 (隻)', style: {{ color: '#94a3b8' }} }}, 
+                            labels: {{ style: {{ colors: '#94a3b8' }} }} 
+                        }},
+                        {{ seriesName: '賺錢持倉 (Profit)', show: false }} // 共用持倉Y軸
                     ],
+                    plotOptions: {{
+                        bar: {{
+                            # 👇 設定柱狀圖圓角 (只讓最頂部的 Profit 柱有圓角，中間的 Loss 是平的)
+                            borderRadius: 4,
+                            borderRadiusApplication: 'around',
+                            borderRadiusWhenStacked: 'last'
+                        }}
+                    }},
                     theme: {{ mode: 'dark' }},
                     legend: {{ position: 'top' }},
                     dataLabels: {{ enabled: false }},
                     grid: {{ borderColor: '#334155', strokeDashArray: 3 }}
                 }};
             }};
-
+            
             new ApexCharts(document.querySelector("#chart-us"), createChartOptions('us')).render();
             new ApexCharts(document.querySelector("#chart-jp"), createChartOptions('jp')).render();
             chartsRendered = true;
