@@ -616,15 +616,22 @@ for i, d in enumerate(hist_dates):
     elif (v_jp_idx50.loc[d] > 50 and v_jp_tot50.loc[d] < 30) or v_jp_idx50.loc[d] < 40 or jp_hist_dist.loc[d] >= 4:
         jp_c_color = "#eab308"
         
+    # 👇 更新呢度：將單一市寬拆分為「大盤」同「全市」
     chart_data.append({
         'date': d_str,
-        'us_breadth': round(float(v_us_tot50.loc[d]), 1), 'us_open': us_open, 'us_color': us_c_color,
-        'jp_breadth': round(float(v_jp_tot50.loc[d]), 1), 'jp_open': jp_open, 'jp_color': jp_c_color
+        'us_idx_breadth': round(float(v_us_idx50.loc[d]), 1), # 大盤 50MA
+        'us_tot_breadth': round(float(v_us_tot50.loc[d]), 1), # 全市 50MA
+        'us_open': us_open, 'us_color': us_c_color,
+        
+        'jp_idx_breadth': round(float(v_jp_idx50.loc[d]), 1), # 大盤 50MA
+        'jp_tot_breadth': round(float(v_jp_tot50.loc[d]), 1), # 全市 50MA
+        'jp_open': jp_open, 'jp_color': jp_c_color    
     })
 
 chart_data_str = json.dumps(chart_data)
 # ==========================================
 
+# 將 Python 字典轉為 JSON 字串，直接注入 JS，避免 fetch CORS 錯誤
 js_payload_str = json.dumps(js_payload)
 trade_history_str = json.dumps(trade_history)
 
