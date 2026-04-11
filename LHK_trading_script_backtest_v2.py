@@ -365,6 +365,22 @@ def calc_macro_regime(index_ticker):
 us_dist, us_is_bull, us_status, us_color = calc_macro_regime('SPY')
 jp_dist, jp_is_bull, jp_status, jp_color = calc_macro_regime('^N225')
 
+# 判定紅黃綠燈
+def evaluate_market_health(price, ma200, idx_50, tot_50, idx_200, tot_20, dist):
+    if price < ma200 or idx_200 < 30 or dist >= 6: return "🔴 防禦/熊市:", 16711680, " 長線破位或極端派發，嚴禁新建倉，現金為主。"
+    elif (idx_50 > 50 and tot_50 < 30): return "🟡 內部背馳:", 16766720, " 指數強但中小盤弱 (拉大出細)，注碼減半，鎖定利潤。"
+    elif idx_50 < 40 or dist >= 4: return "🟡 派發警告:", 16766720, " 大市動力減弱，提高警覺，切勿追高。"
+    elif tot_20 < 15: return "🟡 極度超賣:", 16766720, " 短線跌幅極端，隨時暴力反彈，留意底部 VCP。"
+    elif idx_50 >= 50 and tot_50 >= 40 and dist <= 3: return "🟢 全面牛市:", 65280, " 大細盤共振向上，勝率極高，可 Full Size 積極做多！"
+    else: return "⚪ 震盪過渡:", 8421504, " 大市方向未明，維持現有持倉，小注試水溫。"
+
+spx_price, spx_200ma = float(closes['SPY'].iloc[-1]), float(closes['SPY'].rolling(200).mean().iloc[-1])
+n225_price, n225_200ma = float(closes['^N225'].iloc[-1]), float(closes['^N225'].rolling(200).mean().iloc[-1])
+
+# 抽出狀態、顏色同行動指引
+us_macro_status, us_macro_color, us_action = evaluate_market_health(spx_price, spx_200ma, us_matrix['index_50ma_pct'], us_matrix['total_50ma_pct'], us_matrix['index_200ma_pct'], us_matrix['total_20ma_pct'], us_dist)
+jp_macro_status, jp_macro_color, jp_action = evaluate_market_health(n225_price, n225_200ma, jp_matrix['index_50ma_pct'], jp_matrix['total_50ma_pct'], jp_matrix['index_200ma_pct'], jp_matrix['total_20ma_pct'], jp_dist)
+
 # 繪製 SPY 圖表
 spy_c, spy_v, spy_l = closes['SPY'], vols['SPY'], lows['SPY']
 spy_20, spy_50, spy_200 = spy_c.rolling(20).mean(), spy_c.rolling(50).mean(), spy_c.rolling(200).mean()
@@ -418,7 +434,7 @@ for ticker in [t for t in ALL_TICKERS if t not in ['SPY','^VIX','^N225']]:
         if (c.tail(20) * v.tail(20)).mean() < (300_000_000 if ticker.endswith('.T') else 5_000_000): continue
 
         is_jp = ticker.endswith('.T')
-        ticker_is_bull = jp_is_bull if is_jp else us_is_bull
+        ticker_macro = jp_macro_status if is_jp else us_macro_status # 👈 攞出對應嘅燈號
 
         rs = rs_rank[ticker].iloc[-1]
         rs_mom = rs_momentum[ticker].iloc[-1]
@@ -451,7 +467,8 @@ for ticker in [t for t in ALL_TICKERS if t not in ['SPY','^VIX','^N225']]:
         risk_per_share = 0
         entry_metric = "" # 準備記錄進場指標
 
-        if (is_vcp or is_bb_sqz) and ticker_is_bull:
+        # 🔴 紅燈時，嚴格封殺所有波段突破 (Swing) 策略！
+        if (is_vcp or is_bb_sqz) and ('🔴' not in ticker_macro):
             tag_name = "🏆 VCP 突破" if is_vcp else "💥 BB 擠壓"
             sl_p, tp_p = round(cp - 2.5 * catr, 2), round(cp + 4.5 * catr, 2)
             risk_per_share = cp - sl_p
@@ -518,7 +535,6 @@ if DISCORD_SUMMARY_WEBHOOK:
     open_trades = [t for t in trade_history if t.get('status') == 'OPEN']
     floating_pnl = sum([(10000 / t['px']) * (t['last_px'] - t['px']) for t in open_trades])
     floating_str = f"+${floating_pnl:.2f}" if floating_pnl >= 0 else f"-${abs(floating_pnl):.2f}"
-    floating_color = 65280 if floating_pnl >= 0 else 16711680
 
     # 3. 細分策略 P&L 結算 (歷史總計)
     strategy_stats = {}
@@ -536,38 +552,11 @@ if DISCORD_SUMMARY_WEBHOOK:
         breakdown_lines.append(f"**{tag}**: {w_rate}% 勝率 | P&L: {pnl_s} ({st['total']}單)")
     breakdown_text = "\n".join(breakdown_lines) if breakdown_lines else "尚無足夠結案數據。"
 
-    # 👇 【重點升級】：加入大盤價位與進階紅黃綠燈判斷
+    # 👇 4. 準備 Discord 宏觀數據 (直接調用 MODULE 3 已計算好的結果)
     us_scan_count = len(us_tickers)
     jp_scan_count = len(jp_tickers)
-    
-    spx_price = float(closes['SPY'].iloc[-1])
-    spx_200ma = float(closes['SPY'].rolling(200).mean().iloc[-1])
-    n225_price = float(closes['^N225'].iloc[-1])
-    n225_200ma = float(closes['^N225'].rolling(200).mean().iloc[-1])
 
-    def evaluate_market_health(price, ma200, idx_50, tot_50, idx_200, tot_20, dist):
-        if price < ma200 or idx_200 < 30 or dist >= 6:
-            return "🔴 防禦/熊市", 16711680, "長線破位或極端派發，嚴禁新建倉，現金為主。"
-        elif (idx_50 > 50 and tot_50 < 30): 
-            return "🟡 內部背馳", 16766720, "指數強但中小盤弱 (拉大出細)，注碼減半，鎖定利潤。"
-        elif idx_50 < 40 or dist >= 4:
-            return "🟡 派發警告", 16766720, "大市動力減弱，提高警覺，切勿追高。"
-        elif tot_20 < 15:
-            return "🟡 極度超賣", 16766720, "短線跌幅極端，隨時暴力反彈，留意底部 VCP。"
-        elif idx_50 >= 50 and tot_50 >= 40 and dist <= 3:
-            return "🟢 全面牛市", 65280, "大細盤共振向上，勝率極高，可 Full Size 積極做多！"
-        else:
-            return "⚪ 震盪過渡", 8421504, "大市方向未明，維持現有持倉，小注試水溫。"
-
-    us_macro_status, us_macro_color, us_action = evaluate_market_health(
-        spx_price, spx_200ma, us_matrix['index_50ma_pct'], us_matrix['total_50ma_pct'], 
-        us_matrix['index_200ma_pct'], us_matrix['total_20ma_pct'], us_dist
-    )
-    jp_macro_status, jp_macro_color, jp_action = evaluate_market_health(
-        n225_price, n225_200ma, jp_matrix['index_50ma_pct'], jp_matrix['total_50ma_pct'], 
-        jp_matrix['index_200ma_pct'], jp_matrix['total_20ma_pct'], jp_dist
-    )
-
+    # 決定 Discord Embed 左側那條邊框的顏色 (紅燈優先)
     if us_macro_color == 16711680 or jp_macro_color == 16711680: final_color = 16711680
     elif us_macro_color == 16766720 or jp_macro_color == 16766720: final_color = 16766720
     else: final_color = 65280
@@ -575,6 +564,7 @@ if DISCORD_SUMMARY_WEBHOOK:
     us_macro_str = f"狀態: **{us_macro_status}**\n🔸 盤長(>200MA): **{us_matrix['index_200ma_pct']}%**\n🔸 盤中(>50MA): **{us_matrix['index_50ma_pct']}%**\n🔸 總中(>50MA): **{us_matrix['total_50ma_pct']}%**\n🔸 超賣(>20MA): **{us_matrix['total_20ma_pct']}%**\n🛑 派發: **{us_dist} 日** | 掃描: {us_scan_count}"
     jp_macro_str = f"狀態: **{jp_macro_status}**\n🔸 盤長(>200MA): **{jp_matrix['index_200ma_pct']}%**\n🔸 盤中(>50MA): **{jp_matrix['index_50ma_pct']}%**\n🔸 總中(>50MA): **{jp_matrix['total_50ma_pct']}%**\n🔸 超賣(>20MA): **{jp_matrix['total_20ma_pct']}%**\n🛑 派發: **{jp_dist} 日** | 掃描: {jp_scan_count}"
 
+    # 5. 發送 Payload
     payload = {
         "embeds": [{
             "title": f"📊 系統戰績與 3D 矩陣雷達 ({today_str})", 
@@ -583,10 +573,10 @@ if DISCORD_SUMMARY_WEBHOOK:
             "fields": [
                 {"name": "🇺🇸 美股 (SPX vs Total)", "value": us_macro_str, "inline": True},
                 {"name": "🇯🇵 日股 (N225 vs Total)", "value": jp_macro_str, "inline": True},
-                {"name": '\u200b', "value": '\u200b', "inline": False},
+                {"name": '\u200b', "value": '\u200b', "inline": False}, # 分隔行
                 {"name": "🇺🇸 美股行動指引", "value": f"`{us_action}`", "inline": False},
                 {"name": "🇯🇵 日股行動指引", "value": f"`{jp_action}`", "inline": False},
-                {"name": '\u200b', "value": '\u200b', "inline": False},
+                {"name": '\u200b', "value": '\u200b', "inline": False}, # 分隔行
                 {"name": "📂 目前持倉", "value": f"{len(open_trades)} 隻", "inline": True},
                 {"name": "🌊 總浮動盈虧", "value": f"**{floating_str}**", "inline": True},
                 {"name": "📈 總勝率", "value": f"{win_rate}% ({wins}/{total_closed})", "inline": True}
@@ -596,6 +586,7 @@ if DISCORD_SUMMARY_WEBHOOK:
     }
     try: requests.post(DISCORD_SUMMARY_WEBHOOK, json=payload)
     except: pass
+
 # =============================================================================
 # MODULE 7 — 生成 UAT 前端 HTML (雙分頁系統：Dashboard + Journal)
 # =============================================================================
