@@ -603,6 +603,61 @@ print("⏳ [7/7] 正在生成雙分頁量化儀表板...")
 
 def get_unit(tk): return "¥" if tk.endswith(".T") else "$"
 
+# 👇 新增：準備歷史走勢圖表數據 (最近 60 日)
+print("⏳ 正在生成歷史宏觀走勢圖表數據...")
+hist_dates = closes.index[-60:]
+
+# 向量化計算歷史市寬
+v_us_tot50 = (closes[us_tickers] > closes[us_tickers].rolling(50).mean()).sum(axis=1) / max(1, len(us_tickers)) * 100
+v_us_idx50 = (closes[us_index_tickers] > closes[us_index_tickers].rolling(50).mean()).sum(axis=1) / max(1, len(us_index_tickers)) * 100
+v_us_idx200 = (closes[us_index_tickers] > closes[us_index_tickers].rolling(200).mean()).sum(axis=1) / max(1, len(us_index_tickers)) * 100
+
+v_jp_tot50 = (closes[jp_tickers] > closes[jp_tickers].rolling(50).mean()).sum(axis=1) / max(1, len(jp_tickers)) * 100
+v_jp_idx50 = (closes[jp_index_tickers] > closes[jp_index_tickers].rolling(50).mean()).sum(axis=1) / max(1, len(jp_index_tickers)) * 100
+v_jp_idx200 = (closes[jp_index_tickers] > closes[jp_index_tickers].rolling(200).mean()).sum(axis=1) / max(1, len(jp_index_tickers)) * 100
+
+# 向量化計算歷史派發日
+us_dist_mask = (closes['SPY'].pct_change() < -0.002) & (vols['SPY'] > vols['SPY'].shift(1))
+us_hist_dist = us_dist_mask.rolling(25).sum()
+jp_dist_mask = (closes['^N225'].pct_change() < -0.002) & (vols['^N225'] > vols['^N225'].shift(1))
+jp_hist_dist = jp_dist_mask.rolling(25).sum()
+
+chart_data = []
+for i, d in enumerate(hist_dates):
+    d_str = d.strftime('%Y-%m-%d')
+    us_open, jp_open = 0, 0
+    
+    # 計算當日有多少 Open Orders
+    for t in trade_history:
+        if t['date'] <= d_str:
+            c_date = t.get('close_date', '9999-99-99')
+            if c_date > d_str or t.get('status') == 'OPEN':
+                if t['tk'].endswith('.T'): jp_open += 1
+                else: us_open += 1
+                
+    # 判斷美股歷史燈號顏色 (Hex 碼供 ApexCharts 畫底色)
+    us_c_color = "#22c55e" # 綠燈
+    if closes['SPY'].loc[d] < closes['SPY'].rolling(200).mean().loc[d] or v_us_idx200.loc[d] < 30 or us_hist_dist.loc[d] >= 6:
+        us_c_color = "#ef4444" # 紅燈
+    elif (v_us_idx50.loc[d] > 50 and v_us_tot50.loc[d] < 30) or v_us_idx50.loc[d] < 40 or us_hist_dist.loc[d] >= 4:
+        us_c_color = "#eab308" # 黃燈
+        
+    # 判斷日股歷史燈號顏色
+    jp_c_color = "#22c55e"
+    if closes['^N225'].loc[d] < closes['^N225'].rolling(200).mean().loc[d] or v_jp_idx200.loc[d] < 30 or jp_hist_dist.loc[d] >= 6:
+        jp_c_color = "#ef4444"
+    elif (v_jp_idx50.loc[d] > 50 and v_jp_tot50.loc[d] < 30) or v_jp_idx50.loc[d] < 40 or jp_hist_dist.loc[d] >= 4:
+        jp_c_color = "#eab308"
+        
+    chart_data.append({
+        'date': d_str,
+        'us_breadth': round(float(v_us_tot50.loc[d]), 1), 'us_open': us_open, 'us_color': us_c_color,
+        'jp_breadth': round(float(v_jp_tot50.loc[d]), 1), 'jp_open': jp_open, 'jp_color': jp_c_color
+    })
+
+chart_data_str = json.dumps(chart_data)
+# ==========================================
+
 # 將 Python 字典轉為 JSON 字串，直接注入 JS，避免 fetch CORS 錯誤
 js_payload_str = json.dumps(js_payload)
 trade_history_str = json.dumps(trade_history)
@@ -614,6 +669,7 @@ html = f"""<!DOCTYPE html>
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <title>UAT QUANT ({today_str})</title>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </head>
 <body class="bg-[#020617] text-slate-300 p-4 font-sans h-screen flex flex-col overflow-hidden">
     
@@ -633,6 +689,7 @@ html = f"""<!DOCTYPE html>
                 <div class="flex gap-2 ml-6 bg-slate-950 p-1 rounded-lg border border-slate-800">
                     <button id="tabBtn-dashboard" onclick="switchTab('dashboard')" class="bg-indigo-600 text-white px-4 py-1.5 rounded-md font-bold text-sm shadow-md transition">📊 儀表板 (Dashboard)</button>
                     <button id="tabBtn-journal" onclick="switchTab('journal')" class="text-slate-400 hover:text-white hover:bg-slate-800 px-4 py-1.5 rounded-md font-bold text-sm transition">📜 交易日誌 (Journal)</button>
+                    <button id="tabBtn-charts" onclick="switchTab('charts')" class="text-slate-400 hover:text-white hover:bg-slate-800 px-4 py-1.5 rounded-md font-bold text-sm transition">📈 宏觀走勢 (Charts)</button>
                 </div>
             </div>
             <div class="text-xs font-black text-slate-500 bg-black/50 px-3 py-1 rounded-lg border border-slate-800">🌐 Dual-Market Macro Radar</div>
@@ -764,7 +821,24 @@ html = f"""<!DOCTYPE html>
         </div>
     </main>
 
-<main id="tab-journal" class="hidden flex-1 overflow-y-auto bg-slate-900 rounded-xl border border-slate-800 p-6 z-10 flex flex-col gap-6 shadow-lg">
+    <main id="tab-charts" class="hidden flex-1 overflow-y-auto bg-slate-900 rounded-xl border border-slate-800 p-6 z-10 flex flex-col gap-6 shadow-lg">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+            <h2 class="text-2xl font-black text-white flex items-center gap-2">📈 歷史宏觀與持倉走勢 (最近 60 日)</h2>
+            <div class="text-xs text-slate-500">底色反映當日大盤狀態 (紅=熊市防禦 / 黃=背馳警告 / 綠=牛市通行)</div>
+        </div>
+        <div class="grid grid-cols-1 gap-6">
+            <div class="bg-slate-800/30 p-4 rounded-xl border border-slate-700">
+                <h3 class="font-black text-slate-300 mb-2">🇺🇸 美股 (SPX)</h3>
+                <div id="chart-us" class="h-[350px]"></div>
+            </div>
+            <div class="bg-slate-800/30 p-4 rounded-xl border border-slate-700">
+                <h3 class="font-black text-slate-300 mb-2">🇯🇵 日股 (N225)</h3>
+                <div id="chart-jp" class="h-[350px]"></div>
+            </div>
+        </div>
+    </main>    
+
+    <main id="tab-journal" class="hidden flex-1 overflow-y-auto bg-slate-900 rounded-xl border border-slate-800 p-6 z-10 flex flex-col gap-6 shadow-lg">
         
         <div class="flex justify-between items-center border-b border-slate-800 pb-2">
             <h2 class="text-2xl font-black text-white flex items-center gap-2">📜 歷史交易結算與日誌</h2>
@@ -847,23 +921,67 @@ html = f"""<!DOCTYPE html>
     <script>
         const rawData = {js_payload_str};
         const tradeHistory = {trade_history_str};
+        const chartData = {chart_data_str}; // 👈 加入呢行
         
+        let chartsRendered = false; // 👈 確保圖表只渲染一次
         let currentSelectedTicker = null;
         let tvWidget = null;
 
         function switchTab(tabId) {{
-            document.getElementById('tab-dashboard').classList.toggle('hidden', tabId !== 'dashboard');
-            document.getElementById('tab-journal').classList.toggle('hidden', tabId !== 'journal');
-            
-            document.getElementById('tabBtn-dashboard').className = tabId === 'dashboard' 
+            ['dashboard', 'journal', 'charts'].forEach(id => {{
+            const tabEl = document.getElementById('tab-' + id);
+            const btnEl = document.getElementById('tabBtn-' + id);
+            if (tabEl) tabEl.classList.toggle('hidden', tabId !== id);
+            if (btnEl) btnEl.className = tabId === id 
                 ? 'bg-indigo-600 text-white px-4 py-1.5 rounded-md font-bold text-sm shadow-md transition' 
                 : 'text-slate-400 hover:text-white hover:bg-slate-800 px-4 py-1.5 rounded-md font-bold text-sm transition';
-                
-            document.getElementById('tabBtn-journal').className = tabId === 'journal' 
-                ? 'bg-indigo-600 text-white px-4 py-1.5 rounded-md font-bold text-sm shadow-md transition' 
-                : 'text-slate-400 hover:text-white hover:bg-slate-800 px-4 py-1.5 rounded-md font-bold text-sm transition';
+        }});
 
-            if (tabId === 'journal') renderJournal();
+        if (tabId === 'journal') renderJournal();
+        if (tabId === 'charts' && !chartsRendered) renderCharts();
+        }}
+
+        function renderCharts() {{
+            const dates = chartData.map(d => d.date);
+
+            const createChartOptions = (market) => {{
+                const breadthData = chartData.map(d => d[market + '_breadth']);
+                const openData = chartData.map(d => d[market + '_open']);
+
+                // 動態生成紅黃綠底色區塊 (Annotations)
+                const annotations = chartData.map((d, i) => ({{
+                    x: d.date,
+                    x2: i < chartData.length - 1 ? chartData[i+1].date : d.date,
+                    fillColor: d[market + '_color'],
+                    opacity: 0.15, // 底色透明度
+                    strokeDashArray: 0,
+                    borderWidth: 0
+                }}));
+
+                return {{
+                    series: [
+                        {{ name: '市寬 (Breadth %)', type: 'line', data: breadthData }},
+                        {{ name: '持倉數量 (Open Orders)', type: 'column', data: openData }}
+                    ],
+                    chart: {{ height: 350, type: 'line', toolbar: {{ show: false }}, background: 'transparent' }},
+                    stroke: {{ width: [3, 0], curve: 'smooth' }},
+                    colors: ['#06b6d4', '#8b5cf6'], // 淺藍線(市寬)，紫色柱(持倉)
+                    annotations: {{ xaxis: annotations }},
+                    xaxis: {{ categories: dates, labels: {{ style: {{ colors: '#94a3b8' }} }}, tickAmount: 10 }},
+                    yaxis: [
+                        {{ title: {{ text: '市寬 (%)', style: {{ color: '#06b6d4' }} }}, labels: {{ style: {{ colors: '#06b6d4' }} }}, min: 0, max: 100 }},
+                        {{ opposite: true, title: {{ text: '持倉數量 (隻)', style: {{ color: '#8b5cf6' }} }}, labels: {{ style: {{ colors: '#8b5cf6' }} }} }}
+                    ],
+                    theme: {{ mode: 'dark' }},
+                    legend: {{ position: 'top' }},
+                    dataLabels: {{ enabled: false }},
+                    grid: {{ borderColor: '#334155', strokeDashArray: 3 }}
+                }};
+            }};
+
+            new ApexCharts(document.querySelector("#chart-us"), createChartOptions('us')).render();
+            new ApexCharts(document.querySelector("#chart-jp"), createChartOptions('jp')).render();
+            chartsRendered = true;
         }}
 
         function loadContent(ticker) {{
