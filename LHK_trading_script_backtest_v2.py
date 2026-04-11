@@ -989,25 +989,25 @@ html = f"""<!DOCTYPE html>
                     series: [
                         {{ name: '大盤市寬 (>50MA)', type: 'line', data: idxBreadthData }},
                         {{ name: '全市市寬 (>50MA)', type: 'line', data: totBreadthData }},
-                        # 👇 新增：Profit 與 Loss 數據，並將 P&L 狀態綁定為 Column 類型
+                        // 👇 新增：Profit 與 Loss 數據，並將 P&L 狀態綁定為 Column 類型
                         {{ name: '賺錢持倉 (Profit)', type: 'column', data: profitData }},
                         {{ name: '蝕本持倉 (Loss)', type: 'column', data: lossData }}
                     ],
                     chart: {{ 
                         height: 350, 
                         type: 'line', 
-                        # 👇 開啟 Stacked (堆疊) 模式！
+                        // 👇 開啟 Stacked (堆疊) 模式！
                         stacked: true,
                         toolbar: {{ show: false }}, 
                         background: 'transparent' 
                     }},
                     stroke: {{ 
-                        width: [3, 2, 0, 0], # 前兩條是線，後兩條是柱狀圖的邊框
+                        width: [3, 2, 0, 0], // 前兩條是線，後兩條是柱狀圖的邊框
                         curve: 'smooth', 
-                        dashArray: [0, 4, 0, 0] # 大盤實線，全市虛線
+                        dashArray: [0, 4, 0, 0] // 大盤實線，全市虛線
                     }},
-                    # 👇 定義顏色：[大盤線, 全市虛線, Profit柱, Loss柱]
-                    colors: ['#f59e0b', '#06b6d4', '#22c55e', '#ef4444'], # 湖水綠, 橙色, 綠色, 紅色
+                    // 👇 定義顏色：[大盤線, 全市虛線, Profit柱, Loss柱]
+                    colors: ['#f59e0b', '#06b6d4', '#22c55e', '#ef4444'], // 橙色, 湖水綠, 綠色, 紅色
                     annotations: {{ xaxis: annotations }},
                     xaxis: {{ categories: dates, labels: {{ style: {{ colors: '#94a3b8' }} }}, tickAmount: 10 }},
                     yaxis: [
@@ -1021,14 +1021,14 @@ html = f"""<!DOCTYPE html>
                         {{ 
                             opposite: true, 
                             seriesName: '賺錢持倉 (Profit)', 
-                            title: {{ text: '持倉數量 (隻)', style: {{ color: '#94a3b8' }} }}, 
-                            labels: {{ style: {{ colors: '#94a3b8' }} }} 
+                            title: {{ text: '持倉數量 (隻)', style: {{ color: '#8b5cf6' }} }}, 
+                            labels: {{ style: {{ colors: '#8b5cf6' }} }} 
                         }},
                         {{ seriesName: '賺錢持倉 (Profit)', show: false }} // 共用持倉Y軸
                     ],
                     plotOptions: {{
                         bar: {{
-                            # 👇 設定柱狀圖圓角 (只讓最頂部的 Profit 柱有圓角，中間的 Loss 是平的)
+                            // 👇 設定柱狀圖圓角 (只讓最頂部的 Profit 柱有圓角，中間的 Loss 是平的)
                             borderRadius: 4,
                             borderRadiusApplication: 'around',
                             borderRadiusWhenStacked: 'last'
