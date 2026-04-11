@@ -89,63 +89,71 @@ def build_dynamic_watchlist():
             if source_label not in ticker_sources[clean_t]: ticker_sources[clean_t].append(source_label)
     
     # ---------------------------------------------------------
-    # 1. 獲取標普 500 名單 (美股)
+    # 1. 🇺🇸 美股黃金板塊擴充 (超過 1500 隻)
     # ---------------------------------------------------------
     try:
-        csv_url = "https://raw.githubusercontent.com/datasets/s-p-500-companies/master/data/constituents.csv"
-        df_sp = pd.read_csv(csv_url, timeout=10)
-        add_to_map(df_sp['Symbol'].tolist(), "S&P500")
+        wiki_us_indexes = [
+        ("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies", "S&P500_大盤"),
+        ("https://en.wikipedia.org/wiki/List_of_S%26P_400_companies", "S&P400_中型"),
+        ("https://en.wikipedia.org/wiki/List_of_S%26P_600_companies", "S&P600_小型"),
+        ("https://en.wikipedia.org/wiki/Nasdaq-100", "NDX100_科技")]
+
+        for url, label in wiki_us_indexes:
+            res = requests.get(url, headers={'User-Agent': ua.random}, timeout=10)
+            tables = pd.read_html(StringIO(res.text))
+            
+            # 自動尋找包含 Symbol 或 Ticker 的表格
+            for df in tables:
+                target_col = next((col for col in df.columns if 'symbol' in str(col).lower() or 'ticker' in str(col).lower()), None)
+                if target_col:
+                    add_to_map(df[target_col].dropna().astype(str).tolist(), label)
+                    print(f"  ✅ 成功載入 {label}: {len(df)} 隻")
+                    break
+       
+        #csv_url = "https://raw.githubusercontent.com/datasets/s-p-500-companies/master/data/constituents.csv"
+        #df_sp = pd.read_csv(csv_url, timeout=10)
+        #add_to_map(df_sp['Symbol'].tolist(), "S&P500")
     except:
-        add_to_map(["AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "GOOG", "META", "BRK-B", "TSLA", "UNH",
-        "JPM", "XOM", "V", "MA", "AVGO", "PG", "HD", "JNJ", "LLY", "COST",
-        "CVX", "MRK", "ABBV", "PEP", "KO", "TMO", "PFE", "BAC", "ORCL", "MCD",
-        "CSCO", "CRM", "ABT", "ACN", "LIN", "NFLX", "AMD", "DIS", "WMT", "TXN",
-        "DHR", "PM", "NKE", "NEE", "VZ", "RTX", "UPS", "HON", "QCOM", "AMGN",
-        "LOW", "SPGI", "IBM", "INTU", "CAT", "UNP", "COP", "SBUX", "DE", "GS",
-        "PLD", "MS", "BLK", "ELV", "GILD", "ISRG", "TJX", "LMT", "SYK", "ADP",
-        "MDT", "VRTX", "MMC", "AMT", "GE", "CI", "CB", "NOW", "ADI", "LRCX",
-        "MDLZ", "T", "ETN", "REGN", "ZTS", "BSX", "MU", "PANW", "PGR", "FI",
-        "SNPS", "C", "KLAC", "VLO", "CDNS", "WM", "EOG", "SHW", "MAR", "MCK",
-        "CVS", "MO", "PH", "GD", "ORLY", "APH", "SLB", "ITW", "USB", "FDX",
-        "ECL", "ROP", "PXD", "TGT", "BDX", "NXPI", "CMG", "MNST", "MPC", "MCO",
-        "CTAS", "AIG", "NSC", "PSX", "ADSK", "AON", "EMR", "MET", "D", "KMB",
-        "SRE", "MSI", "MCHP", "AJG", "HCA", "AZO", "F", "WELL", "EW", "DRE",
-        "O", "PCAR", "GPN", "ADP", "FIS", "HUM", "PAYX", "TEL", "DOW", "BKR",
-        "ADM", "KDP", "STZ", "CNC", "JCI", "SYY", "CTSH", "CARR", "DXCM", "EIX",
-        "IDXX", "VRSK", "DLR", "IQV", "A", "GWW", "COR", "ED", "NEM", "CHTR",
-        "YUM", "OXY", "MSCI", "KHC", "WFC", "TFC", "PNC", "COF", "DFS", "SYF",
-        "KEY", "RF", "HBAN", "FITB", "CFG", "STT", "NTRS", "MTB", "BK", "AMP",
-        "IVZ", "BEN", "TROW", "GL", "L", "AIZ", "RE", "TRV", "CBRE", "HST",
-        "SPG", "AVB", "EQR", "VTR", "PEAK", "BXP", "MAA", "CPT", "UDR", "ESS",
-        "ARE", "VICI", "PSA", "EXR", "SBAC", "CCI", "AWK", "NI", "PNW", "ATO",
-        "LNT", "ES", "WEC", "CMS", "XEL", "ETR", "FE", "AEE", "AEP", "PEG",
-        "DTE", "PPL", "DUK", "SO", "CNP", "VST", "PARA", "WBD", "NWSA", "NWS",
-        "FOXA", "FOX", "LYV", "MTCH", "GOOG", "GOOGL", "NFLX", "DIS", "EA",
-        "TTWO", "OMC", "IPG", "CHTR", "VZ", "T", "TMUS", "LUMN", "FYBR", "AMX",
-        "TSLA", "AMZN", "HD", "LOW", "MCD", "SBUX", "NKE", "TGT", "TJX", "ORLY",
-        "AZO", "ROST", "MAR", "HLT", "YUM", "CMG", "DHI", "LEN", "PHM", "NVR",
-        "GRMN", "F", "GM", "BBY", "EBAY", "ETSY", "RVTY", "POOL", "HAS", "MAT",
-        "WMT", "COST", "PG", "KO", "PEP", "PM", "MO", "EL", "CL", "KMB",
-        "MDLZ", "K", "GIS", "CPB", "HRL", "SJM", "ADM", "STZ", "TAP", "MNST",
-        "SYY", "KR", "WBA", "TGT", "DLTR", "DG", "XOM", "CVX", "COP", "SLB",
-        "HAL", "BKR", "MPC", "PSX", "VLO", "EOG", "PXD", "OXY", "HES", "DVN",
-        "FANG", "MRO", "APA", "CTRA", "OKE", "TRGP", "KMI", "WMB", "JPM", "BAC",
-        "WFC", "C", "MS", "GS", "BLK", "AMP", "TROW", "BEN", "IVZ", "STT",
-        "NTRS", "BK", "SCHW", "RJF", "LPLA", "AXP", "V", "MA", "DFS", "COF",
-        "SYF", "PYPL", "GPN", "FIS", "FISV", "JKHY", "AON", "MMC", "AJG", "WTW",
-        "MET", "PRU", "AFL", "TRV", "CB", "PGR", "ALL", "HIG", "L", "CINF",
-        "RE", "AIZ", "GL", "SPGI", "MCO", "MSCI", "NDAQ", "CME", "ICE", "BLK",
-        "UNH", "ELV", "CI", "HUM", "CNC", "CVS", "JNJ", "LLY", "ABBV", "MRK",
-        "PFE", "GILD", "VRTX", "REGN", "AMGN", "BMY", "ZTS", "IDXX", "EW", "BSX",
-        "MDT", "ABT", "SYK", "BDX", "ISRG", "DXCM", "STE", "TMO", "DHR", "A",
-        "WAT", "MTD", "IQV", "CRL", "RMD", "BA", "LMT", "RTX", "GD", "NOC",
-        "TDG", "HWM", "TXT", "GE", "HON", "MMM", "EMR", "ITW", "ETN", "PH",
-        "AME", "ROK", "DOV", "XYL", "GWW", "FAST", "CTAS", "ADP", "PAYX", "RSG",
-        "WM", "UNP", "NSC", "CSX", "FDX", "UPS", "CPT", "INVH", "AMH", "SBAC",
-        "CCI", "AMT", "PLD", "PSA", "EXR", "VICI", "DLR", "EQIX", "NVDA", "AVGO",
-        "AMD", "INTC", "QCOM", "TXN", "ADI", "MU", "AMAT", "LRCX", "KLAC", "SNPS",
-        "CDNS", "ADSK", "ANSS", "ORCL", "CRM", "SAP", "NOW", "PANW", "FTNT", "IBM",
-        "ACN", "CTSH", "TEL", "APH", "MSI", "STX", "WDC", "HPQ", "DELL", "NTAP"], "S&P500")
+        print(f"  ⚠️ S&P 500 CSV 載入失敗，啟動超級後備名單: {e}")
+        # 超強後備名單 (超過 400 隻美股核心成分股)
+        sp500_fallback = [
+            "AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "GOOG", "META", "BRK-B", "TSLA", "UNH",
+            "JPM", "XOM", "V", "MA", "AVGO", "PG", "HD", "JNJ", "LLY", "COST",
+            "CVX", "MRK", "ABBV", "PEP", "KO", "TMO", "PFE", "BAC", "ORCL", "MCD",
+            "CSCO", "CRM", "ABT", "ACN", "LIN", "NFLX", "AMD", "DIS", "WMT", "TXN",
+            "DHR", "PM", "NKE", "NEE", "VZ", "RTX", "UPS", "HON", "QCOM", "AMGN",
+            "LOW", "SPGI", "IBM", "INTU", "CAT", "UNP", "COP", "SBUX", "DE", "GS",
+            "PLD", "MS", "BLK", "ELV", "GILD", "ISRG", "TJX", "LMT", "SYK", "ADP",
+            "MDT", "VRTX", "MMC", "AMT", "GE", "CI", "CB", "NOW", "ADI", "LRCX",
+            "MDLZ", "T", "ETN", "REGN", "ZTS", "BSX", "MU", "PANW", "PGR", "FI",
+            "SNPS", "C", "KLAC", "VLO", "CDNS", "WM", "EOG", "SHW", "MAR", "MCK",
+            "CVS", "MO", "PH", "GD", "ORLY", "APH", "SLB", "ITW", "USB", "FDX",
+            "ECL", "ROP", "PXD", "TGT", "BDX", "NXPI", "CMG", "MNST", "MPC", "MCO",
+            "CTAS", "AIG", "NSC", "PSX", "ADSK", "AON", "EMR", "MET", "D", "KMB",
+            "SRE", "MSI", "MCHP", "AJG", "HCA", "AZO", "F", "WELL", "EW", "DRE",
+            "O", "PCAR", "GPN", "ADP", "FIS", "HUM", "PAYX", "TEL", "DOW", "BKR",
+            "ADM", "KDP", "STZ", "CNC", "JCI", "SYY", "CTSH", "CARR", "DXCM", "EIX",
+            "IDXX", "VRSK", "DLR", "IQV", "A", "GWW", "COR", "ED", "NEM", "CHTR",
+            "YUM", "OXY", "MSCI", "KHC", "WFC", "TFC", "PNC", "COF", "DFS", "SYF",
+            "KEY", "RF", "HBAN", "FITB", "CFG", "STT", "NTRS", "MTB", "BK", "AMP",
+            "IVZ", "BEN", "TROW", "GL", "L", "AIZ", "RE", "TRV", "CBRE", "HST",
+            "SPG", "AVB", "EQR", "VTR", "PEAK", "BXP", "MAA", "CPT", "UDR", "ESS",
+            "ARE", "VICI", "PSA", "EXR", "SBAC", "CCI", "AWK", "NI", "PNW", "ATO",
+            "LNT", "ES", "WEC", "CMS", "XEL", "ETR", "FE", "AEE", "AEP", "PEG",
+            "DTE", "PPL", "DUK", "SO", "CNP", "VST", "PARA", "WBD", "NWSA", "NWS",
+            "FOXA", "FOX", "LYV", "MTCH", "EA", "TTWO", "OMC", "IPG", "TMUS", "LUMN",
+            "FYBR", "AMX", "ROST", "HLT", "DHI", "LEN", "PHM", "NVR", "GRMN", "GM",
+            "BBY", "EBAY", "ETSY", "RVTY", "POOL", "HAS", "MAT", "EL", "CL", "K",
+            "GIS", "CPB", "HRL", "SJM", "TAP", "KR", "WBA", "DLTR", "DG", "HAL",
+            "HES", "DVN", "FANG", "MRO", "APA", "CTRA", "OKE", "TRGP", "KMI", "WMB",
+            "SCHW", "RJF", "LPLA", "AXP", "PYPL", "FISV", "JKHY", "WTW", "PRU", "AFL",
+            "ALL", "HIG", "CINF", "NDAQ", "CME", "ICE", "BMY", "STE", "WAT", "MTD",
+            "CRL", "RMD", "BA", "NOC", "TDG", "HWM", "TXT", "MMM", "AME", "ROK",
+            "DOV", "XYL", "FAST", "RSG", "CSX", "INVH", "AMH", "EQIX", "INTC", "AMAT",
+            "ANSS", "SAP", "FTNT", "STX", "WDC", "HPQ", "DELL", "NTAP"
+        ]
+        add_to_map(sp500_fallback, "S&P500")
+        print(f"  ✅ 成功載入 S&P 500 後備名單 (共 {len(sp500_fallback)} 隻)")
     
     # ---------------------------------------------------------
     # 2. 獲取 Finviz 異動股 (Unusual Volume & Top Gainers)
@@ -347,6 +355,38 @@ def calc_macro_regime(index_ticker):
 us_dist, us_is_bull, us_status, us_color = calc_macro_regime('SPY')
 jp_dist, jp_is_bull, jp_status, jp_color = calc_macro_regime('^N225')
 
+# 判定紅黃綠燈
+def evaluate_market_health(price, ma200, idx_50, tot_50, idx_200, tot_20, dist):
+    if price < ma200 or idx_200 < 30 or dist >= 6: return "🔴 防禦/熊市:", 16711680, " 長線破位或極端派發，嚴禁新建倉，現金為主。"
+    elif (idx_50 > 50 and tot_50 < 30): return "🟡 內部背馳:", 16766720, " 指數強但中小盤弱 (拉大出細)，注碼減半，鎖定利潤。"
+    elif idx_50 < 40 or dist >= 4: return "🟡 派發警告:", 16766720, " 大市動力減弱，提高警覺，切勿追高。"
+    elif tot_20 < 15: return "🟡 極度超賣:", 16766720, " 短線跌幅極端，隨時暴力反彈，留意底部 VCP。"
+    elif idx_50 >= 50 and tot_50 >= 40 and dist <= 3: return "🟢 全面牛市:", 65280, " 大細盤共振向上，勝率極高，可 Full Size 積極做多！"
+    else: return "⚪ 震盪過渡:", 8421504, " 大市方向未明，維持現有持倉，小注試水溫。"
+
+spx_price, spx_200ma = float(closes['SPY'].iloc[-1]), float(closes['SPY'].rolling(200).mean().iloc[-1])
+n225_price, n225_200ma = float(closes['^N225'].iloc[-1]), float(closes['^N225'].rolling(200).mean().iloc[-1])
+
+# 抽出狀態、顏色同行動指引
+us_macro_status, us_macro_color, us_action = evaluate_market_health(spx_price, spx_200ma, us_matrix['index_50ma_pct'], us_matrix['total_50ma_pct'], us_matrix['index_200ma_pct'], us_matrix['total_20ma_pct'], us_dist)
+jp_macro_status, jp_macro_color, jp_action = evaluate_market_health(n225_price, n225_200ma, jp_matrix['index_50ma_pct'], jp_matrix['total_50ma_pct'], jp_matrix['index_200ma_pct'], jp_matrix['total_20ma_pct'], jp_dist)
+
+# 繪製 SPY 圖表
+spy_c, spy_v, spy_l = closes['SPY'], vols['SPY'], lows['SPY']
+spy_20, spy_50, spy_200 = spy_c.rolling(20).mean(), spy_c.rolling(50).mean(), spy_c.rolling(200).mean()
+fig, ax = plt.subplots(figsize=(8, 3), dpi=100)
+ax.plot(spy_c.index[-200:], spy_c.iloc[-200:], color='#cbd5e1', label='SPX', linewidth=1.5)
+ax.plot(spy_20.index[-200:], spy_20.iloc[-200:], color='#3b82f6', label='20MA', linewidth=1, alpha=0.8)
+ax.plot(spy_50.index[-200:], spy_50.iloc[-200:], color='#f59e0b', label='50MA', linewidth=1, alpha=0.8)
+ax.plot(spy_200.index[-200:], spy_200.iloc[-200:], color='#dc2626', label='200MA', linestyle='-.', linewidth=1.5)
+fig.patch.set_facecolor('#0f172a'); ax.set_facecolor('#0f172a')
+ax.tick_params(colors='white', labelsize=8)
+ax.legend(facecolor='#1e293b', labelcolor='white', loc='upper left', ncol=3, fontsize=8)
+for spine in ax.spines.values(): spine.set_edgecolor('#334155')
+plt.tight_layout()
+plt.savefig(os.path.join(CHARTS_DIR, "SPY_Trend.png"), transparent=True)
+plt.close(fig)
+
 # 4. 混合相對強度 (Blended RS)
 r126 = closes / closes.shift(126) - 1
 r252 = closes / closes.shift(252) - 1
@@ -485,7 +525,6 @@ if DISCORD_SUMMARY_WEBHOOK:
     open_trades = [t for t in trade_history if t.get('status') == 'OPEN']
     floating_pnl = sum([(10000 / t['px']) * (t['last_px'] - t['px']) for t in open_trades])
     floating_str = f"+${floating_pnl:.2f}" if floating_pnl >= 0 else f"-${abs(floating_pnl):.2f}"
-    floating_color = 65280 if floating_pnl >= 0 else 16711680
 
     # 3. 細分策略 P&L 結算 (歷史總計)
     strategy_stats = {}
@@ -503,38 +542,11 @@ if DISCORD_SUMMARY_WEBHOOK:
         breakdown_lines.append(f"**{tag}**: {w_rate}% 勝率 | P&L: {pnl_s} ({st['total']}單)")
     breakdown_text = "\n".join(breakdown_lines) if breakdown_lines else "尚無足夠結案數據。"
 
-    # 👇 【重點升級】：加入大盤價位與進階紅黃綠燈判斷
+    # 👇 4. 準備 Discord 宏觀數據 (直接調用 MODULE 3 已計算好的結果)
     us_scan_count = len(us_tickers)
     jp_scan_count = len(jp_tickers)
-    
-    spx_price = float(closes['SPY'].iloc[-1])
-    spx_200ma = float(closes['SPY'].rolling(200).mean().iloc[-1])
-    n225_price = float(closes['^N225'].iloc[-1])
-    n225_200ma = float(closes['^N225'].rolling(200).mean().iloc[-1])
 
-    def evaluate_market_health(price, ma200, idx_50, tot_50, idx_200, tot_20, dist):
-        if price < ma200 or idx_200 < 30 or dist >= 6:
-            return "🔴 防禦/熊市", 16711680, "長線破位或極端派發，嚴禁新建倉，現金為主。"
-        elif (idx_50 > 50 and tot_50 < 30): 
-            return "🟡 內部背馳", 16766720, "指數強但中小盤弱 (拉大出細)，注碼減半，鎖定利潤。"
-        elif idx_50 < 40 or dist >= 4:
-            return "🟡 派發警告", 16766720, "大市動力減弱，提高警覺，切勿追高。"
-        elif tot_20 < 15:
-            return "🟡 極度超賣", 16766720, "短線跌幅極端，隨時暴力反彈，留意底部 VCP。"
-        elif idx_50 >= 50 and tot_50 >= 40 and dist <= 3:
-            return "🟢 全面牛市", 65280, "大細盤共振向上，勝率極高，可 Full Size 積極做多！"
-        else:
-            return "⚪ 震盪過渡", 8421504, "大市方向未明，維持現有持倉，小注試水溫。"
-
-    us_macro_status, us_macro_color, us_action = evaluate_market_health(
-        spx_price, spx_200ma, us_matrix['index_50ma_pct'], us_matrix['total_50ma_pct'], 
-        us_matrix['index_200ma_pct'], us_matrix['total_20ma_pct'], us_dist
-    )
-    jp_macro_status, jp_macro_color, jp_action = evaluate_market_health(
-        n225_price, n225_200ma, jp_matrix['index_50ma_pct'], jp_matrix['total_50ma_pct'], 
-        jp_matrix['index_200ma_pct'], jp_matrix['total_20ma_pct'], jp_dist
-    )
-
+    # 決定 Discord Embed 左側那條邊框的顏色 (紅燈優先)
     if us_macro_color == 16711680 or jp_macro_color == 16711680: final_color = 16711680
     elif us_macro_color == 16766720 or jp_macro_color == 16766720: final_color = 16766720
     else: final_color = 65280
@@ -542,6 +554,7 @@ if DISCORD_SUMMARY_WEBHOOK:
     us_macro_str = f"狀態: **{us_macro_status}**\n🔸 盤長(>200MA): **{us_matrix['index_200ma_pct']}%**\n🔸 盤中(>50MA): **{us_matrix['index_50ma_pct']}%**\n🔸 總中(>50MA): **{us_matrix['total_50ma_pct']}%**\n🔸 超賣(>20MA): **{us_matrix['total_20ma_pct']}%**\n🛑 派發: **{us_dist} 日** | 掃描: {us_scan_count}"
     jp_macro_str = f"狀態: **{jp_macro_status}**\n🔸 盤長(>200MA): **{jp_matrix['index_200ma_pct']}%**\n🔸 盤中(>50MA): **{jp_matrix['index_50ma_pct']}%**\n🔸 總中(>50MA): **{jp_matrix['total_50ma_pct']}%**\n🔸 超賣(>20MA): **{jp_matrix['total_20ma_pct']}%**\n🛑 派發: **{jp_dist} 日** | 掃描: {jp_scan_count}"
 
+    # 5. 發送 Payload
     payload = {
         "embeds": [{
             "title": f"📊 系統戰績與 3D 矩陣雷達 ({today_str})", 
@@ -550,15 +563,15 @@ if DISCORD_SUMMARY_WEBHOOK:
             "fields": [
                 {"name": "🇺🇸 美股 (SPX vs Total)", "value": us_macro_str, "inline": True},
                 {"name": "🇯🇵 日股 (N225 vs Total)", "value": jp_macro_str, "inline": True},
-                {"name": '\u200b', "value": '\u200b', "inline": False},
+                {"name": '\u200b', "value": '\u200b', "inline": False}, # 分隔行
                 {"name": "🇺🇸 美股行動指引", "value": f"`{us_action}`", "inline": False},
                 {"name": "🇯🇵 日股行動指引", "value": f"`{jp_action}`", "inline": False},
-                {"name": '\u200b', "value": '\u200b', "inline": False},
+                {"name": '\u200b', "value": '\u200b', "inline": False}, # 分隔行
                 {"name": "📂 目前持倉", "value": f"{len(open_trades)} 隻", "inline": True},
                 {"name": "🌊 總浮動盈虧", "value": f"**{floating_str}**", "inline": True},
                 {"name": "📈 總勝率", "value": f"{win_rate}% ({wins}/{total_closed})", "inline": True}
             ],
-            "footer": {"text": f"每單本金 $10,000 USD | 正式生產環境"}
+            "footer": {"text": f"每單本金 $10,000 USD | Production場"}
         }]
     }
     try: requests.post(DISCORD_SUMMARY_WEBHOOK, json=payload)
@@ -592,15 +605,33 @@ jp_hist_dist = jp_dist_mask.rolling(25).sum()
 chart_data = []
 for i, d in enumerate(hist_dates):
     d_str = d.strftime('%Y-%m-%d')
-    us_open, jp_open = 0, 0
-    
-    # 計算當日有多少 Open Orders
+    # 👇 更新：將單一變數拆分為 Profit（賺）與 Loss（蝕）
+    us_open_profit, us_open_loss = 0, 0
+    jp_open_profit, jp_open_loss = 0, 0
+        
+    # 準備當日嘅價格數據 (Vectorised 方法，非常快)
+    d_prices = closes.loc[d]
+        
+    # 計算當日有多少 Open Orders，並根據 P&L 狀態細分
     for t in trade_history:
+        # 時光機邏輯：只計當日或之前進場的單
         if t['date'] <= d_str:
             c_date = t.get('close_date', '9999-99-99')
+            # 判斷當日該單是否仍處於 OPEN 狀態
             if c_date > d_str or t.get('status') == 'OPEN':
-                if t['tk'].endswith('.T'): jp_open += 1
-                else: us_open += 1
+                tk = t['tk']
+                # 確保 closes 數據內有呢隻股票，且當日有價格
+                if tk in d_prices.index and not pd.isna(d_prices[tk]):
+                    # 判斷是日賺蝕 (比較當日收市價與當初進場價)
+                    is_profit = float(d_prices[tk]) >= float(t['px'])
+                        
+                    # 根據市場 (美/日) 與狀態 (賺/蝕) 累加
+                    if tk.endswith('.T'):
+                        if is_profit: jp_open_profit += 1
+                        else: jp_open_loss += 1
+                    else:
+                        if is_profit: us_open_profit += 1
+                        else: us_open_loss += 1
                 
     # 判斷美股歷史燈號顏色 (Hex 碼供 ApexCharts 畫底色)
     us_c_color = "#22c55e" # 綠燈
@@ -617,15 +648,24 @@ for i, d in enumerate(hist_dates):
         jp_c_color = "#eab308"
         
     # 👇 更新呢度：將單一市寬拆分為「大盤」同「全市」
+    # 將數據打包
     chart_data.append({
         'date': d_str,
-        'us_idx_breadth': round(float(v_us_idx50.loc[d]), 1), # 大盤 50MA
-        'us_tot_breadth': round(float(v_us_tot50.loc[d]), 1), # 全市 50MA
-        'us_open': us_open, 'us_color': us_c_color,
-        
-        'jp_idx_breadth': round(float(v_jp_idx50.loc[d]), 1), # 大盤 50MA
-        'jp_tot_breadth': round(float(v_jp_tot50.loc[d]), 1), # 全市 50MA
-        'jp_open': jp_open, 'jp_color': jp_c_color    
+        # 美股雙市寬數據 (保留實線+虛線升級版)
+        'us_idx_breadth': round(float(v_us_idx50.loc[d]), 1),
+        'us_tot_breadth': round(float(v_us_tot50.loc[d]), 1),
+        # 👇 美股持倉細分
+        'us_open_profit': us_open_profit,
+        'us_open_loss': us_open_loss,
+        'us_color': us_c_color,
+            
+        # 日股數據
+        'jp_idx_breadth': round(float(v_jp_idx50.loc[d]), 1),
+        'jp_tot_breadth': round(float(v_jp_tot50.loc[d]), 1),
+        # 👇 日股持倉細分
+        'jp_open_profit': jp_open_profit,
+        'jp_open_loss': jp_open_loss,
+        'jp_color': jp_c_color
     })
 
 chart_data_str = json.dumps(chart_data)
@@ -913,42 +953,80 @@ html = f"""<!DOCTYPE html>
 
         function renderCharts() {{
             const dates = chartData.map(d => d.date);
-
+            
             const createChartOptions = (market) => {{
-                const breadthData = chartData.map(d => d[market + '_breadth']);
-                const openData = chartData.map(d => d[market + '_open']);
-
-                // 動態生成紅黃綠底色區塊 (Annotations)
+                // 讀取所有數據欄位
+                const idxBreadthData = chartData.map(d => d[market + '_idx_breadth']);
+                const totBreadthData = chartData.map(d => d[market + '_tot_breadth']);
+                const profitData = chartData.map(d => d[market + '_open_profit']);
+                const lossData = chartData.map(d => d[market + '_open_loss']);
+                
+                // 動態生成底色區塊 (Annotations)
                 const annotations = chartData.map((d, i) => ({{
                     x: d.date,
                     x2: i < chartData.length - 1 ? chartData[i+1].date : d.date,
                     fillColor: d[market + '_color'],
-                    opacity: 0.15, // 底色透明度
+                    opacity: 0.15,
                     strokeDashArray: 0,
                     borderWidth: 0
                 }}));
 
                 return {{
                     series: [
-                        {{ name: '市寬 (Breadth %)', type: 'line', data: breadthData }},
-                        {{ name: '持倉數量 (Open Orders)', type: 'column', data: openData }}
+                        {{ name: '大盤市寬 (>50MA)', type: 'line', data: idxBreadthData }},
+                        {{ name: '全市市寬 (>50MA)', type: 'line', data: totBreadthData }},
+                        # 👇 新增：Profit 與 Loss 數據，並將 P&L 狀態綁定為 Column 類型
+                        {{ name: '賺錢持倉 (Profit)', type: 'column', data: profitData }},
+                        {{ name: '蝕本持倉 (Loss)', type: 'column', data: lossData }}
                     ],
-                    chart: {{ height: 350, type: 'line', toolbar: {{ show: false }}, background: 'transparent' }},
-                    stroke: {{ width: [3, 0], curve: 'smooth' }},
-                    colors: ['#06b6d4', '#8b5cf6'], // 淺藍線(市寬)，紫色柱(持倉)
+                    chart: {{ 
+                        height: 350, 
+                        type: 'line', 
+                        # 👇 開啟 Stacked (堆疊) 模式！
+                        stacked: true,
+                        toolbar: {{ show: false }}, 
+                        background: 'transparent' 
+                    }},
+                    stroke: {{ 
+                        width: [3, 2, 0, 0], # 前兩條是線，後兩條是柱狀圖的邊框
+                        curve: 'smooth', 
+                        dashArray: [0, 4, 0, 0] # 大盤實線，全市虛線
+                    }},
+                    # 👇 定義顏色：[大盤線, 全市虛線, Profit柱, Loss柱]
+                    colors: ['#f59e0b', '#06b6d4', '#22c55e', '#ef4444'], # 湖水綠, 橙色, 綠色, 紅色
                     annotations: {{ xaxis: annotations }},
                     xaxis: {{ categories: dates, labels: {{ style: {{ colors: '#94a3b8' }} }}, tickAmount: 10 }},
                     yaxis: [
-                        {{ title: {{ text: '市寬 (%)', style: {{ color: '#06b6d4' }} }}, labels: {{ style: {{ colors: '#06b6d4' }} }}, min: 0, max: 100 }},
-                        {{ opposite: true, title: {{ text: '持倉數量 (隻)', style: {{ color: '#8b5cf6' }} }}, labels: {{ style: {{ colors: '#8b5cf6' }} }} }}
+                        {{ 
+                            seriesName: '大盤市寬 (>50MA)', 
+                            title: {{ text: '市寬 (%)', style: {{ color: '#94a3b8' }} }}, 
+                            labels: {{ style: {{ colors: '#94a3b8' }} }}, 
+                            min: 0, max: 100 
+                        }},
+                        {{ seriesName: '大盤市寬 (>50MA)', show: false }}, // 共用市寬Y軸
+                        {{ 
+                            opposite: true, 
+                            seriesName: '賺錢持倉 (Profit)', 
+                            title: {{ text: '持倉數量 (隻)', style: {{ color: '#94a3b8' }} }}, 
+                            labels: {{ style: {{ colors: '#94a3b8' }} }} 
+                        }},
+                        {{ seriesName: '賺錢持倉 (Profit)', show: false }} // 共用持倉Y軸
                     ],
+                    plotOptions: {{
+                        bar: {{
+                            # 👇 設定柱狀圖圓角 (只讓最頂部的 Profit 柱有圓角，中間的 Loss 是平的)
+                            borderRadius: 4,
+                            borderRadiusApplication: 'around',
+                            borderRadiusWhenStacked: 'last'
+                        }}
+                    }},
                     theme: {{ mode: 'dark' }},
                     legend: {{ position: 'top' }},
                     dataLabels: {{ enabled: false }},
                     grid: {{ borderColor: '#334155', strokeDashArray: 3 }}
                 }};
             }};
-
+            
             new ApexCharts(document.querySelector("#chart-us"), createChartOptions('us')).render();
             new ApexCharts(document.querySelector("#chart-jp"), createChartOptions('jp')).render();
             chartsRendered = true;
