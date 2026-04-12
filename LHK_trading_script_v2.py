@@ -494,7 +494,7 @@ for ticker in [t for t in ALL_TICKERS if t not in ['SPY','^VIX','^N225']]:
 swing_results.sort(key=lambda x: x['rs'], reverse=True)
 short_term_results.sort(key=lambda x: x['rs'], reverse=True)
 
-with open(HISTORY_FILE, "w", encoding="utf-8") as f: json.dump(trade_history[-150:], f, indent=4)
+with open(HISTORY_FILE, "w", encoding="utf-8") as f: json.dump(trade_history[-2000:], f, indent=4)
 
 # =============================================================================
 # MODULE 6 — 總結算與 Discord 報告
@@ -521,8 +521,14 @@ if DISCORD_SUMMARY_WEBHOOK:
             detail_lines.append(f"{icon} **{t['tk']}** ({t.get('tag', 'N/A')}): {pnl_str}")
     details_text = "\n".join(detail_lines) if detail_lines else "今日無新結案交易。"
 
-    # 2. 目前持倉浮盈
+    # 👇 1.5 新增：計算今日新開倉數量與結案數量 (對帳用)
+    new_trades_today = [t for t in trade_history if t.get('date') == today_str]
+    new_count = len(new_trades_today)
+    closed_count = len(closed_this_run) if 'closed_this_run' in locals() else 0
+
+    # 2. 目前持倉浮盈與總數量
     open_trades = [t for t in trade_history if t.get('status') == 'OPEN']
+    current_open_count = len(open_trades)
     floating_pnl = sum([(10000 / t['px']) * (t['last_px'] - t['px']) for t in open_trades])
     floating_str = f"+${floating_pnl:.2f}" if floating_pnl >= 0 else f"-${abs(floating_pnl):.2f}"
 
@@ -542,7 +548,7 @@ if DISCORD_SUMMARY_WEBHOOK:
         breakdown_lines.append(f"**{tag}**: {w_rate}% 勝率 | P&L: {pnl_s} ({st['total']}單)")
     breakdown_text = "\n".join(breakdown_lines) if breakdown_lines else "尚無足夠結案數據。"
 
-    # 👇 4. 準備 Discord 宏觀數據 (直接調用 MODULE 3 已計算好的結果)
+    # 4. 準備 Discord 宏觀數據 (直接調用 MODULE 3 已計算好的結果)
     us_scan_count = len(us_tickers)
     jp_scan_count = len(jp_tickers)
 
@@ -567,13 +573,66 @@ if DISCORD_SUMMARY_WEBHOOK:
                 {"name": "🇺🇸 美股行動指引", "value": f"`{us_action}`", "inline": False},
                 {"name": "🇯🇵 日股行動指引", "value": f"`{jp_action}`", "inline": False},
                 {"name": '\u200b', "value": '\u200b', "inline": False}, # 分隔行
-                {"name": "📂 目前持倉", "value": f"{len(open_trades)} 隻", "inline": True},
+                
+                # 👇 重點更新：將對帳三部曲並排顯示
+                {"name": "🆕 今日新開", "value": f"{new_count} 隻", "inline": True},
+                {"name": "🏁 今日結案", "value": f"{closed_count} 隻", "inline": True},
+                {"name": "📂 總持倉量", "value": f"{current_open_count} 隻", "inline": True},
+                
                 {"name": "🌊 總浮動盈虧", "value": f"**{floating_str}**", "inline": True},
                 {"name": "📈 總勝率", "value": f"{win_rate}% ({wins}/{total_closed})", "inline": True}
             ],
-            "footer": {"text": f"每單本金 $10,000 USD | Production場"}
+            "footer": {"text": f"每單本金 $10,000 USD | Production v2.0"}
         }]
     }
+
+    # ==========================================
+    # 👇 新增：多維度分組對帳邏輯 (Market x Strategy)
+    # ==========================================
+    # 初始化矩陣：stats[Market][Strategy] = {new, closed, open}
+    group_stats = {
+        'US': {},
+        'JP': {}
+    }
+
+    # 輔助函式：確保字典結構存在
+    def ensure_strat(mkt, strat):
+        if strat not in group_stats[mkt]:
+            group_stats[mkt][strat] = {'new': 0, 'closed': 0, 'open': 0}
+
+    # 統計 1：目前總持倉 (End of Day)
+    open_trades = [t for t in trade_history if t.get('status') == 'OPEN']
+    for t in open_trades:
+        mkt = 'JP' if t['tk'].endswith('.T') else 'US'
+        strat = t.get('tag', '未分類')
+        ensure_strat(mkt, strat)
+        group_stats[mkt][strat]['open'] += 1
+
+    # 統計 2：今日新開倉
+    new_trades = [t for t in trade_history if t.get('date') == today_str and t.get('status') == 'OPEN']
+    for t in new_trades:
+        mkt = 'JP' if t['tk'].endswith('.T') else 'US'
+        strat = t.get('tag', '未分類')
+        ensure_strat(mkt, strat)
+        group_stats[mkt][strat]['new'] += 1
+
+    # 統計 3：今日結案
+    for t in closed_this_run:
+        mkt = 'JP' if t['tk'].endswith('.T') else 'US'
+        strat = t.get('tag', '未分類')
+        ensure_strat(mkt, strat)
+        group_stats[mkt][strat]['closed'] += 1
+
+    # 生成 Discord 表格文字
+    summary_lines = ["**【策略 x 市場 持倉對帳表】**", "```", "市場 | 策略         | 新開 | 結案 | 總持倉", "---------------------------------------"]
+    for mkt in ['US', 'JP']:
+        for strat, s in group_stats[mkt].items():
+            if s['new'] == 0 and s['closed'] == 0 and s['open'] == 0: continue
+            # 格式化排版 (左對齊)
+            line = f"{mkt:4} | {strat[:12]:12} | {s['new']:4} | {s['closed']:4} | {s['open']:4}"
+            summary_lines.append(line)
+    summary_lines.append("```")
+    group_summary_text = "\n".join(summary_lines)
     try: requests.post(DISCORD_SUMMARY_WEBHOOK, json=payload)
     except: pass
 # =============================================================================
