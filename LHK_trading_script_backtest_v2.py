@@ -708,20 +708,29 @@ if DISCORD_SUMMARY_WEBHOOK:
         for strat, s in group_stats[mkt].items():
             s['prev'] = s['final'] - s['new'] + s['closed']
 
-    # 生成文字 Table
-    summary_lines = ["\n**【策略 x 市場 持倉對帳表】**", "```", "市場 | 策略      | 原有 | 新開 | 結案 | 總持倉", "----------------------------------------------"]
+    # 5. 生成 Discord 友善排版 (放棄大表格，改用分組與 Inline Code 對齊)
+    summary_lines = ["\n**【📊 策略持倉對帳表】**"]
+    
     for mkt in ['US', 'JP']:
+        mkt_name = "🇺🇸 **美股 (US)**" if mkt == 'US' else "🇯🇵 **日股 (JP)**"
+        mkt_lines = []
+        
         for strat, s in group_stats[mkt].items():
-            # 如果四個數都係 0，就唔好 display
             if s['prev'] == 0 and s['new'] == 0 and s['closed'] == 0 and s['final'] == 0: continue
             
-            # 格式化排版 (對齊每一欄)
-            line = f"{mkt:2} | {strat[:12]:7} | {s['prev']:3} | {s['new']:3} | {s['closed']:3} | {s['final']:3}"
-            summary_lines.append(line)
-    summary_lines.append("```")
+            # 將中文字/Emoji 與數字拆開，利用 Inline Code (` `) 確保數字絕對垂直對齊
+            # 確保 "+" 同 "-" 號後面嘅數字位數一致
+            line = f"{strat} ➔ 原有: `{s['prev']:3}` | 新開: `+{s['new']:<2}` | 結案: `-{s['closed']:<2}` ＝ 總持倉: `{s['final']:3}`"
+            mkt_lines.append(line)
+            
+        # 如果該市場有數據，先將市場標題同數據加入總結
+        if mkt_lines:
+            summary_lines.append(f"\n{mkt_name}")
+            summary_lines.extend(mkt_lines)
+
     group_summary_text = "\n".join(summary_lines)
 
-    # 4. 準備 Discord 宏觀數據
+    # 6. 準備 Discord 宏觀數據
     us_scan_count = len(us_tickers)
     jp_scan_count = len(jp_tickers)
 
@@ -732,7 +741,7 @@ if DISCORD_SUMMARY_WEBHOOK:
     us_macro_str = f"狀態: **{us_macro_status}**\n🔸 盤長(>200MA): **{us_matrix['index_200ma_pct']}%**\n🔸 盤中(>50MA): **{us_matrix['index_50ma_pct']}%**\n🔸 總中(>50MA): **{us_matrix['total_50ma_pct']}%**\n🔸 超賣(>20MA): **{us_matrix['total_20ma_pct']}%**\n🛑 派發: **{us_dist} 日** | 掃描: {us_scan_count}"
     jp_macro_str = f"狀態: **{jp_macro_status}**\n🔸 盤長(>200MA): **{jp_matrix['index_200ma_pct']}%**\n🔸 盤中(>50MA): **{jp_matrix['index_50ma_pct']}%**\n🔸 總中(>50MA): **{jp_matrix['total_50ma_pct']}%**\n🔸 超賣(>20MA): **{jp_matrix['total_20ma_pct']}%**\n🛑 派發: **{jp_dist} 日** | 掃描: {jp_scan_count}"
 
-    # 5. 發送 Payload (將 group_summary_text 放入 description)
+    # 7. 發送 Payload (將 group_summary_text 放入 description)
     payload = {
         "embeds": [{
             "title": f"📊 系統戰績與 3D 矩陣雷達 ({today_str})", 
