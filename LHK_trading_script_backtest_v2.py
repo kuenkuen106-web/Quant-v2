@@ -679,35 +679,44 @@ if DISCORD_SUMMARY_WEBHOOK:
 
     def ensure_strat(mkt, strat):
         if strat not in group_stats[mkt]:
-            group_stats[mkt][strat] = {'new': 0, 'closed': 0, 'open': 0}
+            # prev: 原有持倉, new: 今日新開, closed: 今日結案, final: 最終持倉
+            group_stats[mkt][strat] = {'prev': 0, 'new': 0, 'closed': 0, 'final': 0}
 
-    # 統計 Open
-    for t in open_trades:
-        mkt = 'JP' if t['tk'].endswith('.T') else 'US'
-        strat = t.get('tag', '未分類')
-        ensure_strat(mkt, strat)
-        group_stats[mkt][strat]['open'] += 1
-
-    # 統計 New
+    # 1. 統計今日新開 (New)
     for t in new_trades_today:
         mkt = 'JP' if t['tk'].endswith('.T') else 'US'
         strat = t.get('tag', '未分類')
         ensure_strat(mkt, strat)
         group_stats[mkt][strat]['new'] += 1
 
-    # 統計 Closed
+    # 2. 統計今日結案 (Closed)
     for t in closed_this_run:
         mkt = 'JP' if t['tk'].endswith('.T') else 'US'
         strat = t.get('tag', '未分類')
         ensure_strat(mkt, strat)
         group_stats[mkt][strat]['closed'] += 1
 
-    # 生成文字 Table
-    summary_lines = ["\n**【策略 x 市場 持倉對帳表】**", "```", "市場 | 策略         | 新開 | 結案 | 總持倉", "---------------------------------------"]
+    # 3. 統計最終持倉 (Final Open)
+    for t in open_trades:
+        mkt = 'JP' if t['tk'].endswith('.T') else 'US'
+        strat = t.get('tag', '未分類')
+        ensure_strat(mkt, strat)
+        group_stats[mkt][strat]['final'] += 1
+
+    # 4. 反推原有持倉 (Prev = Final - New + Closed)
     for mkt in ['US', 'JP']:
         for strat, s in group_stats[mkt].items():
-            if s['new'] == 0 and s['closed'] == 0 and s['open'] == 0: continue
-            line = f"{mkt:4} | {strat[:12]:12} | {s['new']:4} | {s['closed']:4} | {s['open']:4}"
+            s['prev'] = s['final'] - s['new'] + s['closed']
+
+    # 生成文字 Table
+    summary_lines = ["\n**【策略 x 市場 持倉對帳表】**", "```", "市場 | 策略           | 原有 | 新開 | 結案 | 總持倉", "----------------------------------------------"]
+    for mkt in ['US', 'JP']:
+        for strat, s in group_stats[mkt].items():
+            # 如果四個數都係 0，就唔好 display
+            if s['prev'] == 0 and s['new'] == 0 and s['closed'] == 0 and s['final'] == 0: continue
+            
+            # 格式化排版 (對齊每一欄)
+            line = f"{mkt:4} | {strat[:12]:12} | {s['prev']:4} | {s['new']:4} | {s['closed']:4} | {s['final']:4}"
             summary_lines.append(line)
     summary_lines.append("```")
     group_summary_text = "\n".join(summary_lines)
