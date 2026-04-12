@@ -781,7 +781,7 @@ if DISCORD_SUMMARY_WEBHOOK:
                 {"name": "🌊 總浮動盈虧", "value": f"**{floating_str}**", "inline": True},
                 {"name": "📈 總勝率", "value": f"{win_rate}% ({wins}/{total_closed})", "inline": True}
             ],
-            "footer": {"text": f"每單本金 $10,000 USD | 時光機回溯 {SIMULATE_DAYS_AGO} 日"}
+            "footer": {"text": f"每單本金 $10,000 USD | Production v2"}
         }]
     }
     
