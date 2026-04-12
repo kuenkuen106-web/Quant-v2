@@ -730,14 +730,14 @@ if DISCORD_SUMMARY_WEBHOOK:
             s['prev'] = s['final'] - s['new'] + s['closed']
 
     # 生成文字 Table
-    summary_lines = ["\n**【策略 x 市場 持倉對帳表】**", "```", "市場 | 策略           | 原有 | 新開 | 結案 | 總持倉", "----------------------------------------------"]
+    summary_lines = ["\n**【策略 x 市場 持倉對帳表】**", "```", "市場| 策略     | 原有 | 新開 | 結案 | 總持倉", "----------------------------------------------"]
     for mkt in ['US', 'JP']:
         for strat, s in group_stats[mkt].items():
             # 如果四個數都係 0，就唔好 display
             if s['prev'] == 0 and s['new'] == 0 and s['closed'] == 0 and s['final'] == 0: continue
             
             # 格式化排版 (對齊每一欄)
-            line = f"{mkt:4} | {strat[:12]:12} | {s['prev']:4} | {s['new']:4} | {s['closed']:4} | {s['final']:4}"
+            line = f"{mkt:2} | {strat[:12]:6} | {s['prev']:3} | {s['new']:3} | {s['closed']:3} | {s['final']:3}"
             summary_lines.append(line)
     summary_lines.append("```")
     group_summary_text = "\n".join(summary_lines)
