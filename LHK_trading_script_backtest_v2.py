@@ -495,6 +495,11 @@ max10 = closes.rolling(10).max()
 min10 = closes.rolling(10).min()
 rec_volat = ((max10 - min10) / max10).iloc[-1]
 
+sma50_all = closes.rolling(50).mean()
+sma200_all = closes.rolling(200).mean()
+max120_all = closes.rolling(120).max() # 半年高位
+max10_prev_all = closes.shift(1).rolling(10).max() # 尋日為止嘅10日高位 (阻力線)
+
 # Volume MA
 vol_ma50 = vols.rolling(50).mean().iloc[-1]
 vol_ma20 = vols.rolling(20).mean().iloc[-1]
@@ -515,6 +520,10 @@ dict_vol_ma20 = vol_ma20.to_dict()
 dict_prev_price = prev_prices.to_dict()
 dict_curr_open = curr_opens.to_dict()
 dict_curr_vol = curr_vols.to_dict()
+dict_sma50 = sma50_all.iloc[-1].to_dict()
+dict_sma200 = sma200_all.iloc[-1].to_dict()
+dict_max120 = max120_all.iloc[-1].to_dict()
+dict_max10_prev = max10_prev_all.iloc[-1].to_dict()
 # =========================================================================
 
 # 找出美股成交額 > 500萬 USD 的股票
@@ -564,7 +573,30 @@ for ticker in valid_tickers:
         c_vol = dict_curr_vol.get(ticker)
         v_ma50 = dict_vol_ma50.get(ticker)
         
-        is_vcp = (v_base_dd <= 0.35) and (v_rec_vol <= 0.06) and (c_vol < v_ma50)
+        # 提取趨勢與突破數據
+        sma50 = dict_sma50.get(ticker)
+        sma200 = dict_sma200.get(ticker)
+        high120 = dict_max120.get(ticker)
+        resist_10d = dict_max10_prev.get(ticker) # 過去 10 日嘅盤整區頂部
+        
+        # 🛡️ 條件 1: 必須處於明確上升趨勢 (Stage 2)
+        is_uptrend = (cp > sma50) and (sma50 > sma200)
+        
+        # 🛡️ 條件 2: 價格必須企喺半年高位嘅 15% 以內 (高位強勢整固)
+        is_near_high = ((high120 - cp) / high120) <= 0.15
+        
+        # 🛡️ 條件 3: 形態收窄 (維持你原本嘅 Base DD 同近期波幅要求)
+        is_tight = (v_base_dd <= 0.35) and (v_rec_vol <= 0.08)
+        
+        # 🚀 條件 4: 買入觸發點 (Trigger)！
+        # 今日收市價必須升穿過去 10 日嘅阻力位，而且成交量大過 20 日均量 (真突破)
+        v_ma20 = dict_vol_ma20.get(ticker)
+        is_breaking_out = (cp > resist_10d) and (c_vol > v_ma20 * 1.2)
+        
+        # 終極 VCP 判定：必須全部滿足！
+        is_vcp = is_uptrend and is_near_high and is_tight and is_breaking_out
+        
+        # BB 擠壓條件
         is_bb_sqz = (dict_bb_width.get(ticker) <= dict_bb_width_min120.get(ticker) * 1.1)
 
         trade_info = None 
