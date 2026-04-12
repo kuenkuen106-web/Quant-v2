@@ -269,13 +269,76 @@ def build_dynamic_watchlist():
 TICKER_MAP = build_dynamic_watchlist()
 ALL_TICKERS = list(TICKER_MAP.keys())
 
-data_raw = yf.download(ALL_TICKERS, period=f"{LOOKBACK_YEARS}y", progress=False, threads=True, timeout=30, group_by='column')
-if isinstance(data_raw.columns, pd.MultiIndex):
-    closes, highs, lows, vols, opens = data_raw['Close'].ffill(), data_raw['High'].ffill(), data_raw['Low'].ffill(), data_raw['Volume'].ffill(), data_raw['Open'].ffill()
-else:
-    closes = data_raw[['Close']].ffill(); highs = data_raw[['High']].ffill(); lows = data_raw[['Low']].ffill(); vols = data_raw[['Volume']].ffill(); opens = data_raw[['Open']].ffill()
+# =============================================================================
+# ⚡ 實戰提速與防禦：Production 動態快取 (The "Safe" Cache)
+# =============================================================================
+PROD_CACHE_FILE = "prod_market_data_cache.pkl"
+CACHE_TTL_MINUTES = 15 # 👈 快取存活時間 (分鐘)，可按你排程頻率調整
+current_time = time.time()
+data_raw = None
+use_cache = False
 
+# 1. 檢查是否有「新鮮」的 Cache (15分鐘內)
+if os.path.exists(PROD_CACHE_FILE):
+    file_age_minutes = (current_time - os.path.getmtime(PROD_CACHE_FILE)) / 60
+    if file_age_minutes < CACHE_TTL_MINUTES:
+        print(f"⚡ [PROD] 發現新鮮 Cache (數據齡: {file_age_minutes:.1f} 分鐘)，極速讀取...")
+        try:
+            data_raw = pd.read_pickle(PROD_CACHE_FILE)
+            use_cache = True
+        except:
+            pass # 如果讀取失敗，就當作冇 Cache，強制重新下載
+
+# 2. 如果沒有新鮮 Cache，向 API 請求最新數據
+if not use_cache:
+    print("🌐 [PROD] 正在從 Yahoo Finance 獲取最新實時數據...")
+    try:
+        # 下載最新數據
+        data_raw = yf.download(ALL_TICKERS, period=f"{LOOKBACK_YEARS}y", progress=False, threads=True, timeout=30, group_by='column')
+        
+        if data_raw is None or data_raw.empty:
+            raise ValueError("Yahoo Finance 返回空數據")
+            
+        # 成功獲取！覆蓋舊 Cache
+        data_raw.to_pickle(PROD_CACHE_FILE)
+        print("💾 [PROD] 最新實時數據已寫入快取。")
+        
+    except Exception as e:
+        print(f"⚠️ [PROD] Yahoo API 請求失敗: {e}")
+        # 🚨 啟動 Fallback 救命機制：強行使用舊數據
+        if os.path.exists(PROD_CACHE_FILE):
+            file_age_minutes = (current_time - os.path.getmtime(PROD_CACHE_FILE)) / 60
+            print(f"🆘 啟動備援機制：強行使用 {file_age_minutes:.1f} 分鐘前的舊快取續命！")
+            data_raw = pd.read_pickle(PROD_CACHE_FILE)
+            
+            # 【保命絕招】發送緊急通知到 Discord
+            if DISCORD_SUMMARY_WEBHOOK:
+                try:
+                    requests.post(DISCORD_SUMMARY_WEBHOOK, json={
+                        "content": f"🚨 **【系統警告：API 斷線】**\nYahoo Finance 無法連線。系統正使用 `{file_age_minutes:.1f}` 分鐘前的舊數據運作，請密切留意最新推介/持倉狀態是否準確！"
+                    })
+                except: pass
+        else:
+            print("❌ 系統無任何備用數據，為免出錯，徹底終止運行。")
+            exit(1) # 煞停程式
+
+# 3. 數據解構與清洗 (處理 MultiIndex)
+if isinstance(data_raw.columns, pd.MultiIndex):
+    closes = data_raw['Close'].ffill()
+    highs = data_raw['High'].ffill()
+    lows = data_raw['Low'].ffill()
+    vols = data_raw['Volume'].ffill()
+    opens = data_raw['Open'].ffill()
+else:
+    closes = data_raw[['Close']].ffill()
+    highs = data_raw[['High']].ffill()
+    lows = data_raw[['Low']].ffill()
+    vols = data_raw[['Volume']].ffill()
+    opens = data_raw[['Open']].ffill()
+
+# 實戰中，今日日期就是系統真實時間
 today_str = datetime.datetime.now().strftime('%Y-%m-%d')
+print(f"📅 [PROD] 系統執行日期：{today_str}")
 
 # =============================================================================
 # MODULE 3 — 雙市場宏觀剖析 (FTD, 市寬, 派發日 獨立計算)
@@ -394,10 +457,11 @@ rs_rank = ((0.6 * r126) + (0.4 * r252)).rank(axis=1, pct=True) * 99 + 1
 rs_momentum = rs_rank - rs_rank.shift(20)
 
 # =============================================================================
-# MODULE 4 & 5 — 雙策略判定引擎與自動結算
+# MODULE 4 & 5 — 雙策略判定引擎與自動結算 (🚀 向量化極速版)
 # =============================================================================
-print(f"⏳ [4-6/7] 正在按 {today_str} 視角進行策略演算...")
+print(f"⏳ [4-6/7] 正在按 {today_str} 視角進行策略演算 (啟動極速向量化)...")
 
+# 1. 處理現有持倉結案
 current_prices = closes.iloc[-1].to_dict()
 closed_this_run = []
 for trade in trade_history:
@@ -416,65 +480,144 @@ for trade in trade_history:
 
 swing_results, short_term_results, js_payload = [], [], []
 
-for ticker in [t for t in ALL_TICKERS if t not in ['SPY','^VIX','^N225']]:
+# =========================================================================
+# ⚡ 核心提速區：向量化計算所有技術指標 (Out of Loop)
+# =========================================================================
+# 價格與成交量基礎
+prev_prices = closes.iloc[-2]
+curr_opens = opens.iloc[-1]
+curr_vols = vols.iloc[-1]
+
+# 平均成交額 (20日)
+dollar_vol_20 = (closes * vols).rolling(20).mean().iloc[-1]
+
+# 布林帶 (Bollinger Bands)
+sma20_all = closes.rolling(20).mean()
+std20_all = closes.rolling(20).std()
+bb_lower_all = sma20_all - (2 * std20_all)
+bb_width_all = (4 * std20_all) / sma20_all
+bb_width_min120 = bb_width_all.rolling(120).min().iloc[-1]
+
+# ATR
+atr_14 = (highs - lows).rolling(14).mean().iloc[-1]
+
+# RSI
+delta = closes.diff()
+gain = delta.where(delta > 0, 0).rolling(14).mean()
+loss = (-delta.where(delta < 0, 0)).rolling(14).mean()
+rsi_14 = (100 - (100 / (1 + gain / loss))).iloc[-1]
+
+# VCP 形態參數 (Base Drawdown & Recent Volatility)
+max60 = closes.rolling(60).max()
+min60 = closes.rolling(60).min()
+base_dd = ((max60 - min60) / max60).iloc[-1]
+
+max10 = closes.rolling(10).max()
+min10 = closes.rolling(10).min()
+rec_volat = ((max10 - min10) / max10).iloc[-1]
+
+# Volume MA
+vol_ma50 = vols.rolling(50).mean().iloc[-1]
+vol_ma20 = vols.rolling(20).mean().iloc[-1]
+
+# 👇 將最終結果轉為 Dict 以達到 O(1) 極速查詢 (慳 CPU 神技)
+dict_dollar_vol = dollar_vol_20.to_dict()
+dict_rs = rs_rank.iloc[-1].to_dict()
+dict_mom = rs_momentum.iloc[-1].to_dict()
+dict_bb_lower = bb_lower_all.iloc[-1].to_dict()
+dict_bb_width = bb_width_all.iloc[-1].to_dict()
+dict_bb_width_min120 = bb_width_min120.to_dict()
+dict_atr = atr_14.to_dict()
+dict_rsi = rsi_14.to_dict()
+dict_base_dd = base_dd.to_dict()
+dict_rec_volat = rec_volat.to_dict()
+dict_vol_ma50 = vol_ma50.to_dict()
+dict_vol_ma20 = vol_ma20.to_dict()
+dict_prev_price = prev_prices.to_dict()
+dict_curr_open = curr_opens.to_dict()
+dict_curr_vol = curr_vols.to_dict()
+# =========================================================================
+
+# 找出美股成交額 > 500萬 USD 的股票
+us_mask = (~dollar_vol_20.index.str.endswith('.T')) & (dollar_vol_20 >= 5_000_000)
+# 找出日股成交額 > 3億 JPY 的股票
+jp_mask = (dollar_vol_20.index.str.endswith('.T')) & (dollar_vol_20 >= 300_000_000)
+
+# 合併符合資格的名單
+valid_tickers = dollar_vol_20[us_mask | jp_mask].index.tolist()
+
+# 踢走大盤指數與 RS 無效的新股
+valid_tickers = [t for t in valid_tickers if t not in ['SPY', '^VIX', '^N225'] and not pd.isna(dict_rs.get(t))]
+
+print(f"🧹 過濾成交量低迷股票後，掃描名單由 {len(ALL_TICKERS)} 縮減至 {len(valid_tickers)} 隻！")
+
+# =========================================================================
+# 開始極速掃描 (只行精華名單)
+# =========================================================================
+for ticker in valid_tickers:
     try:
-        c_raw = closes[ticker].dropna()
-        if len(c_raw) < 252 + 200: continue
-        c, h, l, v, op = closes[ticker], highs[ticker], lows[ticker], vols[ticker], opens[ticker]
-        cp = float(c.iloc[-1])
-        if (c.tail(20) * v.tail(20)).mean() < (300_000_000 if ticker.endswith('.T') else 5_000_000): continue
-
+        # 因為上面已經做咗過濾，呢度唔使再 check pd.isna(rs) 同 dollar_vol 啦！
+        rs = dict_rs.get(ticker)
+        cp = float(current_prices[ticker])
         is_jp = ticker.endswith('.T')
-        ticker_is_bull = jp_is_bull if is_jp else us_is_bull
+        
+        # 攞出對應嘅燈號
+        ticker_macro = jp_macro_status if is_jp else us_macro_status 
 
-        rs = rs_rank[ticker].iloc[-1]
-        rs_mom = rs_momentum[ticker].iloc[-1]
+        rs_mom = dict_mom.get(ticker)
+        catr = float(dict_atr.get(ticker))
+        rsi_val = float(dict_rsi.get(ticker))
         
-        sma20, std20 = c.rolling(20).mean(), c.rolling(20).std()
-        bb_lower, bb_width = sma20 - (2 * std20), (4 * std20) / sma20
-        atr = (h-l).rolling(14).mean(); catr = float(atr.iloc[-1])
-        
-        delta = c.diff()
-        rsi = 100 - (100 / (1 + (delta.where(delta > 0, 0)).rolling(14).mean() / (-delta.where(delta < 0, 0)).rolling(14).mean()))
-        
-        # 👇 【新增】：每日更新「目前持倉」的現時指標 (curr_metric)
+        # 👇 每日更新「目前持倉」的現時指標 (curr_metric)
         for t in trade_history:
             if t.get('status') == 'OPEN' and t.get('tk') == ticker:
                 if '超賣' in t.get('tag', ''):
-                    t['curr_metric'] = f"RSI: {int(rsi.iloc[-1])}"
+                    t['curr_metric'] = f"RSI: {int(rsi_val)}"
                 else:
                     t['curr_metric'] = f"RS: {int(rs)}"
 
-        if pd.isna(rs) or rs < PQR_SWING_MIN: continue
+        # 波段策略 (Swing) 的 RS 門檻過濾
+        if rs < PQR_SWING_MIN: continue
 
-        base_dd = (c.rolling(60).max() - c.rolling(60).min()) / c.rolling(60).max()
-        rec_volat = (c.rolling(10).max() - c.rolling(10).min()) / c.rolling(10).max()
-        is_vcp = (base_dd.iloc[-1] <= 0.35) and (rec_volat.iloc[-1] <= 0.06) and (v.iloc[-1] < v.rolling(50).mean().iloc[-1])
-        is_bb_sqz = (bb_width.iloc[-1] <= bb_width.rolling(120).min().iloc[-1] * 1.1)
+        # 提取 VCP 與 BB 擠壓的預算數據
+        v_base_dd = dict_base_dd.get(ticker)
+        v_rec_vol = dict_rec_volat.get(ticker)
+        c_vol = dict_curr_vol.get(ticker)
+        v_ma50 = dict_vol_ma50.get(ticker)
+        
+        is_vcp = (v_base_dd <= 0.35) and (v_rec_vol <= 0.06) and (c_vol < v_ma50)
+        is_bb_sqz = (dict_bb_width.get(ticker) <= dict_bb_width_min120.get(ticker) * 1.1)
 
         trade_info = None 
         tag_name = ""
         sl_p, tp_p = 0, 0
         risk_per_share = 0
-        entry_metric = "" # 準備記錄進場指標
+        entry_metric = ""
 
-        if (is_vcp or is_bb_sqz) and ticker_is_bull:
+        # 🔴 紅燈時，嚴格封殺所有波段突破 (Swing) 策略！
+        if (is_vcp or is_bb_sqz) and ('🔴' not in ticker_macro):
             tag_name = "🏆 VCP 突破" if is_vcp else "💥 BB 擠壓"
             sl_p, tp_p = round(cp - 2.5 * catr, 2), round(cp + 4.5 * catr, 2)
             risk_per_share = cp - sl_p
-            entry_metric = f"RS: {int(rs)}" # 👈 記錄進場 RS
+            entry_metric = f"RS: {int(rs)}"
             
             swing_results.append({'tk': ticker, 'rs': round(rs,0), 'mom': round(rs_mom,1), 'px': round(cp,2), 'sl': sl_p, 'tp': tp_p, 'tag': tag_name})
             trade_info = {'date': today_str, 'tk': ticker, 'px': round(cp, 2), 'sl': sl_p, 'tp': tp_p, 'last_px': round(cp, 2), 'status': 'OPEN', 'tag': tag_name, 'entry_metric': entry_metric, 'curr_metric': entry_metric}
         
         elif not trade_info: 
-            is_gap_up = ((op.iloc[-1] - c.iloc[-2]) / c.iloc[-2] >= 0.03) and (v.iloc[-1] > v.rolling(20).mean().iloc[-1] * 2)
-            is_oversold = (rsi.iloc[-1] < 28) and (cp < bb_lower.iloc[-1])
+            p_px = dict_prev_price.get(ticker)
+            c_op = dict_curr_open.get(ticker)
+            v_ma20 = dict_vol_ma20.get(ticker)
+            b_lower = dict_bb_lower.get(ticker)
+            
+            is_gap_up = ((c_op - p_px) / p_px >= 0.03) and (c_vol > v_ma20 * 2)
+            is_oversold = (rsi_val < 28) and (cp < b_lower)
+            
             if is_gap_up or is_oversold:
                 tag_name = "⚡ 缺口動能" if is_gap_up else "📉 極度超賣"
                 sl_p, tp_p = round(cp * 0.95, 2), round(cp * 1.05, 2)
                 risk_per_share = cp - sl_p
-                entry_metric = f"RSI: {int(rsi.iloc[-1])}" if is_oversold else f"RS: {int(rs)}" # 👈 超賣記 RSI，缺口記 RS
+                entry_metric = f"RSI: {int(rsi_val)}" if is_oversold else f"RS: {int(rs)}"
                 
                 short_term_results.append({'tk': ticker, 'rs': round(rs,0), 'mom': round(rs_mom,1), 'px': round(cp,2), 'sl': sl_p, 'tp': tp_p, 'tag': tag_name})
                 trade_info = {'date': today_str, 'tk': ticker, 'px': round(cp, 2), 'sl': sl_p, 'tp': tp_p, 'last_px': round(cp, 2), 'status': 'OPEN', 'tag': tag_name, 'entry_metric': entry_metric, 'curr_metric': entry_metric}
@@ -489,11 +632,13 @@ for ticker in [t for t in ALL_TICKERS if t not in ['SPY','^VIX','^N225']]:
                 "sl_price": sl_p, "tp_price": tp_p, "risk_per_share": risk_per_share
             })
 
-    except Exception as e: pass
+    except Exception as e: 
+        pass
 
 swing_results.sort(key=lambda x: x['rs'], reverse=True)
 short_term_results.sort(key=lambda x: x['rs'], reverse=True)
 
+# 保留 2000 條紀錄以確保歷史倉位對帳準確
 with open(HISTORY_FILE, "w", encoding="utf-8") as f: json.dump(trade_history[-2000:], f, indent=4)
 
 # =============================================================================
