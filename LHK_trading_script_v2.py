@@ -477,28 +477,70 @@ print(f"⏳ [4-6/7] 正在按 {today_str} 視角進行策略演算 (啟動極速
 
 # 1. 處理現有持倉結案
 current_prices = closes.iloc[-1].to_dict()
+current_highs = highs.iloc[-1].to_dict()   # 引入全日最高價
+current_lows = lows.iloc[-1].to_dict()     # 引入全日最低價
 closed_this_run = []
+
 for trade in trade_history:
     if trade.get('status') == 'OPEN':
         tk = trade.get('tk')
         if tk in current_prices and not pd.isna(current_prices[tk]):
             now_px = round(float(current_prices[tk]), 2)
+            today_high = float(current_highs[tk])
+            today_low = float(current_lows[tk])
             buy_px = trade.get('px')
+            strat_tag = trade.get('tag', '')
+            entry_date = trade.get('date', '')
             
-            # 如果現價大過買入價 10 倍，或者跌剩 10% 以下，99% 係 Yahoo 數據錯亂
-            if now_px > buy_px * 10 or now_px < buy_px * 0.1:
-                print(f"⚠️ [防禦系統] 偵測到 {tk} 股價異常 (買入: {buy_px}, 現價: {now_px})，拒絕更新！")
-                continue # 跳過呢隻股票，保留尋日嘅正常價錢
+            # 數據熔斷機制
+            if now_px > buy_px * 10 or now_px < buy_px * 0.1: continue
                 
             trade['last_px'] = now_px
             tp, sl = trade.get('tp'), trade.get('sl')
             
-            if tp and now_px >= tp:
-                trade['status'], trade['close_date'] = '✅ TAKE PROFIT', today_str
-                closed_this_run.append(trade)
-            elif sl and now_px <= sl:
+            # 檢查當日是否觸及邊界
+            hit_tp = tp and today_high >= tp
+            hit_sl = sl and today_low <= sl
+            
+            # -----------------------------------------------------------------
+            # 🛡️ 核心安全防線：處理日內雙觸發與路徑分流
+            # -----------------------------------------------------------------
+            if hit_tp and hit_sl:
+                # 情況 A：同一天既中 TP 又中 SL (雙觸發悖論)
+                # 依據會計保守原則 (Conservative Approach)，一律判定為「先中止損」
+                trade['last_px'] = sl
                 trade['status'], trade['close_date'] = '❌ STOP LOSS', today_str
                 closed_this_run.append(trade)
+                
+            elif "極度超賣" in strat_tag and entry_date == today_str:
+                # 情況 B：撈底策略進場當天 (Day 0)
+                # 買入當天如果向下跌穿 SL，直接判定止損；即使盤中彈上去也不算 TP (防止偷看未來數據)
+                if hit_sl:
+                    trade['last_px'] = sl
+                    trade['status'], trade['close_date'] = '❌ STOP LOSS', today_str
+                    closed_this_run.append(trade)
+                    
+            elif hit_tp:
+                # 情況 C：正常單觸發止盈
+                trade['last_px'] = tp
+                trade['status'], trade['close_date'] = '✅ TAKE PROFIT', today_str
+                closed_this_run.append(trade)
+                
+            elif hit_sl:
+                # 情況 D：正常單觸發止損
+                trade['last_px'] = sl
+                trade['status'], trade['close_date'] = '❌ STOP LOSS', today_str
+                closed_this_run.append(trade)
+                
+            else:
+                # 情況 E：未觸及任何邊界，繼續持倉並嘗試動態推止損 (保本)
+                current_risk = buy_px - sl
+                if now_px > buy_px + (current_risk * 2):
+                    if trade['sl'] < buy_px:
+                        trade['sl'] = buy_px 
+                        # 避免重疊加上標籤
+                        if "🔒" not in trade['tag']:
+                            trade['tag'] = trade['tag'] + " (🔒已保本)"
 
 swing_results, short_term_results, js_payload = [], [], []
 
