@@ -1,11 +1,15 @@
-name: v2 UAT
+name: v2 UAT Backtest Loop
 on:
-  workflow_dispatch:  # 👈 核心：刪除所有 push 同 schedule，只保留呢行
+  workflow_dispatch:
     inputs:
-      days_ago:
-        description: '時光機回溯天數 (需配合 Python Code 修改，或作紀錄用途)'
-        required: false
-        default: '30'
+      start_day:
+        description: '開始天數 (例如 600)'
+        required: true
+        default: '600'
+      end_day:
+        description: '結束天數 (例如 0)'
+        required: true
+        default: '0'
 
 # 加上併發控制，防止多次點擊導致 Git 衝突
 concurrency:
@@ -19,11 +23,9 @@ jobs:
   run-strategy:
     runs-on: ubuntu-latest
     steps:
-      # 【更新1】改用 v4
       - name: 📥 讀取代碼 (Checkout)
         uses: actions/checkout@v4 
 
-      # 【更新2】改用 v5
       - name: 🐍 設定 Python 環境
         uses: actions/setup-python@v5
         with:
@@ -32,20 +34,35 @@ jobs:
       - name: 📦 安裝依賴工具
         run: pip install -r requirements.txt
 
-      - name: 🚀 執行量化掃描與發送 Discord
+      - name: 🚀 執行量化掃描 (大迴圈模式)
         env:
+          # 💡 溫馨提示：如果你行大迴圈 (>30日)，建議暫時將下面兩行 secrets 刪除或變成註解，防止 Discord 封鎖
           DISCORD_BACKTEST_WEBHOOK_URL: ${{ secrets.DISCORD_BACKTEST_WEBHOOK_URL }}
           DISCORD_BACKTEST_SUMMARY_WEBHOOK: ${{ secrets.DISCORD_BACKTEST_SUMMARY_WEBHOOK }}
-          # 將 GitHub UI 嘅輸入傳入 Python 自然環境
-          UAT_DAYS_AGO: ${{ github.event.inputs.days_ago }}
-        # 【重要檢查】請確保下面呢個檔案名，同你 Repo 裡面嘅 Python 檔案名一模一樣！
-        # 如果你個檔案叫 main.py，請將下面改做 run: python main.py
-        run: python LHK_trading_script_backtest_v2.py
+          START: ${{ github.event.inputs.start_day }}
+          END: ${{ github.event.inputs.end_day }}
+        run: |
+          # Bash 倒數迴圈
+          for (( i=$START; i>=$END; i-- ))
+          do
+            echo "======================================================"
+            echo "⏰ 正在啟動時光機：回溯 $i 天..."
+            echo "======================================================"
+            
+            # 將迴圈的 i 值傳給 Python
+            export UAT_DAYS_AGO=$i
+            
+            # 執行 Python
+            python LHK_trading_script_backtest_v2.py
+            
+            # 強制暫停 3 秒，防止連續過快請求導致 API 或 Discord 封鎖
+            sleep 3
+          done
 
-      - name: 💾 更新 Dashboard 網頁檔案
+      - name: 💾 更新 Dashboard 網頁檔案與交易紀錄
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add docs/
-          git commit -m "Auto-update Dashboard" || echo "No changes to commit"
+          git commit -m "Auto-update Backtest from $START to $END days ago" || echo "No changes to commit"
           git push
