@@ -32,7 +32,7 @@ HISTORY_FILE = os.path.join(OUTPUT_DIR, "uat_trade_history.json")
 # =============================================================================
 # 核心策略與時光機參數 
 # =============================================================================
-LOOKBACK_YEARS = 6
+LOOKBACK_YEARS = 10
 PQR_SWING_MIN = 75
 FTD_VALID_DAYS = 20
 MAX_ACCOUNT_RISK_PCT = 0.01 # 每單最多虧損總資金的 1%
@@ -344,7 +344,7 @@ us_tickers = [t for t in closes.columns if not str(t).endswith('.T') and t not i
 us_index_tickers = [tk for tk, sources in TICKER_MAP.items() if any(s in ['S&P500_大盤', 'S&P500'] for s in sources) and tk in closes.columns]
 jp_index_tickers = [tk for tk, sources in TICKER_MAP.items() if any(s in ['NK225', 'TOPIX100'] for s in sources) and tk in closes.columns]
 
-# 👇 極速向量化計算矩陣市寬 (Vectorised Breadth Matrix)
+# 👇 極速向量化計算矩陣市寬 (Vectorised Breadth Matrix) - 增強容錯版
 def calc_matrix(all_tks, idx_tks):
     valid_all = [t for t in all_tks if t in closes.columns]
     valid_idx = [t for t in idx_tks if t in closes.columns]
@@ -354,14 +354,28 @@ def calc_matrix(all_tks, idx_tks):
         
     c_all, c_idx = closes[valid_all], closes[valid_idx]
     
-    ma20_all, ma50_all = c_all.rolling(20).mean(), c_all.rolling(50).mean()
-    ma50_idx, ma200_idx = c_idx.rolling(50).mean(), c_idx.rolling(200).mean()
+    # 🛡️ 加入數據長度檢查，避免因為時光機截斷導致長度不足
+    data_len = len(c_all)
     
-    tot_20 = (c_all.iloc[-1] > ma20_all.iloc[-1]).sum() / len(valid_all) * 100
-    tot_50 = (c_all.iloc[-1] > ma50_all.iloc[-1]).sum() / len(valid_all) * 100
-    idx_50 = (c_idx.iloc[-1] > ma50_idx.iloc[-1]).sum() / len(valid_idx) * 100
-    idx_200 = (c_idx.iloc[-1] > ma200_idx.iloc[-1]).sum() / len(valid_idx) * 100
+    # 計算 MA。如果數據長度不足，使用 min_periods=1 允許部分計算，或者直接返回 0
+    ma20_all = c_all.rolling(20, min_periods=1 if data_len < 20 else 20).mean()
+    ma50_all = c_all.rolling(50, min_periods=1 if data_len < 50 else 50).mean()
+    ma50_idx = c_idx.rolling(50, min_periods=1 if data_len < 50 else 50).mean()
+    ma200_idx = c_idx.rolling(200, min_periods=1 if data_len < 200 else 200).mean()
     
+    # 處理 NaN，防止計算出錯 (例如新股沒有足夠歷史)
+    last_c_all = c_all.iloc[-1].fillna(0)
+    last_c_idx = c_idx.iloc[-1].fillna(0)
+    
+    tot_20 = (last_c_all > ma20_all.iloc[-1].fillna(float('inf'))).sum() / len(valid_all) * 100
+    tot_50 = (last_c_all > ma50_all.iloc[-1].fillna(float('inf'))).sum() / len(valid_all) * 100
+    idx_50 = (last_c_idx > ma50_idx.iloc[-1].fillna(float('inf'))).sum() / len(valid_idx) * 100
+    idx_200 = (last_c_idx > ma200_idx.iloc[-1].fillna(float('inf'))).sum() / len(valid_idx) * 100
+    
+    # ⚠️ 除錯警告：如果 200MA 算出來是 0，且數據長度不足，發出警告
+    if idx_200 == 0.0 and data_len < 200:
+        print(f"⚠️ [警告] 數據長度僅 {data_len} 天，不足以計算 200MA，因此大盤>200MA 為 0.0%。請增加 LOOKBACK_YEARS。")
+        
     return {
         'total_20ma_pct': round(float(tot_20), 1), 'total_50ma_pct': round(float(tot_50), 1),
         'index_50ma_pct': round(float(idx_50), 1), 'index_200ma_pct': round(float(idx_200), 1)
