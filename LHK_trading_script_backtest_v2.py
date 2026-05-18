@@ -32,7 +32,7 @@ HISTORY_FILE = os.path.join(OUTPUT_DIR, "uat_trade_history.json")
 # =============================================================================
 # 核心策略與時光機參數 
 # =============================================================================
-LOOKBACK_YEARS = 3
+LOOKBACK_YEARS = 6
 PQR_SWING_MIN = 75
 FTD_VALID_DAYS = 20
 MAX_ACCOUNT_RISK_PCT = 0.01 # 每單最多虧損總資金的 1%
@@ -341,8 +341,8 @@ jp_tickers = [t for t in closes.columns if str(t).endswith('.T')]
 us_tickers = [t for t in closes.columns if not str(t).endswith('.T') and t not in ['SPY', '^VIX', '^N225']]
 
 # 👇 從 TICKER_MAP 智能提取「大盤成份股」名單
-us_index_tickers = [tk for tk, sources in TICKER_MAP.items() if any(s in ['S&P500_大盤', 'S&P500'] for s in sources)]
-jp_index_tickers = [tk for tk, sources in TICKER_MAP.items() if any(s in ['NK225', 'TOPIX100'] for s in sources)]
+us_index_tickers = [tk for tk, sources in TICKER_MAP.items() if any(s in ['S&P500_大盤', 'S&P500'] for s in sources) and tk in closes.columns]
+jp_index_tickers = [tk for tk, sources in TICKER_MAP.items() if any(s in ['NK225', 'TOPIX100'] for s in sources) and tk in closes.columns]
 
 # 👇 極速向量化計算矩陣市寬 (Vectorised Breadth Matrix)
 def calc_matrix(all_tks, idx_tks):
