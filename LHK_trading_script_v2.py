@@ -352,9 +352,8 @@ jp_tickers = [t for t in closes.columns if str(t).endswith('.T')]
 us_tickers = [t for t in closes.columns if not str(t).endswith('.T') and t not in ['SPY', '^VIX', '^N225']]
 
 # 👇 從 TICKER_MAP 智能提取「大盤成份股」名單
-us_index_tickers = [tk for tk, sources in TICKER_MAP.items() if any(s in ['S&P500_大盤', 'S&P500'] for s in sources)]
-jp_index_tickers = [tk for tk, sources in TICKER_MAP.items() if any(s in ['NK225', 'TOPIX100'] for s in sources)]
-
+us_index_tickers = [tk for tk, sources in TICKER_MAP.items() if any(s in ['S&P500_大盤', 'S&P500'] for s in sources) and tk in closes.columns]
+jp_index_tickers = [tk for tk, sources in TICKER_MAP.items() if any(s in ['NK225', 'TOPIX100'] for s in sources) and tk in closes.columns]
 # 👇 極速向量化計算矩陣市寬 (Vectorised Breadth Matrix)
 def calc_matrix(all_tks, idx_tks):
     valid_all = [t for t in all_tks if t in closes.columns]
