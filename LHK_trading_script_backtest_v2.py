@@ -38,6 +38,10 @@ FTD_VALID_DAYS = 20
 MAX_ACCOUNT_RISK_PCT = 0.01 # 每單最多虧損總資金的 1%
 
 # 👇 時光機設定：從 GitHub Actions 讀取要回溯幾多日 (預設回溯 10 日)
+# 假設你的腳本內新增一個模式
+START_DAYS = 500
+END_DAYS = 0
+
 raw_days = os.environ.get("UAT_DAYS_AGO", "10")
 SIMULATE_DAYS_AGO = int(raw_days)
 
@@ -448,8 +452,16 @@ for trade in trade_history:
         tk = trade.get('tk')
         if tk in current_prices and not pd.isna(current_prices[tk]):
             now_px = round(float(current_prices[tk]), 2)
+            buy_px = trade.get('px')
+
+            # 如果現價大過買入價 10 倍，或者跌剩 10% 以下，99% 係 Yahoo 數據錯亂
+            if now_px > buy_px * 10 or now_px < buy_px * 0.1:
+                print(f"⚠️ [防禦系統] 偵測到 {tk} 股價異常 (買入: {buy_px}, 現價: {now_px})，拒絕更新！")
+                continue # 跳過呢隻股票，保留尋日嘅正常價錢
+                
             trade['last_px'] = now_px
             tp, sl = trade.get('tp'), trade.get('sl')
+            
             if tp and now_px >= tp:
                 trade['status'], trade['close_date'] = '✅ TAKE PROFIT', today_str
                 closed_this_run.append(trade)
@@ -520,6 +532,8 @@ dict_vol_ma20 = vol_ma20.to_dict()
 dict_prev_price = prev_prices.to_dict()
 dict_curr_open = curr_opens.to_dict()
 dict_curr_vol = curr_vols.to_dict()
+dict_curr_high = highs.iloc[-1].to_dict()
+dict_curr_low = lows.iloc[-1].to_dict()
 dict_sma50 = sma50_all.iloc[-1].to_dict()
 dict_sma200 = sma200_all.iloc[-1].to_dict()
 dict_max120 = max120_all.iloc[-1].to_dict()
@@ -548,6 +562,10 @@ for ticker in valid_tickers:
         rs = dict_rs.get(ticker)
         cp = float(current_prices[ticker])
         is_jp = ticker.endswith('.T')
+
+        # 🛡️ 防禦：剔除仙股與錯價股 (美股 > $1, 日股 > 100円)
+        min_price_threshold = 100 if is_jp else 1
+        if cp < min_price_threshold: continue
         
         # 攞出對應嘅燈號
         ticker_macro = jp_macro_status if is_jp else us_macro_status 
@@ -621,7 +639,19 @@ for ticker in valid_tickers:
             v_ma20 = dict_vol_ma20.get(ticker)
             b_lower = dict_bb_lower.get(ticker)
             
-            is_gap_up = ((c_op - p_px) / p_px >= 0.03) and (c_vol > v_ma20 * 2)
+            h_val = dict_curr_high.get(ticker)
+            l_val = dict_curr_low.get(ticker)
+            
+            gap_magnitude = (c_op - p_px) / p_px
+            closing_strength = (cp - l_val) / (h_val - l_val) if h_val != l_val else 0
+            
+            is_gap_up = (
+                (gap_magnitude >= 0.03) and 
+                (c_vol > v_ma20 * 2) and 
+                (cp > c_op) and 
+                (closing_strength >= 0.6)
+            )
+            
             is_oversold = (rsi_val < 28) and (cp < b_lower)
             
             if is_gap_up or is_oversold:
@@ -1297,7 +1327,7 @@ html = f"""<!DOCTYPE html>
             document.getElementById('calc_sl').innerText = unit + data.sl_price.toFixed(2);
             document.getElementById('calc_tp').innerText = unit + data.tp_price.toFixed(2);
             document.getElementById('calc_shares').innerText = shares;
-            document.getElementById('calc_cost').innerText = unit + totalCost.toLocaleString(undefined, {{maximumFractionDigits: 0}}) + " (" + actualPosPct + "%)\";
+            document.getElementById('calc_cost').innerText = unit + totalCost.toLocaleString(undefined, {{maximumFractionDigits: 0}}) + " (" + actualPosPct + "%)";
         }}
 
         function renderJournal() {{
