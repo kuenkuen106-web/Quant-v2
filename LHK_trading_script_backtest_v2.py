@@ -301,6 +301,16 @@ else:
         data_raw.to_pickle(CACHE_FILE)
         print(f"💾 [UAT] 今日數據已寫入快取。")
 
+# =========================================================================
+# 🛠️ 終極修復：解決美日雙時區導致的「隔日跳空/零數據」Bug
+# =========================================================================
+if data_raw is not None and not data_raw.empty:
+    # 強制移除 yfinance 帶來的 UTC 時區，統一日線時間為純粹的 YYYY-MM-DD
+    data_raw.index = pd.to_datetime(data_raw.index).tz_localize(None).normalize()
+    
+    # 將同一日的 US 與 JP 數據完美合併成單一行 (無視 NaN 提取真實數據)
+    data_raw = data_raw.groupby(data_raw.index).max()
+
 # 數據解構與清洗
 if isinstance(data_raw.columns, pd.MultiIndex):
     closes = data_raw['Close'].ffill()
