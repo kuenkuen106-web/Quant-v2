@@ -460,7 +460,15 @@ plt.close(fig)
 
 r126 = closes / closes.shift(126) - 1
 r252 = closes / closes.shift(252) - 1
-rs_rank = ((0.6 * r126) + (0.4 * r252)).rank(axis=1, pct=True) * 99 + 1
+
+# 檢查是否因為時光機回溯太深，導致 252 日數據全線陣亡
+if r252.isna().all().all():
+    print("⚠️ [系統警告] 剩餘數據不足 252 日！RS 計算將智能降級為半年期 (126日) 基準。")
+    rs_rank = r126.rank(axis=1, pct=True) * 99 + 1
+else:
+    r252_filled = r252.fillna(r126) 
+    rs_rank = ((0.6 * r126.fillna(0)) + (0.4 * r252_filled.fillna(0))).rank(axis=1, pct=True) * 99 + 1
+
 rs_momentum = rs_rank - rs_rank.shift(20)
 
 # =============================================================================
@@ -598,6 +606,7 @@ dict_vol_ma20 = vol_ma20.to_dict()
 dict_prev_price = prev_prices.to_dict()
 dict_curr_open = curr_opens.to_dict()
 dict_curr_vol = curr_vols.to_dict()
+dict_prev_vol = vols.iloc[-2].to_dict()
 dict_curr_high = highs.iloc[-1].to_dict()
 dict_curr_low = lows.iloc[-1].to_dict()
 dict_sma50 = sma50_all.iloc[-1].to_dict()
@@ -669,16 +678,24 @@ for ticker in valid_tickers:
         # 🛡️ 條件 2: 價格必須企喺半年高位嘅 15% 以內 (高位強勢整固)
         is_near_high = ((high120 - cp) / high120) <= 0.15
         
-        # 🛡️ 條件 3: 形態收窄 (維持你原本嘅 Base DD 同近期波幅要求)
-        is_tight = (v_base_dd <= 0.35) and (v_rec_vol <= 0.08)
+        # 🛡️ 條件 3: 形態收窄 (放寬至 12%，捕捉活躍突破股)
+        is_tight = (v_base_dd <= 0.35) and (v_rec_vol <= 0.12)
         
         # 🚀 條件 4: 買入觸發點 (Trigger)！
-        # 今日收市價必須升穿過去 10 日嘅阻力位，而且成交量大過 20 日均量 (真突破)
         v_ma20 = dict_vol_ma20.get(ticker)
+        prev_v = dict_prev_vol.get(ticker, 0)
+        
+        # 4a. 尋日成交量萎縮 (細過 20日均量 80%) -> 大戶收乾籌碼
+        is_dry_up = prev_v < (v_ma20 * 0.8)
+        
+        # 4b. 今日帶量升穿過去 10 日阻力位
         is_breaking_out = (cp > resist_10d) and (c_vol > v_ma20 * 1.2)
         
+        # 4c. 拒絕高追 (Buy Zone)：今日收市價不能拋離阻力位超過 5%
+        is_buy_zone = cp <= (resist_10d * 1.05)
+        
         # 終極 VCP 判定：必須全部滿足！
-        is_vcp = is_uptrend and is_near_high and is_tight and is_breaking_out
+        is_vcp = is_uptrend and is_near_high and is_tight and is_breaking_out and is_dry_up and is_buy_zone
         
         # BB 擠壓條件
         is_bb_sqz = (dict_bb_width.get(ticker) <= dict_bb_width_min120.get(ticker) * 1.1)
