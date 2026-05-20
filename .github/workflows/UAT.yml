@@ -57,14 +57,17 @@ jobs:
             sleep 3
           done
 
-      - name: 💾 更新 Dashboard 網頁檔案與交易紀錄
+      - name: 💾 更新 Dashboard 網頁檔案
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          # 🌟 關鍵改裝：強制將 cache 檔排除，確保 git 永遠不會嘗試 push 佢
-          git rm -f docs/UAT/market_data_cache.pkl || echo "Cache file already removed"
+          # 1. 強制加入 .gitignore 防止大檔被 add
+          echo "market_data_cache.pkl" > docs/UAT/.gitignore
           
-          git add docs/
-          git commit -m "Auto-update Backtest from $START to $END days ago" || echo "No changes to commit"
+          # 2. 只 add dashboard 相關檔案，明確避開 pkl 檔
+          git add docs/index.html
+          git add docs/charts/
+          
+          git commit -m "Auto-update Dashboard" || echo "No changes to commit"
           git push
