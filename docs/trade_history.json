@@ -1,1 +1,50 @@
-
+[
+    {
+        "date": "2026-05-20",
+        "tk": "DAR",
+        "px": 58.98,
+        "sl": 56.03,
+        "tp": 61.93,
+        "last_px": 58.98,
+        "status": "OPEN",
+        "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
+        "entry_metric": "RSI: 27",
+        "curr_metric": "RSI: 27"
+    },
+    {
+        "date": "2026-05-20",
+        "tk": "LPG",
+        "px": 47.72,
+        "sl": 45.33,
+        "tp": 50.11,
+        "last_px": 47.72,
+        "status": "OPEN",
+        "tag": "\u26a1 \u7f3a\u53e3\u52d5\u80fd",
+        "entry_metric": "RS: 97",
+        "curr_metric": "RS: 97"
+    },
+    {
+        "date": "2026-05-20",
+        "tk": "ROIV",
+        "px": 32.41,
+        "sl": 30.79,
+        "tp": 34.03,
+        "last_px": 32.41,
+        "status": "OPEN",
+        "tag": "\u26a1 \u7f3a\u53e3\u52d5\u80fd",
+        "entry_metric": "RS: 97",
+        "curr_metric": "RS: 97"
+    },
+    {
+        "date": "2026-05-20",
+        "tk": "6941.T",
+        "px": 8150.0,
+        "sl": 7742.5,
+        "tp": 8557.5,
+        "last_px": 8150.0,
+        "status": "OPEN",
+        "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
+        "entry_metric": "RSI: 24",
+        "curr_metric": "RSI: 24"
+    }
+]
