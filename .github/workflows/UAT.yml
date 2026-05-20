@@ -11,7 +11,6 @@ on:
         required: true
         default: '0'
 
-# 加上併發控制，防止多次點擊導致 Git 衝突
 concurrency:
   group: git-push-group
   cancel-in-progress: false
@@ -31,31 +30,30 @@ jobs:
         with:
           python-version: '3.10'
 
+      # 🌟 關鍵改裝：加入 Cache 機制，以後不用每次重新下載 200MB+ 數據
+      - name: 💾 Cache market data
+        uses: actions/cache@v3
+        with:
+          path: docs/UAT/market_data_cache.pkl
+          key: ${{ runner.os }}-market-data-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-market-data-
+
       - name: 📦 安裝依賴工具
         run: pip install -r requirements.txt
 
       - name: 🚀 執行量化掃描 (大迴圈模式)
         env:
-          # 💡 溫馨提示：如果你行大迴圈 (>30日)，建議暫時將下面兩行 secrets 刪除或變成註解，防止 Discord 封鎖
           DISCORD_BACKTEST_WEBHOOK_URL: ${{ secrets.DISCORD_BACKTEST_WEBHOOK_URL }}
           DISCORD_BACKTEST_SUMMARY_WEBHOOK: ${{ secrets.DISCORD_BACKTEST_SUMMARY_WEBHOOK }}
           START: ${{ github.event.inputs.start_day }}
           END: ${{ github.event.inputs.end_day }}
         run: |
-          # Bash 倒數迴圈
           for (( i=$START; i>=$END; i-- ))
           do
-            echo "======================================================"
             echo "⏰ 正在啟動時光機：回溯 $i 天..."
-            echo "======================================================"
-            
-            # 將迴圈的 i 值傳給 Python
             export UAT_DAYS_AGO=$i
-            
-            # 執行 Python
             python LHK_trading_script_backtest_v2.py
-            
-            # 強制暫停 3 秒，防止連續過快請求導致 API 或 Discord 封鎖
             sleep 3
           done
 
@@ -63,6 +61,10 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # 🌟 關鍵改裝：強制將 cache 檔排除，確保 git 永遠不會嘗試 push 佢
+          git rm -f docs/UAT/market_data_cache.pkl || echo "Cache file already removed"
+          
           git add docs/
           git commit -m "Auto-update Backtest from $START to $END days ago" || echo "No changes to commit"
           git push
