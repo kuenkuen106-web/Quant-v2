@@ -498,6 +498,7 @@ print(f"⏳ [4-6/7] 正在按 {today_str} 視角進行策略演算 (啟動極速
 current_prices = closes.iloc[-1].to_dict()
 current_highs = highs.iloc[-1].to_dict()   # 引入全日最高價
 current_lows = lows.iloc[-1].to_dict()     # 引入全日最低價
+dict_low20 = lows.rolling(20).min().iloc[-1].to_dict()
 closed_this_run = []
 
 for trade in trade_history:
@@ -623,8 +624,6 @@ max10_prev_all = closes.shift(1).rolling(10).max() # 尋日為止嘅10日高位 
 # Volume MA
 vol_ma50 = vols.rolling(50).mean().iloc[-1]
 vol_ma20 = vols.rolling(20).mean().iloc[-1]
-#計算過去 20 日嘅最低價 (用作後半注倉位嘅追蹤止損阻力線)
-low20_all = lows.rolling(20).min().iloc[-1]
 
 # 👇 將最終結果轉為 Dict 以達到 O(1) 極速查詢 (慳 CPU 神技)
 dict_dollar_vol = dollar_vol_20.to_dict()
@@ -638,9 +637,7 @@ dict_rsi = rsi_14.to_dict()
 dict_base_dd = base_dd.to_dict()
 dict_rec_volat = rec_volat.to_dict()
 dict_vol_ma50 = vol_ma50.to_dict()
-# 20日低位光速查詢表
 dict_vol_ma20 = vol_ma20.to_dict()
-dict_low20 = low20_all.to_dict()
 dict_prev_price = prev_prices.to_dict()
 dict_curr_open = curr_opens.to_dict()
 dict_curr_vol = curr_vols.to_dict()
