@@ -9,7 +9,7 @@
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 27",
-        "curr_metric": "RSI: 25",
+        "curr_metric": "RSI: 21",
         "partial_tp_hit": false,
         "initial_sl": 56.03
     },
@@ -63,11 +63,14 @@
         "px": 238.91,
         "sl": 226.96,
         "tp": 250.86,
-        "last_px": 238.91,
-        "status": "OPEN",
+        "last_px": 226.96,
+        "status": "\u274c STOP LOSS",
         "tag": "\u26a1 \u7f3a\u53e3\u52d5\u80fd",
         "entry_metric": "RS: 96",
-        "curr_metric": "RS: 96"
+        "curr_metric": "RS: 96",
+        "partial_tp_hit": false,
+        "initial_sl": 226.96,
+        "close_date": "2026-05-22"
     },
     {
         "date": "2026-05-21",
