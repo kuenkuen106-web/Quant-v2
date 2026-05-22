@@ -9,7 +9,7 @@
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 27",
-        "curr_metric": "RSI: 21",
+        "curr_metric": "RSI: 26",
         "partial_tp_hit": false,
         "initial_sl": 56.03
     },
@@ -95,5 +95,29 @@
         "tag": "\u26a1 \u7f3a\u53e3\u52d5\u80fd",
         "entry_metric": "RS: 98",
         "curr_metric": "RS: 98"
+    },
+    {
+        "date": "2026-05-22",
+        "tk": "DELL",
+        "px": 295.19,
+        "sl": 280.43,
+        "tp": 309.95,
+        "last_px": 295.19,
+        "status": "OPEN",
+        "tag": "\u26a1 \u7f3a\u53e3\u52d5\u80fd",
+        "entry_metric": "RS: 98",
+        "curr_metric": "RS: 98"
+    },
+    {
+        "date": "2026-05-22",
+        "tk": "HLIT",
+        "px": 15.2,
+        "sl": 14.44,
+        "tp": 15.96,
+        "last_px": 15.2,
+        "status": "OPEN",
+        "tag": "\u26a1 \u7f3a\u53e3\u52d5\u80fd",
+        "entry_metric": "RS: 92",
+        "curr_metric": "RS: 92"
     }
 ]
