@@ -384,41 +384,42 @@ us_tickers = [t for t in closes.columns if not str(t).endswith('.T') and t not i
 us_index_tickers = [tk for tk, sources in TICKER_MAP.items() if any(s in ['S&P500_大盤', 'S&P500'] for s in sources) and tk in closes.columns]
 jp_index_tickers = [tk for tk, sources in TICKER_MAP.items() if any(s in ['NK225', 'TOPIX100'] for s in sources) and tk in closes.columns]
 
-# 👇 極速向量化計算矩陣市寬 (Vectorised Breadth Matrix) - 增強容錯版
+# 👇 極速向量化計算矩陣市寬 (Vectorised Breadth Matrix) - 自動跨越休市版
 def calc_matrix(all_tks, idx_tks):
     valid_all = [t for t in all_tks if t in closes.columns]
     valid_idx = [t for t in idx_tks if t in closes.columns]
     
-    if not valid_all or not valid_idx:
+    if not valid_all or len(valid_idx) < 50: 
         return {'total_20ma_pct': 0, 'total_50ma_pct': 0, 'index_50ma_pct': 0, 'index_200ma_pct': 0}
-        
-    c_all, c_idx = closes[valid_all], closes[valid_idx]
     
-    # 🛡️ 加入數據長度檢查，避免因為時光機截斷導致長度不足
-    data_len = len(c_all)
+    # 🛡️ 核心修正：徹底過濾當日休市 (全 NaN) 的行。
+    # 如果今天是日股假期，c_all 會自動退回上一個有交易的日子！
+    c_all = closes[valid_all].dropna(how='all')
+    c_idx = closes[valid_idx].dropna(how='all')
     
-    # 計算 MA。如果數據長度不足，使用 min_periods=1 允許部分計算，或者直接返回 0
-    ma20_all = c_all.rolling(20, min_periods=1 if data_len < 20 else 20).mean()
-    ma50_all = c_all.rolling(50, min_periods=1 if data_len < 50 else 50).mean()
-    ma50_idx = c_idx.rolling(50, min_periods=1 if data_len < 50 else 50).mean()
-    ma200_idx = c_idx.rolling(200, min_periods=1 if data_len < 200 else 200).mean()
+    if c_all.empty or c_idx.empty:
+         return {'total_20ma_pct': 0, 'total_50ma_pct': 0, 'index_50ma_pct': 0, 'index_200ma_pct': 0}
+
+    # 取得最後一個「有效交易日」的數據
+    last_c_all = c_all.iloc[-1]
+    last_c_idx = c_idx.iloc[-1]
     
-    # 處理 NaN，防止計算出錯 (例如新股沒有足夠歷史)
-    last_c_all = c_all.iloc[-1].fillna(0)
-    last_c_idx = c_idx.iloc[-1].fillna(0)
+    # 計算 MA (因為已過濾休市日，MA 不會被 NaN 干擾)
+    ma20_all = c_all.rolling(20, min_periods=10).mean().iloc[-1]
+    ma50_all = c_all.rolling(50, min_periods=25).mean().iloc[-1]
+    ma50_idx = c_idx.rolling(50, min_periods=25).mean().iloc[-1]
+    ma200_idx = c_idx.rolling(200, min_periods=100).mean().iloc[-1]
     
-    tot_20 = (last_c_all > ma20_all.iloc[-1].fillna(float('inf'))).sum() / len(valid_all) * 100
-    tot_50 = (last_c_all > ma50_all.iloc[-1].fillna(float('inf'))).sum() / len(valid_all) * 100
-    idx_50 = (last_c_idx > ma50_idx.iloc[-1].fillna(float('inf'))).sum() / len(valid_idx) * 100
-    idx_200 = (last_c_idx > ma200_idx.iloc[-1].fillna(float('inf'))).sum() / len(valid_idx) * 100
-    
-    # ⚠️ 除錯警告：如果 200MA 算出來是 0，且數據長度不足，發出警告
-    if idx_200 == 0.0 and data_len < 200:
-        print(f"⚠️ [警告] 數據長度僅 {data_len} 天，不足以計算 200MA，因此大盤>200MA 為 0.0%。請增加 LOOKBACK_YEARS。")
-        
+    def safe_pct(price_series, ma_series):
+        valid_mask = price_series.notna() & ma_series.notna()
+        if valid_mask.sum() < 20: return 0 
+        return (price_series[valid_mask] > ma_series[valid_mask]).sum() / valid_mask.sum() * 100
+
     return {
-        'total_20ma_pct': round(float(tot_20), 1), 'total_50ma_pct': round(float(tot_50), 1),
-        'index_50ma_pct': round(float(idx_50), 1), 'index_200ma_pct': round(float(idx_200), 1)
+        'total_20ma_pct': round(float(safe_pct(last_c_all, ma20_all)), 1),
+        'total_50ma_pct': round(float(safe_pct(last_c_all, ma50_all)), 1),
+        'index_50ma_pct': round(float(safe_pct(last_c_idx, ma50_idx)), 1),
+        'index_200ma_pct': round(float(safe_pct(last_c_idx, ma200_idx)), 1)
     }
 
 us_matrix = calc_matrix(us_tickers, us_index_tickers)
@@ -527,72 +528,43 @@ for trade in trade_history:
             today_low = float(current_lows[tk])
             buy_px = trade.get('px')
             strat_tag = trade.get('tag', '')
-            entry_date = trade.get('date', '')
             
-            # 數據熔斷機制
             if now_px > buy_px * 10 or now_px < buy_px * 0.1: continue
-                
-            # 初始化分注與風險錨定欄位 (降級相容舊 JSON 紀錄)
             if 'partial_tp_hit' not in trade: trade['partial_tp_hit'] = False
             if 'initial_sl' not in trade: trade['initial_sl'] = trade['sl']
             
-            # 計算初始風險金額 (R)
             initial_risk = buy_px - trade['initial_sl']
-            tp1_price = round(buy_px + (initial_risk * 2), 2) # TP1 定在 +2R 
+            tp1_price = round(buy_px + (initial_risk * 2), 2)
             
-            # -----------------------------------------------------------------
-            # 💰 🚀 階段 1：動態偵測 +2R 分注平倉 (Scale-Out)
-            # -----------------------------------------------------------------
+            # --- 分注平倉 (所有策略適用) ---
             if not trade['partial_tp_hit'] and today_high >= tp1_price and initial_risk > 0:
                 trade['partial_tp_hit'] = True
-                trade['sl'] = buy_px # 🔒 剩餘 50% 倉位之止損即時推升至「買入價」落實絕對保本
-                trade['tag'] = trade['tag'].replace(" (🎯已分注平倉)", "") + " (🎯已分注平倉)"
-                print(f"🎯 [分注系統] {tk} 賬面大幅利潤達 +2R！成功以 ${tp1_price} 止盈 50% 倉位。")
+                trade['sl'] = buy_px
+                print(f"🎯 [分注系統] {tk} 觸發 TP1，保本鎖定。")
 
-            # -----------------------------------------------------------------
-            # 🛑 🎯 階段 2：最終結案判定 (處理雙觸發與追蹤止損)
-            # -----------------------------------------------------------------
+            # --- 最終結案判定 (3-Way Classification) ---
             tp, sl = trade.get('tp'), trade.get('sl')
             hit_tp = tp and today_high >= tp
             hit_sl = sl and today_low <= sl
             
             if trade['partial_tp_hit']:
-                # 【後半注命運】：採用 20 日新低作為移動止損
                 tk_low20 = dict_low20.get(tk, today_low)
-                
                 if today_low <= tk_low20:
-                    # 後半注不幸跌穿 20日新低 平倉
-                    exit_px = max(today_low, tk_low20)
-                    if exit_px < buy_px: exit_px = buy_px # 保底絕對是保本價
-                    
-                    # 🔔 混合結算價：(前半注TP1 + 後半注移動止損價) / 2
-                    trade['last_px'] = round((tp1_price + exit_px) / 2, 2)
-                    trade['status'], trade['close_date'] = '✅ TAKE PROFIT', today_str
+                    trade['last_px'] = round((tp1_price + max(today_low, tk_low20)) / 2, 2)
+                    trade['status'], trade['close_date'] = '✅ TRAIL EXIT', today_str
                     closed_this_run.append(trade)
-                    
                 elif hit_tp:
-                    # 後半注極度強勢，直接轟穿終極大止盈 (+4.5 ATR)
                     trade['last_px'] = round((tp1_price + tp) / 2, 2)
-                    trade['status'], trade['close_date'] = '✅ TAKE PROFIT', today_str
+                    trade['status'], trade['close_date'] = '✅ MAX TP', today_str
                     closed_this_run.append(trade)
             else:
-                # 【常規持倉命運】：還未觸發過分注平倉，執行嚴格日內雙觸發與 Day 0 撈底防護
-                if hit_tp and hit_sl:
+                if hit_sl:
                     trade['last_px'] = sl
                     trade['status'], trade['close_date'] = '❌ STOP LOSS', today_str
                     closed_this_run.append(trade)
-                elif "極度超賣" in strat_tag and entry_date == today_str:
-                    if hit_sl:
-                        trade['last_px'] = sl
-                        trade['status'], trade['close_date'] = '❌ STOP LOSS', today_str
-                        closed_this_run.append(trade)
                 elif hit_tp:
                     trade['last_px'] = tp
-                    trade['status'], trade['close_date'] = '✅ TAKE PROFIT', today_str
-                    closed_this_run.append(trade)
-                elif hit_sl:
-                    trade['last_px'] = sl
-                    trade['status'], trade['close_date'] = '❌ STOP LOSS', today_str
+                    trade['status'], trade['close_date'] = '✅ MAX TP', today_str
                     closed_this_run.append(trade)
 
 swing_results, short_term_results, js_payload = [], [], []
@@ -865,14 +837,34 @@ if DISCORD_SUMMARY_WEBHOOK:
             
     floating_str = f"+${floating_pnl:.2f}" if floating_pnl >= 0 else f"-${abs(floating_pnl):.2f}"
 
-    # 3. 細分策略 P&L 結算 (歷史總計)
+    # 3. 細分策略 P&L 結算 (3-Way 結局拆解)
     strategy_stats = {}
     for t in [x for x in trade_history if '✅' in x['status'] or '❌' in x['status']]:
-        tag = t.get('tag', '未分類')
-        if tag not in strategy_stats: strategy_stats[tag] = {'wins': 0, 'total': 0, 'pnl': 0}
-        strategy_stats[tag]['total'] += 1
-        if '✅' in t['status']: strategy_stats[tag]['wins'] += 1
-        strategy_stats[tag]['pnl'] += (10000 / t['px']) * (t['last_px'] - t['px'])
+        raw_tag = t.get('tag', '未分類')
+        base_name = raw_tag.replace(' (🎯已分注平倉)', '').replace(raw_tag.split(' ')[0], '').strip()
+        
+        if base_name not in strategy_stats: 
+            strategy_stats[base_name] = {'icon': raw_tag.split(' ')[0], 'total': 0, 'pnl': 0, 'sl_c': 0, 'sl_p': 0, 'tp_c': 0, 'tp_p': 0, 'tr_c': 0, 'tr_p': 0}
+            
+        trade_pnl = (10000 / t['px']) * (t['last_px'] - t['px'])
+        status = t['status']
+        strategy_stats[base_name]['total'] += 1
+        strategy_stats[base_name]['pnl'] += trade_pnl
+            
+        if '❌' in status:
+            strategy_stats[base_name]['sl_c'] += 1; strategy_stats[base_name]['sl_p'] += trade_pnl
+        elif 'MAX TP' in status:
+            strategy_stats[base_name]['tp_c'] += 1; strategy_stats[base_name]['tp_p'] += trade_pnl
+        elif 'TRAIL EXIT' in status:
+            strategy_stats[base_name]['tr_c'] += 1; strategy_stats[base_name]['tr_p'] += trade_pnl
+
+    breakdown_lines = []
+    for n, st in strategy_stats.items():
+        w_rate = round(((st['tp_c'] + st['tr_c']) / st['total']) * 100, 1)
+        breakdown_lines.append(f"> {st['icon']} **{n}** ➔ 勝率: `{w_rate:>4}%` | 淨利: `+${st['pnl']:,.0f}` | 總數: `{st['total']:>3}單`")
+        breakdown_lines.append(f"> 　 ↳ 🛑 中止損: `{st['sl_c']:>2}單` (`+${st['sl_p']:,.0f}`) | 🎯 到止賺: `{st['tp_c']:>2}單` (`+${st['tp_p']:,.0f}`)")
+        breakdown_lines.append(f"> 　 ↳ 🚀 放飛　: `{st['tr_c']:>2}單` (`+${st['tr_p']:,.0f}`) \n> ")
+    breakdown_text = "\n".join(breakdown_lines)
     
     breakdown_lines = []
     for tag, st in strategy_stats.items():
@@ -986,14 +978,18 @@ def get_unit(tk): return "¥" if tk.endswith(".T") else "$"
 print("⏳ 正在生成歷史宏觀走勢圖表數據...")
 hist_dates = closes.index[-60:]
 
-# 向量化計算歷史市寬
-v_us_tot50 = (closes[us_tickers] > closes[us_tickers].rolling(50).mean()).sum(axis=1) / max(1, len(us_tickers)) * 100
-v_us_idx50 = (closes[us_index_tickers] > closes[us_index_tickers].rolling(50).mean()).sum(axis=1) / max(1, len(us_index_tickers)) * 100
-v_us_idx200 = (closes[us_index_tickers] > closes[us_index_tickers].rolling(200).mean()).sum(axis=1) / max(1, len(us_index_tickers)) * 100
+# 🛡️ 核心修正：利用 ffill() 解決歷史走勢圖休市變 0 的問題
+c_us_valid = closes[us_tickers].ffill()
+c_us_idx_valid = closes[us_index_tickers].ffill()
+v_us_tot50 = (c_us_valid > c_us_valid.rolling(50, min_periods=25).mean()).sum(axis=1) / max(1, len(us_tickers)) * 100
+v_us_idx50 = (c_us_idx_valid > c_us_idx_valid.rolling(50, min_periods=25).mean()).sum(axis=1) / max(1, len(us_index_tickers)) * 100
+v_us_idx200 = (c_us_idx_valid > c_us_idx_valid.rolling(200, min_periods=100).mean()).sum(axis=1) / max(1, len(us_index_tickers)) * 100
 
-v_jp_tot50 = (closes[jp_tickers] > closes[jp_tickers].rolling(50).mean()).sum(axis=1) / max(1, len(jp_tickers)) * 100
-v_jp_idx50 = (closes[jp_index_tickers] > closes[jp_index_tickers].rolling(50).mean()).sum(axis=1) / max(1, len(jp_index_tickers)) * 100
-v_jp_idx200 = (closes[jp_index_tickers] > closes[jp_index_tickers].rolling(200).mean()).sum(axis=1) / max(1, len(jp_index_tickers)) * 100
+c_jp_valid = closes[jp_tickers].ffill()
+c_jp_idx_valid = closes[jp_index_tickers].ffill()
+v_jp_tot50 = (c_jp_valid > c_jp_valid.rolling(50, min_periods=25).mean()).sum(axis=1) / max(1, len(jp_tickers)) * 100
+v_jp_idx50 = (c_jp_idx_valid > c_jp_idx_valid.rolling(50, min_periods=25).mean()).sum(axis=1) / max(1, len(jp_index_tickers)) * 100
+v_jp_idx200 = (c_jp_idx_valid > c_jp_idx_valid.rolling(200, min_periods=100).mean()).sum(axis=1) / max(1, len(jp_index_tickers)) * 100
 
 # 向量化計算歷史派發日
 us_dist_mask = (closes['SPY'].pct_change() < -0.002) & (vols['SPY'] > vols['SPY'].shift(1))
@@ -1007,17 +1003,15 @@ for i, d in enumerate(hist_dates):
     us_open_profit, us_open_loss = 0, 0
     jp_open_profit, jp_open_loss = 0, 0
     
-    # 👇 新增：用來記錄當日 4 種策略的 Open 數量
-    strat_counts = {
-        "VCP": 0,
-        "BB": 0,
-        "GAP": 0,
-        "OVERSOLD": 0
-    }
+    strat_counts = {"VCP": 0, "BB": 0, "GAP": 0, "OVERSOLD": 0}
+    
+    # 🌟 新增：用來記錄截至當日的累積利潤 (Cumulative P&L)
+    cum_pnl = {"VCP": 0, "BB": 0, "GAP": 0, "OVERSOLD": 0}
         
     d_prices = closes.loc[d]
         
     for t in trade_history:
+        # 1. 計算 Open 數量狀態
         if t['date'] <= d_str:
             c_date = t.get('close_date', '9999-99-99')
             if c_date > d_str or t.get('status') == 'OPEN':
@@ -1032,47 +1026,45 @@ for i, d in enumerate(hist_dates):
                         if is_profit: us_open_profit += 1
                         else: us_open_loss += 1
                     
-                    # 👇 新增：按策略分類統計當日持倉數量
                     tag = t.get('tag', '')
                     if 'VCP' in tag: strat_counts['VCP'] += 1
                     elif 'BB' in tag: strat_counts['BB'] += 1
                     elif '缺口' in tag: strat_counts['GAP'] += 1
                     elif '超賣' in tag: strat_counts['OVERSOLD'] += 1
-                
-    # 判斷美股歷史燈號顏色 ... (保持不變)
-    us_c_color = "#22c55e" # 綠燈
-    if closes['SPY'].loc[d] < closes['SPY'].rolling(200).mean().loc[d] or v_us_idx200.loc[d] < 30 or us_hist_dist.loc[d] >= 6:
-        us_c_color = "#ef4444" # 紅燈
-    elif (v_us_idx50.loc[d] > 50 and v_us_tot50.loc[d] < 30) or v_us_idx50.loc[d] < 40 or us_hist_dist.loc[d] >= 4:
-        us_c_color = "#eab308" # 黃燈
+            
+            # 2. 🌟 新增：計算累積 P&L (只計當日或之前已經結案的單)
+            if c_date <= d_str and ('✅' in t.get('status', '') or '❌' in t.get('status', '')):
+                pnl = (10000 / t['px']) * (t['last_px'] - t['px'])
+                tag = t.get('tag', '')
+                if 'VCP' in tag: cum_pnl['VCP'] += pnl
+                elif 'BB' in tag: cum_pnl['BB'] += pnl
+                elif '缺口' in tag: cum_pnl['GAP'] += pnl
+                elif '超賣' in tag: cum_pnl['OVERSOLD'] += pnl
+
+    # 判斷歷史燈號顏色 (保留你原本的邏輯)
+    us_c_color = "#22c55e" 
+    if closes['SPY'].loc[d] < closes['SPY'].rolling(200).mean().loc[d] or v_us_idx200.loc[d] < 30 or us_hist_dist.loc[d] >= 6: us_c_color = "#ef4444"
+    elif (v_us_idx50.loc[d] > 50 and v_us_tot50.loc[d] < 30) or v_us_idx50.loc[d] < 40 or us_hist_dist.loc[d] >= 4: us_c_color = "#eab308"
         
-    # 判斷日股歷史燈號顏色 ... (保持不變)
     jp_c_color = "#22c55e"
-    if closes['^N225'].loc[d] < closes['^N225'].rolling(200).mean().loc[d] or v_jp_idx200.loc[d] < 30 or jp_hist_dist.loc[d] >= 6:
-        jp_c_color = "#ef4444"
-    elif (v_jp_idx50.loc[d] > 50 and v_jp_tot50.loc[d] < 30) or v_jp_idx50.loc[d] < 40 or jp_hist_dist.loc[d] >= 4:
-        jp_c_color = "#eab308"
+    if closes['^N225'].loc[d] < closes['^N225'].rolling(200).mean().loc[d] or v_jp_idx200.loc[d] < 30 or jp_hist_dist.loc[d] >= 6: jp_c_color = "#ef4444"
+    elif (v_jp_idx50.loc[d] > 50 and v_jp_tot50.loc[d] < 30) or v_jp_idx50.loc[d] < 40 or jp_hist_dist.loc[d] >= 4: jp_c_color = "#eab308"
         
-    # 將數據打包 (加入 strat_counts)
     chart_data.append({
         'date': d_str,
-        'us_idx_breadth': round(float(v_us_idx50.loc[d]), 1),
-        'us_tot_breadth': round(float(v_us_tot50.loc[d]), 1),
-        'us_open_profit': us_open_profit,
-        'us_open_loss': us_open_loss,
-        'us_color': us_c_color,
-            
-        'jp_idx_breadth': round(float(v_jp_idx50.loc[d]), 1),
-        'jp_tot_breadth': round(float(v_jp_tot50.loc[d]), 1),
-        'jp_open_profit': jp_open_profit,
-        'jp_open_loss': jp_open_loss,
-        'jp_color': jp_c_color,
+        'us_idx_breadth': round(float(v_us_idx50.loc[d]), 1), 'us_tot_breadth': round(float(v_us_tot50.loc[d]), 1),
+        'us_open_profit': us_open_profit, 'us_open_loss': us_open_loss, 'us_color': us_c_color,
+        'jp_idx_breadth': round(float(v_jp_idx50.loc[d]), 1), 'jp_tot_breadth': round(float(v_jp_tot50.loc[d]), 1),
+        'jp_open_profit': jp_open_profit, 'jp_open_loss': jp_open_loss, 'jp_color': jp_c_color,
         
-        # 👇 新增：匯出策略分佈數據
-        'strat_vcp': strat_counts['VCP'],
-        'strat_bb': strat_counts['BB'],
-        'strat_gap': strat_counts['GAP'],
-        'strat_oversold': strat_counts['OVERSOLD']
+        'strat_vcp': strat_counts['VCP'], 'strat_bb': strat_counts['BB'],
+        'strat_gap': strat_counts['GAP'], 'strat_oversold': strat_counts['OVERSOLD'],
+        
+        # 🌟 新增：匯出累積 P&L 數據
+        'pnl_vcp': round(cum_pnl['VCP'], 2),
+        'pnl_bb': round(cum_pnl['BB'], 2),
+        'pnl_gap': round(cum_pnl['GAP'], 2),
+        'pnl_oversold': round(cum_pnl['OVERSOLD'], 2)
     })
 
 chart_data_str = json.dumps(chart_data)
@@ -1258,6 +1250,13 @@ html = f"""<!DOCTYPE html>
                     <div class="text-[10px] text-slate-500">反映不同市況下的資金流向</div>
                 </div>
                 <div id="chart-exposure" class="h-[300px]"></div>
+            </div>
+            <div class="bg-slate-800/30 p-4 rounded-xl border border-slate-700">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-black text-slate-300">💰 策略累積利潤走勢 (Cumulative P&L)</h3>
+                    <div class="text-[10px] text-slate-500">各策略歷史淨利增長曲線</div>
+                </div>
+                <div id="chart-cumulative-pnl" class="h-[350px]"></div>
             </div>
         </div>
     </main>
@@ -1484,6 +1483,48 @@ html = f"""<!DOCTYPE html>
             
             new ApexCharts(document.querySelector("#chart-exposure"), exposureOptions).render();
 
+            // ==========================================
+            // 👇 貼喺呢度：新增嘅策略累積 P&L 折線圖 (雙括號安全版)
+            // ==========================================
+            const pnlOptions = {{
+                series: [
+                    {{ name: '🏆 VCP 突破', data: chartData.map(d => d.pnl_vcp) }},
+                    {{ name: '💥 BB 擠壓', data: chartData.map(d => d.pnl_bb) }},
+                    {{ name: '⚡ 缺口動能', data: chartData.map(d => d.pnl_gap) }},
+                    {{ name: '📉 極度超賣', data: chartData.map(d => d.pnl_oversold) }}
+                ],
+                chart: {{
+                    type: 'line',
+                    height: 350,
+                    toolbar: {{ show: false }},
+                    background: 'transparent'
+                }},
+                colors: ['#a855f7', '#ec4899', '#3b82f6', '#14b8a6'],
+                dataLabels: {{ enabled: false }},
+                stroke: {{ curve: 'smooth', width: 3 }},
+                legend: {{ position: 'top', labels: {{ colors: '#cbd5e1' }} }},
+                xaxis: {{
+                    categories: dates,
+                    labels: {{ style: {{ colors: '#94a3b8' }} }},
+                    tickAmount: 10
+                }},
+                yaxis: {{
+                    title: {{ text: '累積利潤 ($)', style: {{ color: '#94a3b8' }} }},
+                    labels: {{ 
+                        style: {{ colors: '#94a3b8' }},
+                        formatter: (value) => "$" + value.toLocaleString() 
+                    }}
+                }},
+                theme: {{ mode: 'dark' }},
+                grid: {{ borderColor: '#334155', strokeDashArray: 3 }},
+                tooltip: {{
+                    y: {{ formatter: function (val) {{ return "$" + val.toLocaleString() }} }}
+                }}
+            }};
+            
+            new ApexCharts(document.querySelector("#chart-cumulative-pnl"), pnlOptions).render(); 
+            // ==========================================
+
             chartsRendered = true;
         }}
         
@@ -1548,15 +1589,11 @@ html = f"""<!DOCTYPE html>
             opens.forEach(t => {{
                 let buy_px = t.px;
                 let last_px = t.last_px;
-                if (t.partial_tp_hit) {{
-                    let initial_risk = buy_px - (t.initial_sl || buy_px);
-                    let tp1_price = buy_px + (initial_risk * 2);
-                    let pnl_closed = (5000 / buy_px) * (tp1_price - buy_px);
-                    let pnl_floating = (5000 / buy_px) * (last_px - buy_px);
-                    totalOpenPnl += (pnl_closed + pnl_floating);
-                }} else {{
-                    totalOpenPnl += (10000 / buy_px) * (last_px - buy_px);
-                }}
+                // 混合會計公式：即使已部分平倉，依舊能準確反映倉位總浮動價值
+                let pnl = t.partial_tp_hit ? 
+                    ((5000 / buy_px) * (buy_px + (buy_px - t.initial_sl)*2 - buy_px) + (5000 / buy_px) * (last_px - buy_px)) :
+                    (10000 / buy_px) * (last_px - buy_px);
+                totalOpenPnl += pnl;
             }});
 
             const winRate = closeds.length > 0 ? ((wins / closeds.length) * 100).toFixed(1) : 0;
