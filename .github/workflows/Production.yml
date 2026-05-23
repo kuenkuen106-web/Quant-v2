@@ -46,10 +46,15 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          # 🌟 核心修正：強制移除可能產生的大檔案，避免觸發 Push 限制
-          git rm -f docs/UAT/market_data_cache.pkl || echo "No cache file to remove"
+          # 1. 強制設定忽略清單，確保 Git 永遠唔會理個 pkl 檔
+          echo "market_data_cache.pkl" > docs/UAT/.gitignore
           
-          # 🌟 只 add 網頁必要檔案，確保 git commit 不會包含任何大檔
+          # 2. 將所有 docs 裡面嘅改動加入暫存區 (而家有 gitignore 保護，好安全)
           git add docs/
+          
+          # 3. 🌟 關鍵修正：拉取 (Pull) 遠端最新代碼，防止與網頁版手動修改產生衝突
+          git pull origin main --rebase
+          
+          # 4. 提交變更並推送
           git commit -m "Auto-update Dashboard - Production" || echo "No changes to commit"
           git push
