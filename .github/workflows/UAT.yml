@@ -62,12 +62,15 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          # 1. 強制加入 .gitignore 防止大檔被 add
+          # 1. 強制設定忽略清單，確保 Git 永遠唔會理個 pkl 檔
           echo "market_data_cache.pkl" > docs/UAT/.gitignore
           
-          # 2. 只 add dashboard 相關檔案，明確避開 pkl 檔
-          git add docs/index.html
-          git add docs/charts/
+          # 2. 將所有 docs 裡面嘅改動加入暫存區
+          git add docs/
           
+          # 3. 🌟 關鍵修正：拉取 (Pull) 遠端最新代碼，解決網頁版刪除檔案帶來嘅衝突
+          git pull origin main --rebase
+          
+          # 4. 提交變更並推送
           git commit -m "Auto-update Dashboard" || echo "No changes to commit"
           git push
