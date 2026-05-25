@@ -54,7 +54,7 @@ def send_discord_alert(ticker, strategy_name, price, sl, tp, is_bullish, sources
     source_str = " | ".join(sources) if sources else "動態掃描"
     color = 65280 if is_bullish else 16711680 
     
-    # 🌟 統一：所有策略一律顯示分注平倉文字
+    # 🌟 核心修正：徹底刪除舊的 if/else，強制所有策略都採用分注文字！
     tp1_price = round(price + (initial_risk * 2), 2) if initial_risk else tp
     type_str = "**波段建倉 (Swing)**" if strategy_name in ["🏆 VCP 突破", "💥 BB 擠壓"] else "**短線游擊 (Short Term)**"
     action_text = f"{type_str}\n1️⃣ **TP1 (+2R):** `{unit}{tp1_price}` (平倉 50% 並保本)\n2️⃣ **TP2 (Trail):** 跌穿 20日新低清倉"
@@ -66,6 +66,7 @@ def send_discord_alert(ticker, strategy_name, price, sl, tp, is_bullish, sources
         "fields": [
             {"name": "💵 當前現價", "value": f"{unit}{price}", "inline": True},
             {"name": "🛑 初始止損", "value": f"{unit}{sl}", "inline": True},
+            # 統一輸出上面的 action_text
             {"name": "⚙️ 離場策略", "value": action_text, "inline": False}
         ],
         "footer": {"text": "V1 Quant Master 實時監控系統"}
@@ -510,7 +511,8 @@ for trade in trade_history:
             today_low = float(current_lows[tk])
             buy_px = trade.get('px')
             strat_tag = trade.get('tag', '')
-            
+            trade['last_px'] = now_px
+
             if now_px > buy_px * 10 or now_px < buy_px * 0.1: continue
             if 'partial_tp_hit' not in trade: trade['partial_tp_hit'] = False
             if 'initial_sl' not in trade: trade['initial_sl'] = trade['sl']
@@ -1291,6 +1293,7 @@ html = f"""<!DOCTYPE html>
                         <thead class="text-slate-500 uppercase border-b border-slate-700 bg-slate-800/50">
                             <tr>
                                 <th class="p-2">日期</th><th class="p-2">代號</th><th class="p-2">策略</th>
+                                <th class="p-2 text-center">持倉狀態</th>
                                 <th class="p-2">進場指標</th><th class="p-2">現時指標</th>
                                 <th class="p-2">買入價</th><th class="p-2">止損</th><th class="p-2">止盈</th><th class="p-2">現價</th>
                                 <th class="p-2 text-right">浮動 P&L</th><th class="p-2 text-right">回報 (%)</th>
@@ -1736,6 +1739,12 @@ html = f"""<!DOCTYPE html>
                     <td class="p-2">${{t.date}}</td>
                     <td class="p-2 font-bold text-white">${{t.tk}}</td>
                     <td class="p-2"><span class="text-[9px] bg-slate-700 px-1 rounded">${{t.tag || 'N/A'}}</span></td>
+                    <td class="p-2 text-center">
+                        ${{t.partial_tp_hit 
+                            ? '<span class="text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-500/20 text-[10px] font-black">🎯 50% 已止盈 (放飛中)</span>' 
+                            : '<span class="text-cyan-400 bg-cyan-400/10 px-2 py-0.5 rounded border border-cyan-500/20 text-[10px] font-black">⏳ 100% 正常持倉中</span>'
+                        }}
+                    </td>
                     <td class="p-2 text-[10px] font-mono text-slate-400">${{t.entry_metric || '-'}}</td>
                     <td class="p-2 text-[10px] font-mono font-bold ${{metricStatus}}">${{t.curr_metric || '-'}}</td>
                     <td class="p-2">${{unit}}${{t.px}}</td>
