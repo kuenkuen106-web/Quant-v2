@@ -49,12 +49,14 @@ jobs:
           # 1. 強制設定忽略清單，確保 Git 永遠唔會理個 pkl 檔
           echo "market_data_cache.pkl" > docs/UAT/.gitignore
           
-          # 2. 將所有 docs 裡面嘅改動加入暫存區 (而家有 gitignore 保護，好安全)
+          # 2. 將所有 docs 裡面嘅改動加入暫存區
           git add docs/
           
-          # 3. 🌟 關鍵修正：拉取 (Pull) 遠端最新代碼，防止與網頁版手動修改產生衝突
+          # 3. 🌟 關鍵修正：先 Commit (打包存檔)，清空工作台
+          git commit -m "Auto-update Dashboard - Production" || echo "No changes to commit"
+          
+          # 4. 🌟 然後先 Pull (拉取代碼)，工作台乾淨咗，Rebase 就能完美融合
           git pull origin main --rebase
           
-          # 4. 提交變更並推送
-          git commit -m "Auto-update Dashboard - Production" || echo "No changes to commit"
+          # 5. 提交變更並推送
           git push
