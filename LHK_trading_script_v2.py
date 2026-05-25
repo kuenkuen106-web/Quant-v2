@@ -44,14 +44,10 @@ def send_discord_alert(ticker, strategy_name, price, sl, tp, is_bullish, sources
     source_str = " | ".join(sources) if sources else "動態掃描"
     color = 65280 if is_bullish else 16711680 
     
-    # 策略特製文字
-    if strategy_name in ["🏆 VCP 突破", "💥 BB 擠壓"]:
-        # 波段策略：顯示 Scale-out 策略
-        tp1_price = round(price + (initial_risk * 2), 2) if initial_risk else tp
-        action_text = f"**波段建倉 (Swing)**\n1️⃣ **TP1 (+2R):** `{unit}{tp1_price}` (平倉 50% 並保本)\n2️⃣ **TP2 (Trail):** 跌穿 20日新低清倉"
-    else:
-        # 短線策略：顯示固定 TP
-        action_text = f"**短線游擊 (Short Term)**\n🎯 **固定止盈:** `{unit}{tp}` (到達即全數平倉)"
+    # 🌟 統一：所有策略一律顯示分注平倉文字
+    tp1_price = round(price + (initial_risk * 2), 2) if initial_risk else tp
+    type_str = "**波段建倉 (Swing)**" if strategy_name in ["🏆 VCP 突破", "💥 BB 擠壓"] else "**短線游擊 (Short Term)**"
+    action_text = f"{type_str}\n1️⃣ **TP1 (+2R):** `{unit}{tp1_price}` (平倉 50% 並保本)\n2️⃣ **TP2 (Trail):** 跌穿 20日新低清倉"
     
     embed_data = {
         "title": f"🚨 系統異動觸發: {ticker}",
@@ -384,16 +380,19 @@ us_tickers = [t for t in closes.columns if not str(t).endswith('.T') and t not i
 us_index_tickers = [tk for tk, sources in TICKER_MAP.items() if any(s in ['S&P500_大盤', 'S&P500'] for s in sources) and tk in closes.columns]
 jp_index_tickers = [tk for tk, sources in TICKER_MAP.items() if any(s in ['NK225', 'TOPIX100'] for s in sources) and tk in closes.columns]
 
-# 👇 極速向量化計算矩陣市寬 (Vectorised Breadth Matrix) - 自動跨越休市版
+# 👇 極速向量化計算矩陣市寬 (Vectorised Breadth Matrix) - 終極防禦版
 def calc_matrix(all_tks, idx_tks):
     valid_all = [t for t in all_tks if t in closes.columns]
     valid_idx = [t for t in idx_tks if t in closes.columns]
     
-    if not valid_all or len(valid_idx) < 50: 
+    # 🛡️ 核心修正：如果維基百科大盤名單抓取失敗 (<50隻)，強制用全體股票名單頂上，避免 0% 慘劇！
+    if len(valid_idx) < 50:
+        valid_idx = valid_all
+        
+    if not valid_all or len(valid_all) < 50: 
         return {'total_20ma_pct': 0, 'total_50ma_pct': 0, 'index_50ma_pct': 0, 'index_200ma_pct': 0}
     
-    # 🛡️ 核心修正：徹底過濾當日休市 (全 NaN) 的行。
-    # 如果今天是日股假期，c_all 會自動退回上一個有交易的日子！
+    # 過濾當日休市 (全 NaN) 的行，自動退回上一個有效交易日
     c_all = closes[valid_all].dropna(how='all')
     c_idx = closes[valid_idx].dropna(how='all')
     
@@ -404,7 +403,7 @@ def calc_matrix(all_tks, idx_tks):
     last_c_all = c_all.iloc[-1]
     last_c_idx = c_idx.iloc[-1]
     
-    # 計算 MA (因為已過濾休市日，MA 不會被 NaN 干擾)
+    # 計算 MA
     ma20_all = c_all.rolling(20, min_periods=10).mean().iloc[-1]
     ma50_all = c_all.rolling(50, min_periods=25).mean().iloc[-1]
     ma50_idx = c_idx.rolling(50, min_periods=25).mean().iloc[-1]
@@ -757,7 +756,8 @@ for ticker in valid_tickers:
             
             if is_gap_up or is_oversold:
                 tag_name = "⚡ 缺口動能" if is_gap_up else "📉 極度超賣"
-                sl_p, tp_p = round(cp * 0.95, 2), round(cp * 1.05, 2)
+                # 🌟 將 tp_p 改為 1.15 (+15%)，這樣股價升到 +10% (2R) 時就會觸發 50% 分注，剩餘的放到 15% 或跌穿 20MA
+                sl_p, tp_p = round(cp * 0.95, 2), round(cp * 1.15, 2)
                 risk_per_share = cp - sl_p
                 entry_metric = f"RSI: {int(rsi_val)}" if is_oversold else f"RS: {int(rs)}"
                 
@@ -939,7 +939,7 @@ if DISCORD_SUMMARY_WEBHOOK:
     payload = {
         "embeds": [{
             "title": f"📊 系統戰績與 3D 矩陣雷達 ({today_str})", 
-            "description": f"**今日結案動態:**\n{details_text}\n{group_summary_text}\n**🔍 各策略歷史表現:**\n{breakdown_text}",
+            "description": f"**今日結案動態:**\n{details_text}\n{group_summary_text}\n\n**🔍 各策略歷史表現:**\n{breakdown_text}",
             "color": final_color,
             "fields": [
                 {"name": "🇺🇸 美股 (SPX vs Total)", "value": us_macro_str, "inline": True},
@@ -1791,7 +1791,12 @@ html = f"""<!DOCTYPE html>
                     <td class="p-2 font-bold text-white">${{t.tk}}</td>
                     <td class="p-2 text-[10px] text-slate-400">${{t.tag || 'N/A'}}</td>
                     <td class="p-2 text-[10px] font-mono text-indigo-300">${{t.entry_metric || '-'}}</td>
-                    <td class="p-2">${{isWin ? '🎯 止盈' : '🛑 止損'}}</td>
+                    <td class="p-2">${{(() => {{
+                        if (t.status.includes("MAX TP")) return '<span class="text-fuchsia-400 font-bold">🏆 終極止賺</span>';
+                        if (t.status.includes("TRAIL EXIT")) return '<span class="text-blue-400 font-bold">🚀 放飛平倉</span>';
+                        if (t.status.includes("✅")) return '<span class="text-emerald-400 font-bold">🎯 止盈</span>';
+                        return '<span class="text-red-400 font-bold">🛑 止損</span>';
+                    }})()}}</td>
                     <td class="p-2">${{unit}}${{t.px}}</td>
                     <td class="p-2 text-white font-bold">${{unit}}${{t.last_px}}</td>
                     <td class="p-2 text-right font-black font-mono ${{pColor}}">${{pnl >= 0 ? '+' : ''}}${{pnl.toFixed(2)}}</td>
