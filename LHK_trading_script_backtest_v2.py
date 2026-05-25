@@ -57,7 +57,7 @@ def send_discord_alert(ticker, strategy_name, price, sl, tp, is_bullish, sources
     # 🌟 核心修正：徹底刪除舊的 if/else，強制所有策略都採用分注文字！
     tp1_price = round(price + (initial_risk * 2), 2) if initial_risk else tp
     type_str = "**波段建倉 (Swing)**" if strategy_name in ["🏆 VCP 突破", "💥 BB 擠壓"] else "**短線游擊 (Short Term)**"
-    action_text = f"{type_str}\n1️⃣ **TP1 (+2R):** `{unit}{tp1_price}` (平倉 50% 並保本)\n2️⃣ **TP2 (Trail):** 跌穿 20日新低清倉"
+    action_text = f"{type_str}\n1️⃣ **TP1 (+2R):** `{unit}{tp1_price}` (平倉 50% 並保本)\n2️⃣ **TP2 (Trail):** 跌穿 20日新低清倉\n3️⃣ **Max TP:** `{unit}{tp}` (全數強制平倉)"
     
     embed_data = {
         "title": f"🚨 系統異動觸發: {ticker}",
