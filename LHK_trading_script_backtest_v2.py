@@ -821,42 +821,34 @@ if DISCORD_SUMMARY_WEBHOOK:
             
     floating_str = f"+${floating_pnl:.2f}" if floating_pnl >= 0 else f"-${abs(floating_pnl):.2f}"
 
-    # 3. 細分策略 P&L 結算 (3-Way 結局拆解)
+    # 3. 細分策略 P&L 結算 (歷史總計 - 強制清洗並排序)
     strategy_stats = {}
     for t in [x for x in trade_history if '✅' in x['status'] or '❌' in x['status']]:
         raw_tag = t.get('tag', '未分類')
-        base_name = raw_tag.replace(' (🎯已分注平倉)', '').replace(raw_tag.split(' ')[0], '').strip()
         
-        if base_name not in strategy_stats: 
-            strategy_stats[base_name] = {'icon': raw_tag.split(' ')[0], 'total': 0, 'pnl': 0, 'sl_c': 0, 'sl_p': 0, 'tp_c': 0, 'tp_p': 0, 'tr_c': 0, 'tr_p': 0}
+        # 🧹 清洗標籤：統一合併分注與全平倉的數據
+        clean_tag = raw_tag.replace(' (🎯已分注平倉)', '').replace(' (已分注平倉)', '').replace(' (🎯已部分平倉)', '').strip()
+        
+        if clean_tag not in strategy_stats: 
+            strategy_stats[clean_tag] = {'total': 0, 'wins': 0, 'pnl': 0}
             
         trade_pnl = (10000 / t['px']) * (t['last_px'] - t['px'])
-        status = t['status']
-        strategy_stats[base_name]['total'] += 1
-        strategy_stats[base_name]['pnl'] += trade_pnl
-            
-        if '❌' in status:
-            strategy_stats[base_name]['sl_c'] += 1; strategy_stats[base_name]['sl_p'] += trade_pnl
-        elif 'MAX TP' in status:
-            strategy_stats[base_name]['tp_c'] += 1; strategy_stats[base_name]['tp_p'] += trade_pnl
-        elif 'TRAIL EXIT' in status:
-            strategy_stats[base_name]['tr_c'] += 1; strategy_stats[base_name]['tr_p'] += trade_pnl
+        strategy_stats[clean_tag]['total'] += 1
+        strategy_stats[clean_tag]['pnl'] += trade_pnl
+        if '✅' in t['status']:
+            strategy_stats[clean_tag]['wins'] += 1
 
     breakdown_lines = []
-    for n, st in strategy_stats.items():
-        w_rate = round(((st['tp_c'] + st['tr_c']) / st['total']) * 100, 1)
-        breakdown_lines.append(f"> {st['icon']} **{n}** ➔ 勝率: `{w_rate:>4}%` | 淨利: `+${st['pnl']:,.0f}` | 總數: `{st['total']:>3}單`")
-        breakdown_lines.append(f"> 　 ↳ 🛑 中止損: `{st['sl_c']:>2}單` (`+${st['sl_p']:,.0f}`) | 🎯 到止賺: `{st['tp_c']:>2}單` (`+${st['tp_p']:,.0f}`)")
-        breakdown_lines.append(f"> 　 ↳ 🚀 放飛　: `{st['tr_c']:>2}單` (`+${st['tr_p']:,.0f}`) \n> ")
-    breakdown_text = "\n".join(breakdown_lines)
     
-    breakdown_lines = []
-    for tag, st in strategy_stats.items():
+    # 🔠 關鍵修正：使用 sorted() 強制按策略名稱 (tag) 排序
+    sorted_stats = sorted(strategy_stats.items(), key=lambda x: x[0])
+    
+    for tag, st in sorted_stats:
         w_rate = round((st['wins'] / st['total']) * 100, 1) if st['total'] > 0 else 0
         pnl_s = f"+${st['pnl']:.0f}" if st['pnl'] >= 0 else f"-${abs(st['pnl']):.0f}"
         breakdown_lines.append(f"**{tag}**: {w_rate}% 勝率 | P&L: {pnl_s} ({st['total']}單)")
-    breakdown_text = "\n".join(breakdown_lines) if breakdown_lines else "尚無足夠結案數據。"
-
+        
+    breakdown_text = "\n".join(breakdown_lines) if breakdown_lines else "尚無足夠結案數據。"    
     # ==========================================
     # 👇 搬上嚟：多維度分組對帳邏輯 (Market x Strategy)
     # ==========================================
