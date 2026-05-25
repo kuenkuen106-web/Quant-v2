@@ -68,9 +68,11 @@ jobs:
           # 2. 將所有 docs 裡面嘅改動加入暫存區
           git add docs/
           
-          # 3. 🌟 關鍵修正：拉取 (Pull) 遠端最新代碼，解決網頁版刪除檔案帶來嘅衝突
+          # 3. 🌟 關鍵修正：先 Commit！將本地變更正式打包，清空工作台
+          git commit -m "Auto-update Dashboard" || echo "No changes to commit"
+          
+          # 4. 🌟 然後先 Pull：因為工作台乾淨咗，Rebase 會完美將遠端嘅改動攝入去你個 Commit 之前
           git pull origin main --rebase
           
-          # 4. 提交變更並推送
-          git commit -m "Auto-update Dashboard" || echo "No changes to commit"
+          # 5. 提交變更並推送
           git push
