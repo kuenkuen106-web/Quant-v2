@@ -1389,7 +1389,10 @@ html = f"""<!DOCTYPE html>
                     }},
                     // 👇 定義顏色：[大盤線, 全市虛線, Profit柱, Loss柱]
                     colors: ['#f59e0b', '#06b6d4', '#22c55e', '#ef4444'], // 橙色, 湖水綠, 綠色, 紅色
-                    annotations: {{ xaxis: annotations }},
+                    annotations: {{ 
+                        position: 'back', 
+                        xaxis: annotations 
+                    }},
                     xaxis: {{ categories: dates, labels: {{ style: {{ colors: '#94a3b8' }} }}, tickAmount: 10 }},
                     yaxis: [
                         {{ 
