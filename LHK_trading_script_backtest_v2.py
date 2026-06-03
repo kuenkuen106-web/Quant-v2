@@ -816,10 +816,10 @@ if DISCORD_SUMMARY_WEBHOOK:
     detail_lines = []
     if closed_this_run:
         for t in closed_this_run:
-            icon = "🟢" if pnl >= 0 else "🔴"
             shares = 10000 / t['px']
             pnl = shares * (t['last_px'] - t['px'])
             pnl_str = f"+${pnl:.2f}" if pnl >= 0 else f"-${abs(pnl):.2f}"
+            icon = "🟢" if pnl >= 0 else "🔴"
             detail_lines.append(f"{icon} **{t['tk']}** ({t.get('tag', 'N/A')}): {pnl_str}")
     details_text = "\n".join(detail_lines) if detail_lines else "今日無新結案交易。"
 
