@@ -48,16 +48,17 @@ SIMULATE_DAYS_AGO = int(raw_days)
 # =============================================================================
 # 功能函數區
 # =============================================================================
-def send_discord_alert(ticker, strategy_name, price, sl, tp, is_bullish, sources, initial_risk=None):
+def send_discord_alert(ticker, strategy_name, price, sl, tp, is_bullish, sources, tp1_price=None):
     if not DISCORD_WEBHOOK_URL: return
     unit = "¥" if ticker.endswith(".T") else "$"
     source_str = " | ".join(sources) if sources else "動態掃描"
     color = 65280 if is_bullish else 16711680 
     
-    # 🌟 核心修正：徹底刪除舊的 if/else，強制所有策略都採用分注文字！
-    tp1_price = round(price + (initial_risk * 2), 2) if initial_risk else tp
     type_str = "**波段建倉 (Swing)**" if strategy_name in ["🏆 VCP 突破", "💥 BB 擠壓"] else "**短線游擊 (Short Term)**"
-    action_text = f"{type_str}\n1️⃣ **TP1 (+2R):** `{unit}{tp1_price}` (平倉 50% 並保本)\n2️⃣ **TP2 (Trail):** 跌穿 20日新低清倉\n3️⃣ **Max TP:** `{unit}{tp}` (全數強制平倉)"
+    trail_str = "跌穿 5日新低" if "短線" in type_str else "跌穿 20日新低"
+    tp1_val = tp1_price if tp1_price else tp
+    
+    action_text = f"{type_str}\n1️⃣ **TP1:** `{unit}{tp1_val}` (平倉 50% 並保本)\n2️⃣ **TP2 (Trail):** {trail_str}清倉\n3️⃣ **Max TP:** `{unit}{tp}` (全數強制平倉)"
     
     embed_data = {
         "title": f"🚨 系統異動觸發: {ticker}",
@@ -66,7 +67,6 @@ def send_discord_alert(ticker, strategy_name, price, sl, tp, is_bullish, sources
         "fields": [
             {"name": "💵 當前現價", "value": f"{unit}{price}", "inline": True},
             {"name": "🛑 初始止損", "value": f"{unit}{sl}", "inline": True},
-            # 統一輸出上面的 action_text
             {"name": "⚙️ 離場策略", "value": action_text, "inline": False}
         ],
         "footer": {"text": "V1 Quant Master 實時監控系統"}
@@ -500,6 +500,7 @@ current_prices = closes.iloc[-1].to_dict()
 current_highs = highs.iloc[-1].to_dict()   # 引入全日最高價
 current_lows = lows.iloc[-1].to_dict()     # 引入全日最低價
 dict_low20 = lows.rolling(20).min().iloc[-1].to_dict()
+dict_low5 = lows.rolling(5).min().iloc[-1].to_dict()
 closed_this_run = []
 
 for trade in trade_history:
@@ -518,13 +519,16 @@ for trade in trade_history:
             if 'initial_sl' not in trade: trade['initial_sl'] = trade['sl']
             
             initial_risk = buy_px - trade['initial_sl']
-            tp1_price = round(buy_px + (initial_risk * 2), 2)
+            is_short_term = ('缺口' in strat_tag or '超賣' in strat_tag)
             
-            # --- 分注平倉 (所有策略適用) ---
+            # 👇 讀取專屬的 TP1 價格 (相容舊紀錄)
+            tp1_price = trade.get('tp1_price', round(buy_px + (initial_risk * 2), 2))
+            
+            # --- 分注平倉 ---
             if not trade['partial_tp_hit'] and today_high >= tp1_price and initial_risk > 0:
                 trade['partial_tp_hit'] = True
                 trade['sl'] = buy_px
-                print(f"🎯 [分注系統] {tk} 觸發 TP1，保本鎖定。")
+                print(f"🎯 [分注系統] {tk} 觸發 TP1 ({tp1_price})，保本鎖定。")
 
             # --- 最終結案判定 (3-Way Classification) ---
             tp, sl = trade.get('tp'), trade.get('sl')
@@ -532,9 +536,11 @@ for trade in trade_history:
             hit_sl = sl and today_low <= sl
             
             if trade['partial_tp_hit']:
-                tk_low20 = dict_low20.get(tk, today_low)
-                if today_low <= tk_low20:
-                    trade['last_px'] = round((tp1_price + max(today_low, tk_low20)) / 2, 2)
+                # 🌟 改善三：雙軌放飛制 (短線 5 日，波段 20 日)
+                tk_trail_low = dict_low5.get(tk, today_low) if is_short_term else dict_low20.get(tk, today_low)
+                
+                if today_low <= tk_trail_low:
+                    trade['last_px'] = round((tp1_price + max(today_low, tk_trail_low)) / 2, 2)
                     trade['status'], trade['close_date'] = '✅ TRAIL EXIT', today_str
                     closed_this_run.append(trade)
                 elif hit_tp:
@@ -700,21 +706,30 @@ for ticker in valid_tickers:
         entry_metric = ""
 
         # 🛡️ 優化 2：放寬大盤大閘。只要不是「🔴防禦熊市」而且不是「🟡派發警告」，系統即通行
-        if (is_vcp or is_bb_sqz) and ('🔴' not in ticker_macro) and ('派發警告' not in ticker_macro):
-            tag_name = "🏆 VCP 突破" if is_vcp else "💥 BB 擠壓"
+        # 🌟 提取燈號狀態
+        is_red_light = '🔴' in ticker_macro
+        is_yellow_light = '🟡' in ticker_macro
+
+        if (is_vcp or is_bb_sqz):
+            # ⛔ 改善二 (煞車)：紅燈嚴禁任何波段新建倉！
+            if is_red_light: continue 
             
-            # 🛡️ 優化 3：將原始止損由 2.5 ATR 縮緊至 1.5 ATR (精準截斷虧損)
+            tag_name = "🏆 VCP 突破" if is_vcp else "💥 BB 擠壓"
             sl_p = round(cp - 1.5 * catr, 2)
-            tp_p = round(cp + 4.5 * catr, 2) # 4.5 ATR 保持作為終極利潤天花板
+            tp_p = round(cp + 4.5 * catr, 2) 
             risk_per_share = cp - sl_p
             entry_metric = f"RS: {int(rs)}"
             
+            # ⚖️ 改善二 (動態目標)：黃燈降溫，+1R 就食第一注
+            target_r = 1.0 if is_yellow_light else 2.0
+            tp1_price = round(cp + (risk_per_share * target_r), 2)
+            
             swing_results.append({'tk': ticker, 'rs': round(rs,0), 'mom': round(rs_mom,1), 'px': round(cp,2), 'sl': sl_p, 'tp': tp_p, 'tag': tag_name})
             
-            # 🔔 關鍵：將 initial_sl 寫入 trade_info，確保時光機下一日能夠鎖定初始風險金額
+            # 🔔 將 tp1_price 存入系統
             trade_info = {
                 'date': today_str, 'tk': ticker, 'px': round(cp, 2), 
-                'sl': sl_p, 'tp': tp_p, 'initial_sl': sl_p, 
+                'sl': sl_p, 'tp': tp_p, 'initial_sl': sl_p, 'tp1_price': tp1_price,
                 'last_px': round(cp, 2), 'status': 'OPEN', 'tag': tag_name, 
                 'entry_metric': entry_metric, 'curr_metric': entry_metric
             }
@@ -742,17 +757,24 @@ for ticker in valid_tickers:
             
             if is_gap_up or is_oversold:
                 tag_name = "⚡ 缺口動能" if is_gap_up else "📉 極度超賣"
-                # 🌟 將 tp_p 改為 1.15 (+15%)，這樣股價升到 +10% (2R) 時就會觸發 50% 分注，剩餘的放到 15% 或跌穿 20MA
                 sl_p, tp_p = round(cp * 0.95, 2), round(cp * 1.15, 2)
                 risk_per_share = cp - sl_p
                 entry_metric = f"RSI: {int(rsi_val)}" if is_oversold else f"RS: {int(rs)}"
                 
+                # ⚡ 改善一 (降目標)：短線游擊太難中，一律降至 +1R (5%) 食第一注
+                tp1_price = round(cp + (risk_per_share * 1.0), 2)
+                
                 short_term_results.append({'tk': ticker, 'rs': round(rs,0), 'mom': round(rs_mom,1), 'px': round(cp,2), 'sl': sl_p, 'tp': tp_p, 'tag': tag_name})
-                trade_info = {'date': today_str, 'tk': ticker, 'px': round(cp, 2), 'sl': sl_p, 'tp': tp_p, 'last_px': round(cp, 2), 'status': 'OPEN', 'tag': tag_name, 'entry_metric': entry_metric, 'curr_metric': entry_metric}
+                trade_info = {
+                    'date': today_str, 'tk': ticker, 'px': round(cp, 2), 
+                    'sl': sl_p, 'tp': tp_p, 'initial_sl': sl_p, 'tp1_price': tp1_price,
+                    'last_px': round(cp, 2), 'status': 'OPEN', 'tag': tag_name, 
+                    'entry_metric': entry_metric, 'curr_metric': entry_metric
+                }
 
         if trade_info:
-            # 傳入 initial_risk (即係 cp - sl_p) 畀 Discord 計算 TP1 價位
-            send_discord_alert(ticker, tag_name, round(cp, 2), sl_p, tp_p, True, [], initial_risk=risk_per_share)
+            # 呼叫 Discord 時傳入專屬的 tp1_price
+            send_discord_alert(ticker, tag_name, round(cp, 2), sl_p, tp_p, True, [], tp1_price=tp1_price)
             if not any(t.get('tk') == ticker and t.get('status') == 'OPEN' for t in trade_history):
                  trade_history.append(trade_info)
             
@@ -766,9 +788,9 @@ for ticker in valid_tickers:
 
 swing_results.sort(key=lambda x: x['rs'], reverse=True)
 short_term_results.sort(key=lambda x: x['rs'], reverse=True)
-
-# 保留 2000 條紀錄以確保歷史倉位對帳準確
-with open(HISTORY_FILE, "w", encoding="utf-8") as f: json.dump(trade_history[-2000:], f, indent=4)
+ 
+# 保留 5000 條紀錄以確保歷史倉位對帳準確
+with open(HISTORY_FILE, "w", encoding="utf-8") as f: json.dump(trade_history[-5000:], f, indent=4)
 
 # =============================================================================
 # MODULE 6 — 總結算與 Discord 報告
@@ -1575,8 +1597,9 @@ html = f"""<!DOCTYPE html>
                 let buy_px = t.px;
                 let last_px = t.last_px;
                 // 混合會計公式：即使已部分平倉，依舊能準確反映倉位總浮動價值
+                let tp1 = t.tp1_price || (buy_px + (buy_px - t.initial_sl)*2); // 相容舊單
                 let pnl = t.partial_tp_hit ? 
-                    ((5000 / buy_px) * (buy_px + (buy_px - t.initial_sl)*2 - buy_px) + (5000 / buy_px) * (last_px - buy_px)) :
+                    ((5000 / buy_px) * (tp1 - buy_px) + (5000 / buy_px) * (last_px - buy_px)) :
                     (10000 / buy_px) * (last_px - buy_px);
                 totalOpenPnl += pnl;
             }});
@@ -1714,8 +1737,7 @@ html = f"""<!DOCTYPE html>
                 let last_px = t.last_px;
                 
                 if (t.partial_tp_hit) {{
-                    let initial_risk = buy_px - (t.initial_sl || buy_px);
-                    let tp1_price = buy_px + (initial_risk * 2);
+                    let tp1_price = t.tp1_price || (buy_px + (buy_px - (t.initial_sl || buy_px)) * 2);
                     let pnl_closed = (5000 / buy_px) * (tp1_price - buy_px);
                     let pnl_floating = (5000 / buy_px) * (last_px - buy_px);
                     pnl = pnl_closed + pnl_floating; // 混合真實利潤
