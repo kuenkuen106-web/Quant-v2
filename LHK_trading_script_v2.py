@@ -41,7 +41,11 @@ MAX_ACCOUNT_RISK_PCT = 0.01 # 每單最多虧損總資金的 1%
 def send_discord_alert(ticker, strategy_name, price, sl, tp, is_bullish, sources, tp1_price=None):
     if not DISCORD_WEBHOOK_URL: return
     unit = "¥" if ticker.endswith(".T") else "$"
-    source_str = " | ".join(sources) if sources else "動態掃描"
+    if sources:
+        clean_sources = [f"#{s.replace('&', '').replace(' ', '_')}" for s in sources]
+        source_str = " ".join(clean_sources)
+    else:
+        source_str = "#動態掃描"
     color = 65280 if is_bullish else 16711680 
     
     type_str = "**波段建倉 (Swing)**" if strategy_name in ["🏆 VCP 突破", "💥 BB 擠壓"] else "**短線游擊 (Short Term)**"
@@ -789,8 +793,10 @@ for ticker in valid_tickers:
                 }
                 
         if trade_info:
+            # 👇 由 TICKER_MAP 抽返隻股到底屬於邊幾個名單
+            ticker_sources = TICKER_MAP.get(ticker, [])
             # 呼叫 Discord 時傳入專屬的 tp1_price
-            send_discord_alert(ticker, tag_name, round(cp, 2), sl_p, tp_p, True, [], tp1_price=tp1_price)
+            send_discord_alert(ticker, tag_name, round(cp, 2), sl_p, tp_p, True, ticker_sources, tp1_price=tp1_price)
             if not any(t.get('tk') == ticker and t.get('status') == 'OPEN' for t in trade_history):
                  trade_history.append(trade_info)
             
@@ -805,8 +811,8 @@ for ticker in valid_tickers:
 swing_results.sort(key=lambda x: x['rs'], reverse=True)
 short_term_results.sort(key=lambda x: x['rs'], reverse=True)
 
-# 保留 5000 條紀錄以確保歷史倉位對帳準確
-with open(HISTORY_FILE, "w", encoding="utf-8") as f: json.dump(trade_history[-5000:], f, indent=4)
+# 保留 20000 條紀錄以確保歷史倉位對帳準確
+with open(HISTORY_FILE, "w", encoding="utf-8") as f: json.dump(trade_history[-20000:], f, indent=4)
 
 # =============================================================================
 # MODULE 6 — 總結算與 Discord 報告
@@ -826,7 +832,7 @@ if DISCORD_SUMMARY_WEBHOOK:
     detail_lines = []
     if closed_this_run:
         for t in closed_this_run:
-            icon = "🎯" if "TAKE PROFIT" in t['status'] else "🛑"
+            icon = "🟢" if pnl >= 0 else "🔴"
             shares = 10000 / t['px']
             pnl = shares * (t['last_px'] - t['px'])
             pnl_str = f"+${pnl:.2f}" if pnl >= 0 else f"-${abs(pnl):.2f}"
@@ -966,6 +972,7 @@ if DISCORD_SUMMARY_WEBHOOK:
             "description": f"**今日結案動態:**\n{details_text}\n{group_summary_text}\n\n**🔍 各策略歷史表現:**\n{breakdown_text}",
             "color": final_color,
             "fields": [
+                {"name": '\u200b', "value": '\u200b', "inline": False},
                 {"name": "🇺🇸 美股 (SPX vs Total)", "value": us_macro_str, "inline": True},
                 {"name": "🇯🇵 日股 (N225 vs Total)", "value": jp_macro_str, "inline": True},
                 {"name": '\u200b', "value": '\u200b', "inline": False},
