@@ -226,15 +226,15 @@
         "date": "2026-05-27",
         "tk": "AMG",
         "px": 308.65,
-        "sl": 296.38,
+        "sl": 308.65,
         "tp": 345.47,
         "initial_sl": 296.38,
-        "last_px": 311.61,
+        "last_px": 334.82,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 81",
-        "curr_metric": "RS: 77",
-        "partial_tp_hit": false
+        "curr_metric": "RS: 82",
+        "partial_tp_hit": true
     },
     {
         "date": "2026-05-27",
@@ -270,15 +270,15 @@
         "date": "2026-05-27",
         "tk": "C",
         "px": 126.86,
-        "sl": 122.62,
+        "sl": 126.86,
         "tp": 139.59,
         "initial_sl": 122.62,
-        "last_px": 129.93,
+        "last_px": 135.15,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 83",
-        "curr_metric": "RS: 79",
-        "partial_tp_hit": false
+        "curr_metric": "RS: 81",
+        "partial_tp_hit": true
     },
     {
         "date": "2026-05-27",
@@ -347,11 +347,11 @@
         "sl": 124.19,
         "tp": 141.03,
         "initial_sl": 124.19,
-        "last_px": 127.95,
+        "last_px": 130.25,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 85",
-        "curr_metric": "RS: 80",
+        "curr_metric": "RS: 82",
         "partial_tp_hit": false
     },
     {
@@ -406,11 +406,11 @@
         "sl": 10.62,
         "tp": 13.23,
         "initial_sl": 10.62,
-        "last_px": 11.23,
+        "last_px": 11.79,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 91",
-        "curr_metric": "RS: 89",
+        "curr_metric": "RS: 91",
         "partial_tp_hit": false
     },
     {
@@ -420,12 +420,13 @@
         "sl": 962.92,
         "tp": 1074.8,
         "initial_sl": 925.63,
-        "last_px": 1056.58,
-        "status": "OPEN",
+        "last_px": 1056.15,
+        "status": "\u2705 MAX TP",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 76",
         "curr_metric": "RS: 80",
-        "partial_tp_hit": true
+        "partial_tp_hit": true,
+        "close_date": "2026-06-04"
     },
     {
         "date": "2026-05-27",
@@ -462,11 +463,11 @@
         "sl": 18.99,
         "tp": 19.09,
         "initial_sl": 18.96,
-        "last_px": 19.04,
+        "last_px": 19.06,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 87",
-        "curr_metric": "RS: 83",
+        "curr_metric": "RS: 84",
         "partial_tp_hit": true
     },
     {
@@ -519,11 +520,11 @@
         "px": 30.08,
         "sl": 28.58,
         "tp": 34.59,
-        "last_px": 31.06,
+        "last_px": 31.56,
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 19",
-        "curr_metric": "RSI: 36",
+        "curr_metric": "RSI: 40",
         "partial_tp_hit": false,
         "initial_sl": 28.58
     },
@@ -548,11 +549,11 @@
         "px": 76.81,
         "sl": 72.97,
         "tp": 88.33,
-        "last_px": 77.97,
+        "last_px": 78.49,
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 18",
-        "curr_metric": "RSI: 32",
+        "curr_metric": "RSI: 34",
         "partial_tp_hit": false,
         "initial_sl": 72.97
     },
@@ -562,11 +563,11 @@
         "px": 511.57,
         "sl": 485.99,
         "tp": 588.31,
-        "last_px": 542.16,
+        "last_px": 539.77,
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 19",
-        "curr_metric": "RSI: 41",
+        "curr_metric": "RSI: 40",
         "partial_tp_hit": false,
         "initial_sl": 485.99
     },
@@ -596,7 +597,7 @@
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 85",
-        "curr_metric": "RS: 82",
+        "curr_metric": "RS: 83",
         "partial_tp_hit": false
     },
     {
@@ -624,7 +625,7 @@
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 87",
-        "curr_metric": "RS: 86",
+        "curr_metric": "RS: 87",
         "partial_tp_hit": false
     },
     {
@@ -682,7 +683,7 @@
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 76",
-        "curr_metric": "RS: 72",
+        "curr_metric": "RS: 73",
         "partial_tp_hit": false
     },
     {
@@ -765,13 +766,14 @@
         "px": 420.91,
         "sl": 420.91,
         "tp": 484.05,
-        "last_px": 421.08,
-        "status": "OPEN",
+        "last_px": 431.0,
+        "status": "\u2705 TRAIL EXIT",
         "tag": "\u26a1 \u7f3a\u53e3\u52d5\u80fd",
         "entry_metric": "RS: 98",
         "curr_metric": "RS: 98",
         "partial_tp_hit": true,
-        "initial_sl": 399.86
+        "initial_sl": 399.86,
+        "close_date": "2026-06-04"
     },
     {
         "date": "2026-05-29",
@@ -794,13 +796,14 @@
         "px": 32.35,
         "sl": 30.73,
         "tp": 37.2,
-        "last_px": 32.11,
-        "status": "OPEN",
+        "last_px": 30.73,
+        "status": "\u274c STOP LOSS",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 21",
         "curr_metric": "RSI: 26",
         "partial_tp_hit": false,
-        "initial_sl": 30.73
+        "initial_sl": 30.73,
+        "close_date": "2026-06-04"
     },
     {
         "date": "2026-05-29",
@@ -867,11 +870,11 @@
         "px": 33.28,
         "sl": 31.62,
         "tp": 38.27,
-        "last_px": 34.21,
+        "last_px": 34.77,
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 27",
-        "curr_metric": "RSI: 32",
+        "curr_metric": "RSI: 36",
         "partial_tp_hit": false,
         "initial_sl": 31.62
     },
@@ -896,11 +899,11 @@
         "px": 20.98,
         "sl": 19.93,
         "tp": 24.13,
-        "last_px": 20.76,
+        "last_px": 21.15,
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 23",
-        "curr_metric": "RSI: 28",
+        "curr_metric": "RSI: 36",
         "partial_tp_hit": false,
         "initial_sl": 19.93
     },
@@ -925,11 +928,11 @@
         "px": 745.58,
         "sl": 708.3,
         "tp": 857.42,
-        "last_px": 774.19,
+        "last_px": 761.57,
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 14",
-        "curr_metric": "RSI: 22",
+        "curr_metric": "RSI: 20",
         "partial_tp_hit": false,
         "initial_sl": 708.3
     },
@@ -984,11 +987,11 @@
         "px": 65.27,
         "sl": 62.01,
         "tp": 75.06,
-        "last_px": 67.35,
+        "last_px": 68.11,
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 25",
-        "curr_metric": "RSI: 34",
+        "curr_metric": "RSI: 37",
         "partial_tp_hit": false,
         "initial_sl": 62.01
     },
@@ -1013,11 +1016,11 @@
         "px": 53.66,
         "sl": 50.98,
         "tp": 61.71,
-        "last_px": 53.84,
+        "last_px": 54.61,
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 27",
-        "curr_metric": "RSI: 23",
+        "curr_metric": "RSI: 31",
         "partial_tp_hit": false,
         "initial_sl": 50.98
     },
@@ -1085,7 +1088,7 @@
         "sl": 69.97,
         "tp": 80.74,
         "initial_sl": 69.97,
-        "last_px": 72.91,
+        "last_px": 72.97,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 94",
@@ -1099,11 +1102,11 @@
         "sl": 54.99,
         "tp": 61.02,
         "initial_sl": 54.99,
-        "last_px": 56.51,
+        "last_px": 58.18,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 78",
-        "curr_metric": "RS: 68",
+        "curr_metric": "RS: 72",
         "partial_tp_hit": false
     },
     {
@@ -1113,11 +1116,11 @@
         "sl": 7.49,
         "tp": 8.3,
         "initial_sl": 7.49,
-        "last_px": 7.62,
+        "last_px": 7.82,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 81",
-        "curr_metric": "RS: 68",
+        "curr_metric": "RS: 72",
         "partial_tp_hit": false
     },
     {
@@ -1127,12 +1130,13 @@
         "sl": 521.07,
         "tp": 715.23,
         "initial_sl": 521.07,
-        "last_px": 620.37,
-        "status": "OPEN",
+        "last_px": 521.07,
+        "status": "\u274c STOP LOSS",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 99",
         "curr_metric": "RS: 99",
-        "partial_tp_hit": false
+        "partial_tp_hit": false,
+        "close_date": "2026-06-04"
     },
     {
         "date": "2026-06-02",
@@ -1141,11 +1145,11 @@
         "sl": 31.17,
         "tp": 31.58,
         "initial_sl": 31.17,
-        "last_px": 31.28,
+        "last_px": 31.29,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 83",
-        "curr_metric": "RS: 76",
+        "curr_metric": "RS: 77",
         "partial_tp_hit": false
     },
     {
@@ -1155,11 +1159,11 @@
         "sl": 58.92,
         "tp": 69.65,
         "initial_sl": 58.92,
-        "last_px": 62.2,
+        "last_px": 61.0,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 84",
-        "curr_metric": "RS: 75",
+        "curr_metric": "RS: 74",
         "partial_tp_hit": false
     },
     {
@@ -1169,11 +1173,11 @@
         "sl": 35.59,
         "tp": 40.88,
         "initial_sl": 35.59,
-        "last_px": 36.64,
+        "last_px": 37.55,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 83",
-        "curr_metric": "RS: 74",
+        "curr_metric": "RS: 77",
         "partial_tp_hit": false
     },
     {
@@ -1183,7 +1187,7 @@
         "sl": 67.37,
         "tp": 81.12,
         "initial_sl": 67.37,
-        "last_px": 73.34,
+        "last_px": 72.83,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 92",
@@ -1196,11 +1200,11 @@
         "px": 104.97,
         "sl": 99.72,
         "tp": 120.72,
-        "last_px": 108.66,
+        "last_px": 109.28,
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 25",
-        "curr_metric": "RSI: 48",
+        "curr_metric": "RSI: 50",
         "partial_tp_hit": false,
         "initial_sl": 99.72
     },
@@ -1211,11 +1215,11 @@
         "sl": 329.97,
         "tp": 397.97,
         "initial_sl": 329.97,
-        "last_px": 340.09,
+        "last_px": 346.79,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 77",
-        "curr_metric": "RS: 58",
+        "curr_metric": "RS: 62",
         "partial_tp_hit": false
     },
     {
@@ -1225,11 +1229,11 @@
         "sl": 56.12,
         "tp": 63.61,
         "initial_sl": 56.12,
-        "last_px": 57.31,
+        "last_px": 59.43,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 81",
-        "curr_metric": "RS: 69",
+        "curr_metric": "RS: 74",
         "partial_tp_hit": false
     },
     {
@@ -1239,11 +1243,11 @@
         "sl": 26.5,
         "tp": 30.98,
         "initial_sl": 26.5,
-        "last_px": 26.94,
+        "last_px": 28.17,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 87",
-        "curr_metric": "RS: 77",
+        "curr_metric": "RS: 80",
         "partial_tp_hit": false
     },
     {
@@ -1253,7 +1257,7 @@
         "sl": 51.61,
         "tp": 52.08,
         "initial_sl": 51.61,
-        "last_px": 51.75,
+        "last_px": 51.78,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 81",
@@ -1267,11 +1271,11 @@
         "sl": 31.62,
         "tp": 37.54,
         "initial_sl": 31.62,
-        "last_px": 33.46,
+        "last_px": 33.55,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 80",
-        "curr_metric": "RS: 69",
+        "curr_metric": "RS: 70",
         "partial_tp_hit": false
     },
     {
@@ -1281,11 +1285,11 @@
         "sl": 300.59,
         "tp": 336.58,
         "initial_sl": 300.59,
-        "last_px": 303.45,
+        "last_px": 309.78,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 75",
-        "curr_metric": "RS: 58",
+        "curr_metric": "RS: 62",
         "partial_tp_hit": false
     },
     {
@@ -1295,11 +1299,11 @@
         "sl": 179.34,
         "tp": 214.42,
         "initial_sl": 179.34,
-        "last_px": 185.81,
+        "last_px": 187.29,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 92",
-        "curr_metric": "RS: 87",
+        "curr_metric": "RS: 88",
         "partial_tp_hit": false
     },
     {
@@ -1309,7 +1313,7 @@
         "sl": 43.6,
         "tp": 47.08,
         "initial_sl": 43.6,
-        "last_px": 44.08,
+        "last_px": 44.21,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 85",
@@ -1323,11 +1327,11 @@
         "sl": 290.39,
         "tp": 350.99,
         "initial_sl": 290.39,
-        "last_px": 317.2,
+        "last_px": 317.41,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 88",
-        "curr_metric": "RS: 85",
+        "curr_metric": "RS: 86",
         "partial_tp_hit": false
     },
     {
@@ -1351,11 +1355,11 @@
         "sl": 35.1,
         "tp": 44.45,
         "initial_sl": 35.1,
-        "last_px": 37.99,
+        "last_px": 39.78,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 90",
-        "curr_metric": "RS: 85",
+        "curr_metric": "RS: 87",
         "partial_tp_hit": false
     },
     {
@@ -1380,7 +1384,7 @@
         "sl": 55.68,
         "tp": 65.52,
         "initial_sl": 55.68,
-        "last_px": 59.24,
+        "last_px": 59.29,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 88",
@@ -1394,11 +1398,11 @@
         "sl": 6.43,
         "tp": 7.9,
         "initial_sl": 6.43,
-        "last_px": 7.12,
+        "last_px": 7.26,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 82",
-        "curr_metric": "RS: 74",
+        "curr_metric": "RS: 76",
         "partial_tp_hit": false
     },
     {
@@ -1423,7 +1427,7 @@
         "sl": 216.09,
         "tp": 223.25,
         "initial_sl": 216.09,
-        "last_px": 219.13,
+        "last_px": 219.0,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 91",
@@ -1451,11 +1455,11 @@
         "sl": 40.04,
         "tp": 46.88,
         "initial_sl": 40.04,
-        "last_px": 41.16,
+        "last_px": 42.09,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 76",
-        "curr_metric": "RS: 65",
+        "curr_metric": "RS: 63",
         "partial_tp_hit": false
     },
     {
@@ -1465,11 +1469,11 @@
         "sl": 337.2,
         "tp": 411.16,
         "initial_sl": 337.2,
-        "last_px": 374.52,
+        "last_px": 365.33,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 92",
-        "curr_metric": "RS: 89",
+        "curr_metric": "RS: 88",
         "partial_tp_hit": false
     },
     {
@@ -1479,11 +1483,11 @@
         "sl": 18.17,
         "tp": 22.1,
         "initial_sl": 18.17,
-        "last_px": 18.62,
+        "last_px": 18.97,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 94",
-        "curr_metric": "RS: 88",
+        "curr_metric": "RS: 90",
         "partial_tp_hit": false
     },
     {
@@ -1493,11 +1497,11 @@
         "sl": 132.98,
         "tp": 175.07,
         "initial_sl": 132.98,
-        "last_px": 148.25,
+        "last_px": 143.65,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 91",
-        "curr_metric": "RS: 93",
+        "curr_metric": "RS: 92",
         "partial_tp_hit": false
     },
     {
@@ -1522,11 +1526,11 @@
         "sl": 61.73,
         "tp": 72.97,
         "initial_sl": 61.73,
-        "last_px": 64.27,
+        "last_px": 66.11,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 82",
-        "curr_metric": "RS: 82",
+        "curr_metric": "RS: 85",
         "partial_tp_hit": false
     },
     {
@@ -1535,11 +1539,11 @@
         "px": 70.91,
         "sl": 67.36,
         "tp": 81.55,
-        "last_px": 70.71,
+        "last_px": 72.29,
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 26",
-        "curr_metric": "RSI: 31",
+        "curr_metric": "RSI: 38",
         "partial_tp_hit": false,
         "initial_sl": 67.36
     },
@@ -1565,11 +1569,11 @@
         "sl": 1043.33,
         "tp": 1157.22,
         "initial_sl": 1043.33,
-        "last_px": 1077.0,
+        "last_px": 1089.15,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 76",
-        "curr_metric": "RS: 77",
+        "curr_metric": "RS: 78",
         "partial_tp_hit": false
     },
     {
@@ -1578,11 +1582,11 @@
         "px": 209.25,
         "sl": 198.79,
         "tp": 240.64,
-        "last_px": 220.22,
+        "last_px": 222.44,
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 22",
-        "curr_metric": "RSI: 42",
+        "curr_metric": "RSI: 45",
         "partial_tp_hit": false,
         "initial_sl": 198.79
     },
@@ -1592,11 +1596,11 @@
         "px": 358.39,
         "sl": 340.47,
         "tp": 412.15,
-        "last_px": 355.68,
+        "last_px": 369.27,
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 12",
-        "curr_metric": "RSI: 13",
+        "curr_metric": "RSI: 31",
         "partial_tp_hit": false,
         "initial_sl": 340.47
     },
@@ -1606,11 +1610,11 @@
         "px": 361.85,
         "sl": 343.76,
         "tp": 416.13,
-        "last_px": 358.99,
+        "last_px": 372.19,
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 15",
-        "curr_metric": "RSI: 15",
+        "curr_metric": "RSI: 31",
         "partial_tp_hit": false,
         "initial_sl": 343.76
     },
@@ -1618,14 +1622,14 @@
         "date": "2026-06-03",
         "tk": "INDV",
         "px": 33.71,
-        "sl": 32.02,
+        "sl": 33.71,
         "tp": 38.77,
-        "last_px": 35.43,
+        "last_px": 37.45,
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 20",
-        "curr_metric": "RSI: 41",
-        "partial_tp_hit": false,
+        "curr_metric": "RSI: 53",
+        "partial_tp_hit": true,
         "initial_sl": 32.02
     },
     {
@@ -1635,11 +1639,11 @@
         "sl": 22.58,
         "tp": 30.13,
         "initial_sl": 22.58,
-        "last_px": 23.86,
+        "last_px": 24.69,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 87",
-        "curr_metric": "RS: 87",
+        "curr_metric": "RS: 89",
         "partial_tp_hit": false
     },
     {
@@ -1649,11 +1653,11 @@
         "sl": 144.7,
         "tp": 179.21,
         "initial_sl": 144.7,
-        "last_px": 155.23,
+        "last_px": 161.3,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 91",
-        "curr_metric": "RS: 89",
+        "curr_metric": "RS: 91",
         "partial_tp_hit": false
     },
     {
@@ -1663,27 +1667,27 @@
         "sl": 24.47,
         "tp": 30.3,
         "initial_sl": 24.47,
-        "last_px": 25.76,
+        "last_px": 24.93,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 75",
-        "curr_metric": "RS: 72",
+        "curr_metric": "RS: 69",
         "partial_tp_hit": false
     },
     {
         "date": "2026-06-04",
         "tk": "CNC",
         "px": 59.55,
-        "sl": 56.84,
+        "sl": 59.55,
         "tp": 67.67,
         "initial_sl": 56.84,
         "tp1_price": 62.26,
-        "last_px": 59.55,
+        "last_px": 62.7,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 80",
-        "curr_metric": "RS: 77",
-        "partial_tp_hit": false
+        "curr_metric": "RS: 81",
+        "partial_tp_hit": true
     },
     {
         "date": "2026-06-04",
@@ -1693,11 +1697,11 @@
         "tp": 79.29,
         "initial_sl": 68.05,
         "tp1_price": 73.67,
-        "last_px": 70.86,
+        "last_px": 71.81,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 81",
-        "curr_metric": "RS: 78",
+        "curr_metric": "RS: 79",
         "partial_tp_hit": false
     },
     {
@@ -1712,7 +1716,7 @@
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 85",
-        "curr_metric": "RS: 82",
+        "curr_metric": "RS: 83",
         "partial_tp_hit": false
     },
     {
@@ -1802,7 +1806,8 @@
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 89",
-        "curr_metric": "RS: 89"
+        "curr_metric": "RS: 89",
+        "partial_tp_hit": false
     },
     {
         "date": "2026-06-04",
@@ -1812,11 +1817,13 @@
         "tp": 8699.29,
         "initial_sl": 7113.57,
         "tp1_price": 7906.43,
-        "last_px": 7510.0,
-        "status": "OPEN",
+        "last_px": 7113.57,
+        "status": "\u274c STOP LOSS",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 76",
-        "curr_metric": "RS: 76"
+        "curr_metric": "RS: 76",
+        "partial_tp_hit": false,
+        "close_date": "2026-06-04"
     },
     {
         "date": "2026-06-04",
@@ -1830,7 +1837,8 @@
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 87",
-        "curr_metric": "RS: 87"
+        "curr_metric": "RS: 88",
+        "partial_tp_hit": false
     },
     {
         "date": "2026-06-04",
@@ -1844,7 +1852,8 @@
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 79",
-        "curr_metric": "RS: 79"
+        "curr_metric": "RS: 79",
+        "partial_tp_hit": false
     },
     {
         "date": "2026-06-04",
@@ -1858,7 +1867,211 @@
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 92",
-        "curr_metric": "RS: 92"
+        "curr_metric": "RS: 93",
+        "partial_tp_hit": false
+    },
+    {
+        "date": "2026-06-04",
+        "tk": "8354.T",
+        "px": 6747.0,
+        "sl": 6473.25,
+        "tp": 7568.25,
+        "initial_sl": 6473.25,
+        "tp1_price": 7020.75,
+        "last_px": 6473.25,
+        "status": "\u274c STOP LOSS",
+        "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
+        "entry_metric": "RS: 85",
+        "curr_metric": "RS: 85",
+        "partial_tp_hit": false,
+        "close_date": "2026-06-04"
+    },
+    {
+        "date": "2026-06-04",
+        "tk": "9831.T",
+        "px": 650.0,
+        "sl": 625.69,
+        "tp": 722.93,
+        "initial_sl": 625.69,
+        "tp1_price": 674.31,
+        "last_px": 625.69,
+        "status": "\u274c STOP LOSS",
+        "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
+        "entry_metric": "RS: 81",
+        "curr_metric": "RS: 81",
+        "partial_tp_hit": false,
+        "close_date": "2026-06-04"
+    },
+    {
+        "date": "2026-06-04",
+        "tk": "ASML",
+        "px": 1757.47,
+        "sl": 1673.17,
+        "tp": 2010.38,
+        "initial_sl": 1673.17,
+        "tp1_price": 1841.77,
+        "last_px": 1757.47,
+        "status": "OPEN",
+        "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
+        "entry_metric": "RS: 92",
+        "curr_metric": "RS: 92",
+        "sources": [
+            "NDX100_\u79d1\u6280"
+        ],
+        "sector": "N/A",
+        "mcap": 0
+    },
+    {
+        "date": "2026-06-04",
+        "tk": "JAZZ",
+        "px": 240.06,
+        "sl": 231.02,
+        "tp": 267.18,
+        "initial_sl": 231.02,
+        "tp1_price": 249.1,
+        "last_px": 240.06,
+        "status": "OPEN",
+        "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
+        "entry_metric": "RS: 91",
+        "curr_metric": "RS: 91",
+        "sources": [
+            "S&P400_\u4e2d\u578b"
+        ],
+        "sector": "N/A",
+        "mcap": 0
+    },
+    {
+        "date": "2026-06-04",
+        "tk": "M",
+        "px": 23.03,
+        "sl": 21.72,
+        "tp": 26.95,
+        "initial_sl": 21.72,
+        "tp1_price": 24.34,
+        "last_px": 23.03,
+        "status": "OPEN",
+        "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
+        "entry_metric": "RS: 80",
+        "curr_metric": "RS: 80",
+        "sources": [
+            "S&P400_\u4e2d\u578b"
+        ],
+        "sector": "N/A",
+        "mcap": 0
+    },
+    {
+        "date": "2026-06-04",
+        "tk": "MBIN",
+        "px": 47.7,
+        "sl": 45.74,
+        "tp": 53.57,
+        "initial_sl": 45.74,
+        "tp1_price": 49.66,
+        "last_px": 47.7,
+        "status": "OPEN",
+        "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
+        "entry_metric": "RS: 81",
+        "curr_metric": "RS: 81",
+        "sources": [
+            "S&P600_\u5c0f\u578b"
+        ],
+        "sector": "N/A",
+        "mcap": 0
+    },
+    {
+        "date": "2026-06-04",
+        "tk": "MUR",
+        "px": 39.97,
+        "sl": 37.98,
+        "tp": 45.96,
+        "initial_sl": 37.98,
+        "tp1_price": 41.96,
+        "last_px": 39.97,
+        "status": "OPEN",
+        "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
+        "entry_metric": "RS: 80",
+        "curr_metric": "RS: 80",
+        "sources": [
+            "S&P400_\u4e2d\u578b"
+        ],
+        "sector": "N/A",
+        "mcap": 0
+    },
+    {
+        "date": "2026-06-04",
+        "tk": "PTEN",
+        "px": 12.27,
+        "sl": 11.44,
+        "tp": 14.76,
+        "initial_sl": 11.44,
+        "tp1_price": 13.1,
+        "last_px": 12.27,
+        "status": "OPEN",
+        "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
+        "entry_metric": "RS: 94",
+        "curr_metric": "RS: 94",
+        "sources": [
+            "S&P600_\u5c0f\u578b"
+        ],
+        "sector": "N/A",
+        "mcap": 0
+    },
+    {
+        "date": "2026-06-04",
+        "tk": "PTGX",
+        "px": 102.79,
+        "sl": 96.71,
+        "tp": 121.03,
+        "initial_sl": 96.71,
+        "tp1_price": 108.87,
+        "last_px": 102.79,
+        "status": "OPEN",
+        "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
+        "entry_metric": "RS: 81",
+        "curr_metric": "RS: 81",
+        "sources": [
+            "S&P600_\u5c0f\u578b"
+        ],
+        "sector": "N/A",
+        "mcap": 0
+    },
+    {
+        "date": "2026-06-04",
+        "tk": "VIR",
+        "px": 9.15,
+        "sl": 8.55,
+        "tp": 10.95,
+        "initial_sl": 8.55,
+        "tp1_price": 9.75,
+        "last_px": 9.15,
+        "status": "OPEN",
+        "tag": "\ud83d\udca5 BB \u64e0\u58d3",
+        "entry_metric": "RS: 84",
+        "curr_metric": "RS: 84",
+        "sources": [
+            "S&P600_\u5c0f\u578b"
+        ],
+        "sector": "N/A",
+        "mcap": 0
+    },
+    {
+        "date": "2026-06-04",
+        "tk": "6432.T",
+        "px": 7510.0,
+        "sl": 7113.57,
+        "tp": 8699.29,
+        "initial_sl": 7113.57,
+        "tp1_price": 7906.43,
+        "last_px": 7510.0,
+        "status": "OPEN",
+        "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
+        "entry_metric": "RS: 76",
+        "curr_metric": "RS: 76",
+        "sources": [
+            "TOPIX_Small500_\u5c0f\u578b"
+        ],
+        "sector": "N/A",
+        "mcap": 0
     },
     {
         "date": "2026-06-04",
@@ -1872,7 +2085,12 @@
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 85",
-        "curr_metric": "RS: 85"
+        "curr_metric": "RS: 85",
+        "sources": [
+            "TOPIX_Mid400_\u4e2d\u578b"
+        ],
+        "sector": "N/A",
+        "mcap": 0
     },
     {
         "date": "2026-06-04",
@@ -1885,7 +2103,12 @@
         "last_px": 650.0,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
-        "entry_metric": "RS: 81",
-        "curr_metric": "RS: 81"
+        "entry_metric": "RS: 82",
+        "curr_metric": "RS: 82",
+        "sources": [
+            "TOPIX_Mid400_\u4e2d\u578b"
+        ],
+        "sector": "N/A",
+        "mcap": 0
     }
 ]
