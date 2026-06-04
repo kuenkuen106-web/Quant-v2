@@ -48,36 +48,52 @@ SIMULATE_DAYS_AGO = int(raw_days)
 # =============================================================================
 # 功能函數區
 # =============================================================================
+STOCK_INFO_CACHE = {} # 👈 新增：智能緩存，避免重複呼叫 yfinance 拖慢速度
+
+def get_stock_info(tk):
+    if tk in STOCK_INFO_CACHE: return STOCK_INFO_CACHE[tk]
+    try:
+        info = yf.Ticker(tk).info
+        sector = info.get('sector', 'N/A')
+        mcap = info.get('marketCap', 0)
+        STOCK_INFO_CACHE[tk] = {'sector': sector, 'mcap': mcap}
+        return STOCK_INFO_CACHE[tk]
+    except:
+        STOCK_INFO_CACHE[tk] = {'sector': 'N/A', 'mcap': 0}
+        return STOCK_INFO_CACHE[tk]
+
 def send_discord_alert(ticker, strategy_name, price, sl, tp, is_bullish, sources, tp1_price=None):
     if not DISCORD_WEBHOOK_URL: return
     unit = "¥" if ticker.endswith(".T") else "$"
+    
     if sources:
         clean_sources = [f"#{s.replace('&', '').replace(' ', '_')}" for s in sources]
         source_str = " ".join(clean_sources)
     else:
         source_str = "#動態掃描"
+        
     color = 65280 if is_bullish else 16711680 
-    
     type_str = "**波段建倉 (Swing)**" if strategy_name in ["🏆 VCP 突破", "💥 BB 擠壓"] else "**短線游擊 (Short Term)**"
     trail_str = "跌穿 5日新低" if "短線" in type_str else "跌穿 20日新低"
     tp1_val = tp1_price if tp1_price else tp
     
-    action_text = f"{type_str}\n1️⃣ **TP1:** `{unit}{tp1_val}` (平倉 50% 並保本)\n2️⃣ **TP2 (Trail):** {trail_str}清倉\n3️⃣ **Max TP:** `{unit}{tp}` (全數強制平倉)"
+    # 👇 改成平倉 75%
+    action_text = f"{type_str}\n1️⃣ **TP1:** `{unit}{tp1_val}` (平倉 75% 並保本)\n2️⃣ **TP2 (Trail):** {trail_str}清倉\n3️⃣ **Max TP:** `{unit}{tp}` (全數強制平倉)"
     
     embed_data = {
         "title": f"🚨 系統異動觸發: {ticker}",
-        "description": f"**{strategy_name}** 條件已達成！\n🔍 來源: `{source_str}`",
+        "description": f"**{strategy_name}** 條件已達成！\n🔍 來源: **{source_str}**",
         "color": color,
         "fields": [
             {"name": "💵 當前現價", "value": f"{unit}{price}", "inline": True},
             {"name": "🛑 初始止損", "value": f"{unit}{sl}", "inline": True},
             {"name": "⚙️ 離場策略", "value": action_text, "inline": False}
         ],
-        "footer": {"text": "V1 Quant Master 實時監控系統"}
+        # 👇 加入 UAT 時光機 Footnote
+        "footer": {"text": f"V1 Quant Master (UAT 測試) | 時光機回溯 {SIMULATE_DAYS_AGO} 日"}
     }
     try: 
-        res = requests.post(DISCORD_WEBHOOK_URL, json={"embeds": [embed_data]})
-        if res.status_code == 429: print(f"⚠️ Discord 拒絕接收 - 傳送太快！")
+        requests.post(DISCORD_WEBHOOK_URL, json={"embeds": [embed_data]})
         time.sleep(0.5) 
     except Exception as e: print(f"⚠️ Discord 連線錯誤: {e}")
 
@@ -97,6 +113,7 @@ print(f"⏳ [1-3/7] 正在抓取數據與啟動時光機 (回溯 {SIMULATE_DAYS_
 
 def build_dynamic_watchlist():
     ticker_sources = {}
+    # 建立 UA 生成器
     ua = UserAgent()
 
     def add_to_map(tickers, source_label):
@@ -779,6 +796,12 @@ for ticker in valid_tickers:
         if trade_info:
             # 👇 由 TICKER_MAP 抽返隻股到底屬於邊幾個名單
             ticker_sources = TICKER_MAP.get(ticker, [])
+            # 👇 智能獲取板塊與市值
+            s_info = get_stock_info(ticker) 
+            # 👇 寫入 trade_info，等 Dashboard 讀取
+            trade_info['sources'] = ticker_sources
+            trade_info['sector'] = s_info['sector']
+            trade_info['mcap'] = s_info['mcap']
             # 呼叫 Discord 時傳入專屬的 tp1_price
             send_discord_alert(ticker, tag_name, round(cp, 2), sl_p, tp_p, True, ticker_sources, tp1_price=tp1_price)
             if not any(t.get('tk') == ticker and t.get('status') == 'OPEN' for t in trade_history):
@@ -842,8 +865,8 @@ if DISCORD_SUMMARY_WEBHOOK:
             initial_risk = buy_px - t.get('initial_sl', buy_px)
             tp1_price = buy_px + (initial_risk * 2)
             
-            pnl_closed_half = (5000 / buy_px) * (tp1_price - buy_px)   # 已鎖定利潤
-            pnl_floating_half = (5000 / buy_px) * (last_px - buy_px) # 剩餘浮動盈虧
+            pnl_closed_half = (7500 / buy_px) * (tp1_price - buy_px)   # 已鎖定利潤
+            pnl_floating_half = (2500 / buy_px) * (last_px - buy_px) # 剩餘浮動盈虧
             floating_pnl += (pnl_closed_half + pnl_floating_half)
         else:
             # 常規未分注持倉，100% 隨現價浮動
@@ -1089,6 +1112,13 @@ html = f"""<!DOCTYPE html>
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <title>UAT QUANT ({today_str})</title>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <style>
+        .apexcharts-tooltip {{
+            z-index: 99999 !important; 
+        }}
+        th.cursor-pointer {{ transition: color 0.2s; }}
+        th.cursor-pointer:hover {{ color: #f8fafc; }}
+    </style>
 </head>
 <body class="bg-[#020617] text-slate-300 p-4 font-sans h-screen flex flex-col overflow-hidden">
     
@@ -1279,6 +1309,25 @@ html = f"""<!DOCTYPE html>
         </div>
 
         <div class="grid grid-cols-4 gap-4" id="journal-stats"></div>
+
+        <div class="bg-slate-800/30 rounded-xl border border-slate-700 p-3 flex gap-4 items-end shadow-lg">
+            <div>
+                <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">🔍 策略篩選</label>
+                <select id="filter-strat" onchange="renderJournal()" class="bg-slate-900 border border-slate-600 text-xs text-white px-3 py-1.5 rounded outline-none focus:border-fuchsia-500">
+                    <option value="ALL">全部策略</option>
+                    <option value="VCP">🏆 VCP 突破</option>
+                    <option value="BB">💥 BB 擠壓</option>
+                    <option value="缺口">⚡ 缺口動能</option>
+                    <option value="超賣">📉 極度超賣</option>
+                </select>
+            </div>
+            <div>
+                <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">📁 股票來源篩選</label>
+                <select id="filter-source" onchange="renderJournal()" class="bg-slate-900 border border-slate-600 text-xs text-white px-3 py-1.5 rounded outline-none focus:border-fuchsia-500">
+                    <option value="ALL">全部來源</option>
+                    </select>
+            </div>
+        </div>
 
         <div class="bg-slate-800/30 rounded-xl border border-slate-700 p-4">
             <h3 class="font-black text-fuchsia-400 mb-3 flex items-center gap-2">🎯 按策略分析 (Strategy Performance)</h3>
@@ -1585,28 +1634,89 @@ html = f"""<!DOCTYPE html>
             document.getElementById('calc_cost').innerText = unit + totalCost.toLocaleString(undefined, {{maximumFractionDigits: 0}}) + " (" + actualPosPct + "%)";
         }}
 
+        // 👇 新增全域變數 (控制排序與過濾)
+        let currentSort = 'date';
+        let isAsc = false;
+        let sourcesLoaded = false;
+
+        function sortData(col) {{
+            if (currentSort === col) {{ isAsc = !isAsc; }} 
+            else {{ currentSort = col; isAsc = false; }}
+            renderJournal();
+        }}
+
+        // 數值格式化工具 (處理市值 Market Cap)
+        function formatMcap(val) {{
+            if (!val) return '-';
+            if (val >= 1e12) return (val / 1e12).toFixed(1) + 'T';
+            if (val >= 1e9) return (val / 1e9).toFixed(1) + 'B';
+            if (val >= 1e6) return (val / 1e6).toFixed(1) + 'M';
+            return val.toLocaleString();
+        }}
+
+        // 🌟 終極整合版 renderJournal
         function renderJournal() {{
             const openTbody = document.getElementById('journal-open-tbody');
             const closedTbody = document.getElementById('journal-closed-tbody');
             const statsContainer = document.getElementById('journal-stats');
 
-            const sortedHist = [...tradeHistory].reverse();
-            const opens = sortedHist.filter(t => t.status === 'OPEN');
-            const closeds = sortedHist.filter(t => t.status !== 'OPEN');
+            // 1️⃣ 讀取 Filter 數值 (防呆設計：如果 HTML 未加 Filter UI，就預設 ALL)
+            const stratFilter = document.getElementById('filter-strat') ? document.getElementById('filter-strat').value : 'ALL';
+            const sourceFilter = document.getElementById('filter-source') ? document.getElementById('filter-source').value : 'ALL';
 
+            // 動態載入來源 Filter 選項 (只執行一次)
+            if (!sourcesLoaded && document.getElementById('filter-source')) {{
+                let allSources = new Set();
+                tradeHistory.forEach(t => {{ if(t.sources) t.sources.forEach(s => allSources.add(s)); }});
+                const sourceSelect = document.getElementById('filter-source');
+                allSources.forEach(s => {{
+                    const opt = document.createElement('option');
+                    opt.value = s; opt.innerText = s;
+                    sourceSelect.appendChild(opt);
+                }});
+                sourcesLoaded = true;
+            }}
+
+            // 2️⃣ 過濾邏輯
+            let filteredHist = tradeHistory.filter(t => {{
+                let matchStrat = stratFilter === 'ALL' || (t.tag && t.tag.includes(stratFilter));
+                let matchSource = sourceFilter === 'ALL' || (t.sources && t.sources.includes(sourceFilter));
+                return matchStrat && matchSource;
+            }});
+
+            // 3️⃣ 排序邏輯
+            filteredHist.sort((a, b) => {{
+                let valA = a[currentSort]; let valB = b[currentSort];
+                // 特殊處理：浮動盈虧排序
+                if (currentSort === 'pnl') {{
+                    valA = a.status === 'OPEN' ? (a.last_px - a.px)/a.px : (a.last_px - a.px);
+                    valB = b.status === 'OPEN' ? (b.last_px - b.px)/b.px : (b.last_px - b.px);
+                }}
+                if (valA < valB) return isAsc ? -1 : 1;
+                if (valA > valB) return isAsc ? 1 : -1;
+                return 0;
+            }});
+
+            const opens = filteredHist.filter(t => t.status === 'OPEN');
+            const closeds = filteredHist.filter(t => t.status !== 'OPEN');
+
+            // ==========================================
+            // 📊 頂部 4 個總計數據方塊 (已經升級 75/25 會計)
+            // ==========================================
             let totalClosedPnl = 0, wins = 0, totalOpenPnl = 0;
             
             closeds.forEach(t => {{
                 totalClosedPnl += (10000 / t.px) * (t.last_px - t.px);
                 if (t.status.includes('✅')) wins++;
             }});
+            
             opens.forEach(t => {{
                 let buy_px = t.px;
                 let last_px = t.last_px;
-                // 混合會計公式：即使已部分平倉，依舊能準確反映倉位總浮動價值
-                let tp1 = t.tp1_price || (buy_px + (buy_px - t.initial_sl)*2); // 相容舊單
+                // 🌟 混合會計公式：75% 已鎖定，25% 隨現價浮動
+                let tp1 = t.tp1_price || (buy_px + (buy_px - (t.initial_sl || buy_px))*2); 
                 let pnl = t.partial_tp_hit ? 
-                    ((5000 / buy_px) * (tp1 - buy_px) + (5000 / buy_px) * (last_px - buy_px)) :
+                    ((7500 / buy_px) * (tp1 - buy_px) + (2500 / buy_px) * (last_px - buy_px)) :
                     (10000 / buy_px) * (last_px - buy_px);
                 totalOpenPnl += pnl;
             }});
@@ -1641,7 +1751,7 @@ html = f"""<!DOCTYPE html>
             `;
 
             // ==========================================
-            // 1. 生成策略卡片
+            // 🎯 1. 生成策略卡片
             // ==========================================
             const strategyStats = {{}};
             closeds.forEach(t => {{
@@ -1651,8 +1761,7 @@ html = f"""<!DOCTYPE html>
                 }}
                 strategyStats[strat].trades += 1;
                 if (t.status.includes('✅')) strategyStats[strat].wins += 1;
-                const tradePnl = (10000 / t.px) * (t.last_px - t.px);
-                strategyStats[strat].pnl += tradePnl;
+                strategyStats[strat].pnl += (10000 / t.px) * (t.last_px - t.px);
                 strategyStats[strat].deployed += 10000;
             }});
 
@@ -1678,7 +1787,7 @@ html = f"""<!DOCTYPE html>
             document.getElementById('strategy-stats-container').innerHTML = strategyHtml || '<div class="text-xs text-slate-500 italic p-2">暫無策略數據</div>';
 
             // ==========================================
-            // 2. 按進場指標 (RS / RSI) 分組統計
+            // 📈 2. 按進場指標 (RS / RSI) 分組統計
             // ==========================================
             const metricStats = {{
                 rs: {{ '95-99 (極強)': {{ trades: 0, wins: 0, pnl: 0 }}, '90-94 (強勢)': {{ trades: 0, wins: 0, pnl: 0 }}, '80-89 (中等)': {{ trades: 0, wins: 0, pnl: 0 }}, '< 80 (較弱)': {{ trades: 0, wins: 0, pnl: 0 }} }},
@@ -1736,60 +1845,63 @@ html = f"""<!DOCTYPE html>
             if(rsiTbody) rsiTbody.innerHTML = renderMetricRows(metricStats.rsi);
 
             // ==========================================
-            // 3. 渲染 Open Positions
+            // 📂 3. 渲染 Open Positions (加入過濾/排序/板塊/市值/75%)
             // ==========================================
-            openTbody.innerHTML = opens.length === 0 ? '<tr><td colspan="11" class="p-4 text-center text-slate-500">目前無持倉</td></tr>' : opens.map(t => {{
+            const openThead = openTbody.parentElement.querySelector('thead');
+            openThead.innerHTML = `
+                <tr>
+                    <th class="p-2 cursor-pointer hover:text-white" onclick="sortData('date')">日期 ↕</th>
+                    <th class="p-2 cursor-pointer hover:text-white" onclick="sortData('tk')">代號 ↕</th>
+                    <th class="p-2">策略 & 來源</th>
+                    <th class="p-2 cursor-pointer hover:text-white" onclick="sortData('sector')">板塊 (Sector) ↕</th>
+                    <th class="p-2 cursor-pointer hover:text-white text-right" onclick="sortData('mcap')">市值 ↕</th>
+                    <th class="p-2 text-center">持倉狀態</th>
+                    <th class="p-2">進場指標</th>
+                    <th class="p-2 text-right cursor-pointer hover:text-white" onclick="sortData('pnl')">回報 (%) ↕</th>
+                </tr>
+            `;
+
+            openTbody.innerHTML = opens.length === 0 ? '<tr><td colspan="8" class="p-4 text-center text-slate-500">目前無符合條件持倉</td></tr>' : opens.map(t => {{
                 let pnl = 0;
                 let buy_px = t.px;
                 let last_px = t.last_px;
                 
+                // 🌟 75/25 混合會計公式
                 if (t.partial_tp_hit) {{
                     let tp1_price = t.tp1_price || (buy_px + (buy_px - (t.initial_sl || buy_px)) * 2);
-                    let pnl_closed = (5000 / buy_px) * (tp1_price - buy_px);
-                    let pnl_floating = (5000 / buy_px) * (last_px - buy_px);
-                    pnl = pnl_closed + pnl_floating; // 混合真實利潤
+                    let pnl_closed = (7500 / buy_px) * (tp1_price - buy_px);
+                    let pnl_floating = (2500 / buy_px) * (last_px - buy_px);
+                    pnl = pnl_closed + pnl_floating; 
                 }} else {{
                     pnl = (10000 / buy_px) * (last_px - buy_px);
                 }}
-                // 回報百分比則反映現價相對進場價的真實拉鋸幅度
+                
                 let pnlPct = ((last_px - buy_px) / buy_px * 100).toFixed(2);
                 const pColor = pnl >= 0 ? 'text-emerald-400' : 'text-red-400';
-                const isJp = t.tk.endsWith('.T');
-                const unit = isJp ? '¥' : '$';
                 
-                let metricStatus = '';
-                if(t.curr_metric && t.entry_metric) {{
-                    const currVal = parseInt(t.curr_metric.replace(/[^0-9-]/g, ''));
-                    const entryVal = parseInt(t.entry_metric.replace(/[^0-9-]/g, ''));
-                    metricStatus = currVal >= entryVal ? 'text-emerald-400' : 'text-red-400';
-                }} else {{
-                    metricStatus = 'text-slate-300';
-                }}
+                // 動態生成 Source 標籤
+                let sourceBadges = (t.sources || []).map(s => `<span class="text-[8px] bg-blue-500/20 text-blue-300 px-1 rounded ml-1 border border-blue-500/30">${{s}}</span>`).join('');
 
                 return `
                 <tr class="border-b border-slate-700/50 hover:bg-slate-800 transition">
                     <td class="p-2">${{t.date}}</td>
                     <td class="p-2 font-bold text-white">${{t.tk}}</td>
-                    <td class="p-2"><span class="text-[9px] bg-slate-700 px-1 rounded">${{t.tag || 'N/A'}}</span></td>
+                    <td class="p-2 flex flex-wrap items-center gap-1 mt-1"><span class="text-[9px] bg-slate-700 px-1 rounded">${{t.tag || 'N/A'}}</span>${{sourceBadges}}</td>
+                    <td class="p-2 text-[10px] text-slate-400 truncate max-w-[100px]">${{t.sector || 'N/A'}}</td>
+                    <td class="p-2 text-[10px] text-slate-400 font-mono text-right">${{formatMcap(t.mcap)}}</td>
                     <td class="p-2 text-center">
                         ${{t.partial_tp_hit 
-                            ? '<span class="text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-500/20 text-[10px] font-black">🎯 50% 已止盈 (放飛中)</span>' 
+                            ? '<span class="text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-500/20 text-[10px] font-black">🎯 75% 已止盈 (25% 放飛)</span>' 
                             : '<span class="text-cyan-400 bg-cyan-400/10 px-2 py-0.5 rounded border border-cyan-500/20 text-[10px] font-black">⏳ 100% 正常持倉中</span>'
                         }}
                     </td>
-                    <td class="p-2 text-[10px] font-mono text-slate-400">${{t.entry_metric || '-'}}</td>
-                    <td class="p-2 text-[10px] font-mono font-bold ${{metricStatus}}">${{t.curr_metric || '-'}}</td>
-                    <td class="p-2">${{unit}}${{t.px}}</td>
-                    <td class="p-2 text-red-400 font-mono">${{t.sl ? unit + t.sl : '-'}}</td>
-                    <td class="p-2 text-emerald-400 font-mono">${{t.tp ? unit + t.tp : '-'}}</td>
-                    <td class="p-2 text-white font-bold">${{unit}}${{t.last_px}}</td>
-                    <td class="p-2 text-right font-black font-mono ${{pColor}}">${{pnl >= 0 ? '+' : ''}}${{pnl.toFixed(2)}}</td>
-                    <td class="p-2 text-right font-black font-mono ${{pColor}}">${{pnl >= 0 ? '+' : ''}}${{pnlPct}}%</td>
+                    <td class="p-2 text-[10px] font-mono text-indigo-300">${{t.entry_metric || '-'}}</td>
+                    <td class="p-2 text-right font-black font-mono ${{pColor}}">${{pnl >= 0 ? '+' : ''}}${{pnlPct}}%<br><span class="text-[9px] font-normal opacity-70">${{pnl >= 0 ? '+' : ''}}$${{pnl.toFixed(0)}}</span></td>
                 </tr>`;
             }}).join('');
 
             // ==========================================
-            // 4. 渲染 Closed Trades (加入進場指標欄位)
+            // 📁 4. 渲染 Closed Trades (維持原本顯示)
             // ==========================================
             const closedThead = document.querySelector('#journal-closed-tbody').parentElement.querySelector('thead');
             if(closedThead) {{
