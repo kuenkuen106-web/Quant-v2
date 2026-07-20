@@ -917,11 +917,11 @@
         "px": 20.98,
         "sl": 19.93,
         "tp": 24.13,
-        "last_px": 21.14,
+        "last_px": 20.87,
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 23",
-        "curr_metric": "RSI: 48",
+        "curr_metric": "RSI: 43",
         "partial_tp_hit": false,
         "initial_sl": 19.93
     },
@@ -1036,11 +1036,11 @@
         "px": 53.66,
         "sl": 53.66,
         "tp": 61.71,
-        "last_px": 58.6,
+        "last_px": 58.56,
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 27",
-        "curr_metric": "RSI: 64",
+        "curr_metric": "RSI: 63",
         "partial_tp_hit": true,
         "initial_sl": 50.98
     },
@@ -1172,7 +1172,7 @@
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 83",
-        "curr_metric": "RS: 88",
+        "curr_metric": "RS: 87",
         "partial_tp_hit": true
     },
     {
@@ -1466,7 +1466,7 @@
         "sl": 216.09,
         "tp": 223.25,
         "initial_sl": 216.09,
-        "last_px": 217.47,
+        "last_px": 217.36,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 91",
@@ -1495,7 +1495,7 @@
         "sl": 40.04,
         "tp": 46.88,
         "initial_sl": 40.04,
-        "last_px": 44.17,
+        "last_px": 44.16,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 76",
@@ -2938,8 +2938,8 @@
         "tp": 29.81,
         "initial_sl": 27.24,
         "tp1_price": 28.52,
-        "last_px": 29.62,
-        "status": "OPEN",
+        "last_px": 29.16,
+        "status": "\u2705 MAX TP",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 76",
         "curr_metric": "RS: 85",
@@ -2948,7 +2948,8 @@
         ],
         "sector": "N/A",
         "mcap": 0,
-        "partial_tp_hit": true
+        "partial_tp_hit": true,
+        "close_date": "2026-07-20"
     },
     {
         "date": "2026-06-08",
@@ -3210,8 +3211,8 @@
         "tp": 47.18,
         "initial_sl": 42.43,
         "tp1_price": 44.81,
-        "last_px": 44.5,
-        "status": "OPEN",
+        "last_px": 44.34,
+        "status": "\u2705 TRAIL EXIT",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 89",
         "curr_metric": "RS: 90",
@@ -3220,7 +3221,8 @@
         ],
         "sector": "N/A",
         "mcap": 0,
-        "partial_tp_hit": true
+        "partial_tp_hit": true,
+        "close_date": "2026-07-20"
     },
     {
         "date": "2026-06-09",
@@ -3335,11 +3337,11 @@
         "tp": 32.71,
         "initial_sl": 28.83,
         "tp1_price": 30.77,
-        "last_px": 31.64,
+        "last_px": 31.28,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 80",
-        "curr_metric": "RS: 81",
+        "curr_metric": "RS: 86",
         "sources": [
             "S&P600_\u5c0f\u578b"
         ],
@@ -4195,11 +4197,11 @@
         "tp": 89.13,
         "initial_sl": 74.8,
         "tp1_price": 81.96,
-        "last_px": 80.7,
+        "last_px": 79.21,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 84",
-        "curr_metric": "RS: 91",
+        "curr_metric": "RS: 90",
         "sources": [
             "S&P400_\u4e2d\u578b"
         ],
@@ -4215,11 +4217,11 @@
         "tp": 26.94,
         "initial_sl": 23.58,
         "tp1_price": 25.26,
-        "last_px": 25.92,
+        "last_px": 25.59,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 84",
-        "curr_metric": "RS: 92",
+        "curr_metric": "RS: 91",
         "sources": [
             "S&P600_\u5c0f\u578b"
         ],
@@ -4361,11 +4363,11 @@
         "tp": 15.34,
         "initial_sl": 13.77,
         "tp1_price": 14.55,
-        "last_px": 14.95,
+        "last_px": 14.67,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 82",
-        "curr_metric": "RS: 89",
+        "curr_metric": "RS: 88",
         "sources": [
             "S&P400_\u4e2d\u578b"
         ],
@@ -4738,11 +4740,11 @@
         "tp": 40.97,
         "initial_sl": 35.98,
         "tp1_price": 38.48,
-        "last_px": 38.29,
+        "last_px": 37.97,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 75",
-        "curr_metric": "RS: 77",
+        "curr_metric": "RS: 76",
         "sources": [
             "S&P600_\u5c0f\u578b"
         ],
@@ -4947,11 +4949,11 @@
         "tp": 192.84,
         "initial_sl": 165.49,
         "tp1_price": 179.17,
-        "last_px": 180.22,
+        "last_px": 180.86,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 75",
-        "curr_metric": "RS: 76",
+        "curr_metric": "RS: 77",
         "sources": [
             "S&P500_\u5927\u76e4"
         ],
@@ -5366,11 +5368,11 @@
         "tp": 249.54,
         "initial_sl": 223.83,
         "tp1_price": 236.69,
-        "last_px": 237.0,
+        "last_px": 235.21,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 75",
-        "curr_metric": "RS: 74",
+        "curr_metric": "RS: 73",
         "sources": [
             "S&P500_\u5927\u76e4"
         ],
@@ -5386,11 +5388,11 @@
         "tp": 73.75,
         "initial_sl": 66.24,
         "tp1_price": 70.0,
-        "last_px": 71.04,
+        "last_px": 70.36,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 75",
-        "curr_metric": "RS: 79",
+        "curr_metric": "RS: 78",
         "sources": [
             "S&P500_\u5927\u76e4"
         ],
@@ -5448,11 +5450,11 @@
         "tp": 39.99,
         "initial_sl": 32.39,
         "tp1_price": 36.19,
-        "last_px": 34.52,
+        "last_px": 33.97,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 83",
-        "curr_metric": "RS: 86",
+        "curr_metric": "RS: 84",
         "sources": [
             "S&P600_\u5c0f\u578b"
         ],
@@ -5698,11 +5700,11 @@
         "tp": 49.68,
         "initial_sl": 41.04,
         "tp1_price": 45.36,
-        "last_px": 47.43,
+        "last_px": 47.21,
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 18",
-        "curr_metric": "RSI: 95",
+        "curr_metric": "RSI: 91",
         "sources": [
             "S&P600_\u5c0f\u578b"
         ],
@@ -6656,7 +6658,7 @@
         "tp": 296.96,
         "initial_sl": 253.69,
         "tp1_price": 275.33,
-        "last_px": 282.91,
+        "last_px": 282.35,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 83",
@@ -6907,11 +6909,11 @@
         "tp": 94.35,
         "initial_sl": 78.8,
         "tp1_price": 90.47,
-        "last_px": 85.67,
+        "last_px": 85.34,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 76",
-        "curr_metric": "RS: 86",
+        "curr_metric": "RS: 85",
         "sources": [
             "S&P600_\u5c0f\u578b"
         ],
@@ -6927,11 +6929,11 @@
         "tp": 121.93,
         "initial_sl": 104.65,
         "tp1_price": 117.61,
-        "last_px": 112.06,
+        "last_px": 114.19,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 80",
-        "curr_metric": "RS: 84",
+        "curr_metric": "RS: 85",
         "sources": [
             "S&P500_\u5927\u76e4"
         ],
@@ -7010,11 +7012,11 @@
         "tp": 78.06,
         "initial_sl": 69.46,
         "tp1_price": 75.91,
-        "last_px": 74.21,
+        "last_px": 74.66,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 76",
-        "curr_metric": "RS: 80",
+        "curr_metric": "RS: 81",
         "sources": [
             "S&P500_\u5927\u76e4"
         ],
@@ -7030,11 +7032,11 @@
         "tp": 58.82,
         "initial_sl": 49.97,
         "tp1_price": 56.6,
-        "last_px": 53.15,
+        "last_px": 51.92,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 89",
-        "curr_metric": "RS: 94",
+        "curr_metric": "RS: 93",
         "sources": [
             "S&P600_\u5c0f\u578b"
         ],
@@ -7050,11 +7052,11 @@
         "tp": 37.16,
         "initial_sl": 30.56,
         "tp1_price": 35.51,
-        "last_px": 34.51,
+        "last_px": 34.05,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 96",
-        "curr_metric": "RS: 97",
+        "curr_metric": "RS: 98",
         "sources": [
             "S&P400_\u4e2d\u578b"
         ],
@@ -7444,11 +7446,11 @@
         "tp": 81.3,
         "initial_sl": 67.16,
         "tp1_price": 74.24,
-        "last_px": 72.12,
+        "last_px": 71.64,
         "status": "OPEN",
         "tag": "\u26a1 \u7f3a\u53e3\u52d5\u80fd",
         "entry_metric": "RS: 79",
-        "curr_metric": "RS: 70",
+        "curr_metric": "RS: 69",
         "sources": [
             "S&P500_\u5927\u76e4"
         ],
@@ -7714,7 +7716,7 @@
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 94",
-        "curr_metric": "RS: 94",
+        "curr_metric": "RS: 96",
         "sources": [
             "TOPIX_Small500_\u5c0f\u578b"
         ],
@@ -7875,11 +7877,11 @@
         "tp": 240.15,
         "initial_sl": 198.39,
         "tp1_price": 219.27,
-        "last_px": 233.46,
+        "last_px": 235.78,
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 25",
-        "curr_metric": "RSI: 80",
+        "curr_metric": "RSI: 82",
         "sources": [
             "S&P500_\u5927\u76e4",
             "NDX100_\u79d1\u6280"
@@ -8024,7 +8026,7 @@
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 84",
-        "curr_metric": "RS: 76",
+        "curr_metric": "RS: 82",
         "sources": [
             "TOPIX_Mid400_\u4e2d\u578b"
         ],
@@ -8210,7 +8212,7 @@
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 94",
-        "curr_metric": "RS: 93",
+        "curr_metric": "RS: 95",
         "sources": [
             "TOPIX_Small500_\u5c0f\u578b"
         ],
@@ -8230,7 +8232,7 @@
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 92",
-        "curr_metric": "RS: 91",
+        "curr_metric": "RS: 94",
         "sources": [
             "TOPIX_Small500_\u5c0f\u578b"
         ],
@@ -8246,11 +8248,11 @@
         "tp": 28.32,
         "initial_sl": 23.4,
         "tp1_price": 25.86,
-        "last_px": 24.97,
+        "last_px": 24.99,
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 24",
-        "curr_metric": "RSI: 56",
+        "curr_metric": "RSI: 58",
         "sources": [
             "S&P600_\u5c0f\u578b"
         ],
@@ -8308,7 +8310,7 @@
         "tp": 217.03,
         "initial_sl": 182.68,
         "tp1_price": 208.45,
-        "last_px": 208.5,
+        "last_px": 205.8,
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 86",
@@ -8433,11 +8435,11 @@
         "tp": 21.05,
         "initial_sl": 16.84,
         "tp1_price": 19.99,
-        "last_px": 19.25,
+        "last_px": 18.89,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 82",
-        "curr_metric": "RS: 94",
+        "curr_metric": "RS: 93",
         "sources": [
             "S&P600_\u5c0f\u578b"
         ],
@@ -8475,7 +8477,7 @@
         "tp": 53.8,
         "initial_sl": 45.43,
         "tp1_price": 51.7,
-        "last_px": 46.13,
+        "last_px": 46.34,
         "status": "OPEN",
         "tag": "\ud83d\udca5 BB \u64e0\u58d3",
         "entry_metric": "RS: 78",
@@ -9440,7 +9442,7 @@
         "status": "OPEN",
         "tag": "\ud83c\udfc6 VCP \u7a81\u7834",
         "entry_metric": "RS: 86",
-        "curr_metric": "RS: 86",
+        "curr_metric": "RS: 90",
         "sources": [
             "TOPIX_Small500_\u5c0f\u578b"
         ],
@@ -10042,11 +10044,11 @@
         "tp": 26.17,
         "initial_sl": 21.62,
         "tp1_price": 23.9,
-        "last_px": 23.94,
+        "last_px": 24.06,
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 25",
-        "curr_metric": "RSI: 54",
+        "curr_metric": "RSI: 55",
         "sources": [
             "S&P500_\u5927\u76e4"
         ],
@@ -10062,11 +10064,11 @@
         "tp": 53.66,
         "initial_sl": 44.33,
         "tp1_price": 48.99,
-        "last_px": 49.71,
+        "last_px": 48.91,
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 25",
-        "curr_metric": "RSI: 48",
+        "curr_metric": "RSI: 44",
         "sources": [
             "S&P600_\u5c0f\u578b"
         ],
@@ -10191,7 +10193,7 @@
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 25",
-        "curr_metric": "RSI: 36",
+        "curr_metric": "RSI: 32",
         "sources": [
             "TOPIX_Small500_\u5c0f\u578b"
         ],
@@ -10968,21 +10970,21 @@
         "date": "2026-07-16",
         "tk": "MOG-A",
         "px": 382.48,
-        "sl": 363.36,
+        "sl": 382.48,
         "tp": 439.85,
         "initial_sl": 363.36,
         "tp1_price": 401.6,
-        "last_px": 393.31,
+        "last_px": 395.96,
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 20",
-        "curr_metric": "RSI: 31",
+        "curr_metric": "RSI: 33",
         "sources": [
             "S&P400_\u4e2d\u578b"
         ],
         "sector": "N/A",
         "mcap": 0,
-        "partial_tp_hit": false
+        "partial_tp_hit": true
     },
     {
         "date": "2026-07-17",
@@ -11138,7 +11140,7 @@
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 14",
-        "curr_metric": "RSI: 14",
+        "curr_metric": "RSI: 13",
         "sources": [
             "TOPIX_Mid400_\u4e2d\u578b"
         ],
@@ -11179,7 +11181,7 @@
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 25",
-        "curr_metric": "RSI: 25",
+        "curr_metric": "RSI: 27",
         "sources": [
             "TOPIX_Small500_\u5c0f\u578b"
         ],
@@ -11257,11 +11259,11 @@
         "tp": 379.03,
         "initial_sl": 313.11,
         "tp1_price": 346.07,
-        "last_px": 329.59,
+        "last_px": 336.61,
         "status": "OPEN",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 21",
-        "curr_metric": "RSI: 23",
+        "curr_metric": "RSI: 26",
         "sources": [
             "S&P400_\u4e2d\u578b"
         ],
@@ -11400,6 +11402,25 @@
         "curr_metric": "RSI: 21",
         "sources": [
             "TOPIX_Mid400_\u4e2d\u578b"
+        ],
+        "sector": "N/A",
+        "mcap": 0
+    },
+    {
+        "date": "2026-07-20",
+        "tk": "6875.T",
+        "px": 9290.0,
+        "sl": 8825.5,
+        "tp": 10683.5,
+        "initial_sl": 8825.5,
+        "tp1_price": 9754.5,
+        "last_px": 9290.0,
+        "status": "OPEN",
+        "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
+        "entry_metric": "RSI: 22",
+        "curr_metric": "RSI: 22",
+        "sources": [
+            "TOPIX_Small500_\u5c0f\u578b"
         ],
         "sector": "N/A",
         "mcap": 0
