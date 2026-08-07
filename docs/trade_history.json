@@ -31,7 +31,7 @@
         "status": "OPEN",
         "tag": "\u26a1 \u7f3a\u53e3\u52d5\u80fd",
         "entry_metric": "RS: 89",
-        "curr_metric": "RS: 79",
+        "curr_metric": "RS: 83",
         "sources": [
             "S&P600_\u5c0f\u578b"
         ],
@@ -276,7 +276,7 @@
         "status": "OPEN",
         "tag": "\u26a1 \u7f3a\u53e3\u52d5\u80fd",
         "entry_metric": "RS: 78",
-        "curr_metric": "RS: 76",
+        "curr_metric": "RS: 81",
         "sources": [
             "S&P600_\u5c0f\u578b"
         ],
@@ -451,12 +451,12 @@
         "date": "2026-08-07",
         "tk": "APLE",
         "px": 15.99,
-        "sl": 15.19,
+        "sl": 15.99,
         "tp": 18.39,
         "initial_sl": 15.19,
         "tp1_price": 16.79,
-        "last_px": 15.99,
-        "status": "OPEN",
+        "last_px": 16.38,
+        "status": "\u2705 TRAIL EXIT",
         "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
         "entry_metric": "RSI: 27",
         "curr_metric": "RSI: 27",
@@ -464,7 +464,9 @@
             "S&P600_\u5c0f\u578b"
         ],
         "sector": "N/A",
-        "mcap": 0
+        "mcap": 0,
+        "partial_tp_hit": true,
+        "close_date": "2026-08-07"
     },
     {
         "date": "2026-08-07",
@@ -483,7 +485,8 @@
             "S&P500_\u5927\u76e4"
         ],
         "sector": "N/A",
-        "mcap": 0
+        "mcap": 0,
+        "partial_tp_hit": false
     },
     {
         "date": "2026-08-07",
@@ -502,7 +505,8 @@
             "S&P400_\u4e2d\u578b"
         ],
         "sector": "N/A",
-        "mcap": 0
+        "mcap": 0,
+        "partial_tp_hit": false
     },
     {
         "date": "2026-08-07",
@@ -557,6 +561,44 @@
         "curr_metric": "RS: 83",
         "sources": [
             "TOPIX_Mid400_\u4e2d\u578b"
+        ],
+        "sector": "N/A",
+        "mcap": 0
+    },
+    {
+        "date": "2026-08-07",
+        "tk": "APLE",
+        "px": 15.99,
+        "sl": 15.19,
+        "tp": 18.39,
+        "initial_sl": 15.19,
+        "tp1_price": 16.79,
+        "last_px": 15.99,
+        "status": "OPEN",
+        "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
+        "entry_metric": "RSI: 27",
+        "curr_metric": "RSI: 27",
+        "sources": [
+            "S&P600_\u5c0f\u578b"
+        ],
+        "sector": "N/A",
+        "mcap": 0
+    },
+    {
+        "date": "2026-08-07",
+        "tk": "FRT",
+        "px": 117.91,
+        "sl": 112.01,
+        "tp": 135.6,
+        "initial_sl": 112.01,
+        "tp1_price": 123.81,
+        "last_px": 117.91,
+        "status": "OPEN",
+        "tag": "\ud83d\udcc9 \u6975\u5ea6\u8d85\u8ce3",
+        "entry_metric": "RSI: 18",
+        "curr_metric": "RSI: 18",
+        "sources": [
+            "S&P500_\u5927\u76e4"
         ],
         "sector": "N/A",
         "mcap": 0
