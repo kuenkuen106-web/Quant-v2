@@ -3,9 +3,9 @@ name: v2 Production
 on:
   schedule:
     # 🇯🇵 日股收市後結算
-    - cron: '17 8 * * 1-5'
+    #- cron: '17 8 * * 1-5'
     # 🇺🇸 美股收市後結算
-    - cron: '43 22 * * 1-5'
+    #- cron: '43 22 * * 1-5'
   workflow_dispatch: 
 
 permissions:
